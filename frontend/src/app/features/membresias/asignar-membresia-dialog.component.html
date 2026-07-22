@@ -1,0 +1,53 @@
+<h2 mat-dialog-title>Asignar membresía</h2>
+
+<mat-dialog-content style="min-width: 320px">
+  <form [formGroup]="form" class="tf-form-grid">
+    <div style="display: flex; gap: 8px; align-items: flex-start" class="tf-full-width">
+      <mat-form-field appearance="outline" style="flex: 1">
+        <mat-label>Cédula del cliente</mat-label>
+        <input matInput formControlName="cedula" />
+      </mat-form-field>
+      <button
+        mat-stroked-button
+        type="button"
+        style="margin-top: 8px"
+        [disabled]="buscando"
+        (click)="buscarCliente()"
+      >
+        Buscar
+      </button>
+    </div>
+
+    <p *ngIf="cliente" class="tf-full-width" style="margin: -8px 0 8px">
+      Cliente: <strong>{{ cliente.nombres }} {{ cliente.apellidos }}</strong>
+    </p>
+
+    <mat-form-field appearance="outline" class="tf-full-width">
+      <mat-label>Plan</mat-label>
+      <mat-select formControlName="planId">
+        <mat-option *ngFor="let p of planes" [value]="p.id">
+          {{ p.nombre }} ({{ p.duracionDias }} días · {{ p.precio | currency: 'USD' }})
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="tf-full-width">
+      <mat-label>Fecha de inicio</mat-label>
+      <input matInput [matDatepicker]="picker" formControlName="fechaInicio" />
+      <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-datepicker #picker></mat-datepicker>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="ref.close()">Cancelar</button>
+  <button
+    mat-flat-button
+    color="primary"
+    [disabled]="form.invalid || !cliente || guardando"
+    (click)="guardar()"
+  >
+    Asignar
+  </button>
+</mat-dialog-actions>

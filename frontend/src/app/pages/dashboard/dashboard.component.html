@@ -1,0 +1,116 @@
+<div class="tf-page">
+  <div class="tf-header">
+    <h1>Dashboard</h1>
+  </div>
+
+  <div *ngIf="cargando" class="tf-center tf-loading">
+    <mat-spinner diameter="40"></mat-spinner>
+  </div>
+
+  <ng-container *ngIf="!cargando && resumen">
+    <!-- KPI Cards -->
+    <div class="tf-kpi-grid">
+      <mat-card class="tf-kpi-card">
+        <div class="tf-kpi-header">
+          <span class="tf-kpi-etiqueta">Clientes activos</span>
+          <mat-icon class="tf-kpi-icon">groups</mat-icon>
+        </div>
+        <span class="tf-kpi-valor">{{ resumen.clientesActivos }}</span>
+      </mat-card>
+      <mat-card class="tf-kpi-card">
+        <div class="tf-kpi-header">
+          <span class="tf-kpi-etiqueta">Membresías activas</span>
+          <mat-icon class="tf-kpi-icon">card_membership</mat-icon>
+        </div>
+        <span class="tf-kpi-valor">{{ resumen.membresiasActivas }}</span>
+      </mat-card>
+      <mat-card class="tf-kpi-card">
+        <div class="tf-kpi-header">
+          <span class="tf-kpi-etiqueta">Por vencer (7 días)</span>
+          <mat-icon class="tf-kpi-icon">event_busy</mat-icon>
+        </div>
+        <span class="tf-kpi-valor">{{ resumen.membresiasPorVencer }}</span>
+      </mat-card>
+      <mat-card class="tf-kpi-card">
+        <div class="tf-kpi-header">
+          <span class="tf-kpi-etiqueta">Asistencias hoy</span>
+          <mat-icon class="tf-kpi-icon">how_to_reg</mat-icon>
+        </div>
+        <span class="tf-kpi-valor">{{ resumen.asistenciasHoy }}</span>
+      </mat-card>
+      <mat-card class="tf-kpi-card">
+        <div class="tf-kpi-header">
+          <span class="tf-kpi-etiqueta">Ingresos del día</span>
+          <mat-icon class="tf-kpi-icon">payments</mat-icon>
+        </div>
+        <span class="tf-kpi-valor">{{ resumen.ingresosDia | currency: 'USD' }}</span>
+      </mat-card>
+      <mat-card class="tf-kpi-card">
+        <div class="tf-kpi-header">
+          <span class="tf-kpi-etiqueta">Ingresos del mes</span>
+          <mat-icon class="tf-kpi-icon">trending_up</mat-icon>
+        </div>
+        <span class="tf-kpi-valor">{{ resumen.ingresosMes | currency: 'USD' }}</span>
+      </mat-card>
+    </div>
+
+    <!-- Accesos rápidos -->
+    <h2 style="font-family: var(--tf-font-title); font-size: 18px; font-weight: 600; margin-bottom: 16px; color: var(--tf-text);">
+      Accesos rápidos
+    </h2>
+    <div class="tf-kpi-grid" style="margin-bottom: 32px;">
+      <button mat-stroked-button class="tf-quick-access" *ngFor="let acc of accesosRapidos" [routerLink]="acc.ruta">
+        <mat-icon>{{ acc.icono }}</mat-icon>
+        <span>{{ acc.etiqueta }}</span>
+      </button>
+    </div>
+
+    <!-- Últimos pagos -->
+    <mat-card class="tf-card">
+      <mat-card-header>
+        <mat-card-title>Últimos pagos</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="tf-table-wrap">
+          <table mat-table [dataSource]="resumen.ultimosPagos">
+            <ng-container matColumnDef="cliente">
+              <th mat-header-cell *matHeaderCellDef>Cliente</th>
+              <td mat-cell *matCellDef="let p">
+                {{ p.membresia?.cliente?.nombres }} {{ p.membresia?.cliente?.apellidos }}
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="plan">
+              <th mat-header-cell *matHeaderCellDef>Plan</th>
+              <td mat-cell *matCellDef="let p">{{ p.membresia?.plan?.nombre }}</td>
+            </ng-container>
+            <ng-container matColumnDef="monto">
+              <th mat-header-cell *matHeaderCellDef>Monto</th>
+              <td mat-cell *matCellDef="let p">{{ p.monto | currency: 'USD' }}</td>
+            </ng-container>
+            <ng-container matColumnDef="metodo">
+              <th mat-header-cell *matHeaderCellDef>Método</th>
+              <td mat-cell *matCellDef="let p">{{ p.metodo }}</td>
+            </ng-container>
+            <ng-container matColumnDef="estado">
+              <th mat-header-cell *matHeaderCellDef>Estado</th>
+              <td mat-cell *matCellDef="let p">
+                <span class="tf-estado-chip" [style.background]="colorEstado(p.estado)">
+                  {{ p.estado }}
+                </span>
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="fecha">
+              <th mat-header-cell *matHeaderCellDef>Fecha</th>
+              <td mat-cell *matCellDef="let p">{{ p.fecha | date: 'dd/MM/yyyy HH:mm' }}</td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="columnasPagos"></tr>
+            <tr mat-row *matRowDef="let row; columns: columnasPagos"></tr>
+          </table>
+          <p *ngIf="!resumen.ultimosPagos.length" class="tf-vacio" style="padding: 24px; text-align: center;">
+            Aún no se han registrado pagos.
+          </p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </ng-container>
+</div>

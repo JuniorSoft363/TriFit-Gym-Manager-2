@@ -1,0 +1,96 @@
+<div class="tf-page">
+  <div class="tf-header">
+    <h1>Inventario</h1>
+  </div>
+
+  <mat-tab-group>
+    <mat-tab label="Productos y equipos">
+      <div style="padding-top: 16px">
+        <app-crud-page
+          recurso="inventario/productos"
+          busquedaPlaceholder="Buscar producto o equipo..."
+          [columnas]="columnasProductos"
+          [campos]="camposProductos"
+          textoEliminar="¿Desea desactivar este producto?"
+        >
+        </app-crud-page>
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Proveedores">
+      <div style="padding-top: 16px">
+        <app-crud-page
+          recurso="inventario/proveedores"
+          busquedaPlaceholder="Buscar proveedor..."
+          [columnas]="columnasProveedores"
+          [campos]="camposProveedores"
+          textoEliminar="¿Desea desactivar este proveedor?"
+        >
+        </app-crud-page>
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Movimientos">
+      <div style="padding-top: 16px">
+        <div class="tf-toolbar-filtros">
+          <span class="tf-spacer"></span>
+          <button mat-flat-button color="primary" (click)="abrirMovimiento()">
+            <mat-icon>add</mat-icon>
+            Registrar movimiento
+          </button>
+        </div>
+
+        <div *ngIf="cargando" class="tf-center tf-loading">
+          <mat-spinner diameter="36"></mat-spinner>
+        </div>
+
+        <div class="tf-table-wrap" *ngIf="!cargando">
+          <table mat-table [dataSource]="movimientos">
+            <ng-container matColumnDef="producto">
+              <th mat-header-cell *matHeaderCellDef>Producto</th>
+              <td mat-cell *matCellDef="let m">{{ m.producto?.nombre }}</td>
+            </ng-container>
+            <ng-container matColumnDef="tipo">
+              <th mat-header-cell *matHeaderCellDef>Tipo</th>
+              <td mat-cell *matCellDef="let m">
+                <span
+                  class="tf-estado-chip"
+                  [style.background]="m.tipo === 'ENTRADA' ? '#2e7d32' : m.tipo === 'SALIDA' ? '#c62828' : '#607d8b'"
+                >
+                  {{ m.tipo }}
+                </span>
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="cantidad">
+              <th mat-header-cell *matHeaderCellDef>Cantidad</th>
+              <td mat-cell *matCellDef="let m">{{ m.cantidad }}</td>
+            </ng-container>
+            <ng-container matColumnDef="usuario">
+              <th mat-header-cell *matHeaderCellDef>Usuario</th>
+              <td mat-cell *matCellDef="let m">{{ m.usuario?.nombre || '—' }}</td>
+            </ng-container>
+            <ng-container matColumnDef="fecha">
+              <th mat-header-cell *matHeaderCellDef>Fecha</th>
+              <td mat-cell *matCellDef="let m">{{ m.fecha | date: 'dd/MM/yyyy HH:mm' }}</td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="columnasMovimientos"></tr>
+            <tr mat-row *matRowDef="let row; columns: columnasMovimientos"></tr>
+          </table>
+          <p *ngIf="!movimientos.length" class="tf-center" style="padding: 24px; color: rgba(0,0,0,.5)">
+            No se encontraron movimientos.
+          </p>
+        </div>
+
+        <mat-paginator
+          *ngIf="!cargando"
+          [length]="total"
+          [pageIndex]="pageIndex"
+          [pageSize]="pageSize"
+          [pageSizeOptions]="[5, 10, 25, 50]"
+          (page)="onPagina($event)"
+        >
+        </mat-paginator>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div>

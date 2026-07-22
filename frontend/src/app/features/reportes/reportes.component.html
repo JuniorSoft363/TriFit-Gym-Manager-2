@@ -1,0 +1,67 @@
+<div class="tf-page">
+  <div class="tf-header">
+    <h1>Reportes</h1>
+  </div>
+
+  <mat-tab-group>
+    <mat-tab label="Clientes">
+      <div style="padding-top: 16px">
+        <app-reporte-tabla
+          recurso="reportes/clientes"
+          tituloPdf="Reporte de Clientes"
+          [columnas]="columnasClientes"
+          [filtros]="filtrosClientes"
+        >
+        </app-reporte-tabla>
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Membresías">
+      <div style="padding-top: 16px">
+        <app-reporte-tabla
+          recurso="reportes/membresias"
+          tituloPdf="Reporte de Membresías"
+          [columnas]="columnasMembresias"
+          [filtros]="filtrosMembresias"
+        >
+        </app-reporte-tabla>
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Ingresos">
+      <div style="padding-top: 16px">
+        <app-reporte-tabla
+          recurso="reportes/ingresos"
+          tituloPdf="Reporte de Ingresos"
+          [columnas]="columnasIngresos"
+          [filtros]="filtrosIngresos"
+        >
+        </app-reporte-tabla>
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Asistencias">
+      <div style="padding-top: 16px">
+        <app-reporte-tabla
+          recurso="reportes/asistencias"
+          tituloPdf="Reporte de Asistencias"
+          [columnas]="columnasAsistencias"
+          [filtros]="filtrosAsistencias"
+        >
+        </app-reporte-tabla>
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Inventario">
+      <div style="padding-top: 16px">
+        <app-reporte-tabla
+          recurso="reportes/inventario"
+          tituloPdf="Reporte de Inventario"
+          [columnas]="columnasInventario"
+          [filtros]="filtrosInventario"
+        >
+        </app-reporte-tabla>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div>

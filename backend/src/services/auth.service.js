@@ -1,0 +1,21 @@
+// Autenticación: login con email/contraseña y emisión de JWT
+const prisma = require('../config/prisma');
+const { HttpError } = require('../utils/httpError');
+const { compararPassword } = require('../utils/password');
+const { firmarToken } = require('../utils/jwt');
+
+async function login(email, password) {
+  const u = await prisma.usuario.findUnique({ where: { email }, include: { rol: true } });
+  if (!u || !u.activo) throw new HttpError(401, 'Credenciales incorrectas');
+  const ok = await compararPassword(password, u.passwordHash);
+  if (!ok) throw new HttpError(401, 'Credenciales incorrectas');
+  const usuario = { id: u.id, nombre: u.nombre, email: u.email, rol: u.rol.nombre };
+  return { token: firmarToken(usuario), usuario };
+}
+
+async function perfil(id) {
+  const u = await prisma.usuario.findUniqueOrThrow({ where: { id }, include: { rol: true } });
+  return { id: u.id, nombre: u.nombre, email: u.email, rol: u.rol.nombre };
+}
+
+module.exports = { login, perfil };

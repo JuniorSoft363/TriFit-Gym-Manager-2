@@ -1,0 +1,249 @@
+// TriFit Gym Manager - Esquema de base de datos (PostgreSQL + Prisma)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum EstadoMembresia {
+  ACTIVA
+  VENCIDA
+  SUSPENDIDA
+  CANCELADA
+}
+
+enum MetodoPago {
+  EFECTIVO
+  TARJETA
+  TRANSFERENCIA
+}
+
+enum EstadoPago {
+  PAGADO
+  PENDIENTE
+  ANULADO
+}
+
+enum TipoProducto {
+  PRODUCTO
+  EQUIPO
+}
+
+enum TipoMovimiento {
+  ENTRADA
+  SALIDA
+  AJUSTE
+}
+
+model Rol {
+  id       Int       @id @default(autoincrement())
+  nombre   String    @unique
+  usuarios Usuario[]
+}
+
+model Usuario {
+  id            Int          @id @default(autoincrement())
+  nombre        String
+  email         String       @unique
+  passwordHash  String
+  activo        Boolean      @default(true)
+  rolId         Int
+  rol           Rol          @relation(fields: [rolId], references: [id])
+  entrenador    Entrenador?
+  pagos         Pago[]
+  asistencias   Asistencia[]
+  movimientos   Inventario[]
+  auditorias    Auditoria[]
+  creadoEn      DateTime     @default(now())
+  actualizadoEn DateTime     @updatedAt
+}
+
+model Cliente {
+  id              Int                 @id @default(autoincrement())
+  cedula          String              @unique
+  nombres         String
+  apellidos       String
+  email           String?
+  telefono        String?
+  direccion       String?
+  fechaNacimiento DateTime?
+  activo          Boolean             @default(true)
+  membresias      Membresia[]
+  asistencias     Asistencia[]
+  entrenadores    ClienteEntrenador[]
+  rutinas         Rutina[]
+  creadoEn        DateTime            @default(now())
+  actualizadoEn   DateTime            @updatedAt
+}
+
+model Plan {
+  id           Int         @id @default(autoincrement())
+  nombre       String      @unique
+  descripcion  String?
+  duracionDias Int
+  precio       Decimal     @db.Decimal(10, 2)
+  activo       Boolean     @default(true)
+  membresias   Membresia[]
+}
+
+model Membresia {
+  id          Int             @id @default(autoincrement())
+  clienteId   Int
+  cliente     Cliente         @relation(fields: [clienteId], references: [id])
+  planId      Int
+  plan        Plan            @relation(fields: [planId], references: [id])
+  fechaInicio DateTime
+  fechaFin    DateTime
+  estado      EstadoMembresia @default(ACTIVA)
+  pagos       Pago[]
+  creadoEn    DateTime        @default(now())
+}
+
+model Pago {
+  id          Int        @id @default(autoincrement())
+  membresiaId Int
+  membresia   Membresia  @relation(fields: [membresiaId], references: [id])
+  monto       Decimal    @db.Decimal(10, 2)
+  metodo      MetodoPago
+  estado      EstadoPago @default(PAGADO)
+  fecha       DateTime   @default(now())
+  observacion String?
+  usuarioId   Int?
+  usuario     Usuario?   @relation(fields: [usuarioId], references: [id])
+}
+
+model Asistencia {
+  id          Int       @id @default(autoincrement())
+  clienteId   Int
+  cliente     Cliente   @relation(fields: [clienteId], references: [id])
+  fecha       DateTime
+  horaEntrada DateTime
+  horaSalida  DateTime?
+  usuarioId   Int?
+  usuario     Usuario?  @relation(fields: [usuarioId], references: [id])
+}
+
+model Entrenador {
+  id           Int                 @id @default(autoincrement())
+  cedula       String              @unique
+  nombres      String
+  apellidos    String
+  telefono     String?
+  email        String?
+  especialidad String?
+  activo       Boolean             @default(true)
+  usuarioId    Int?                @unique
+  usuario      Usuario?            @relation(fields: [usuarioId], references: [id])
+  clientes     ClienteEntrenador[]
+  rutinas      Rutina[]
+}
+
+model ClienteEntrenador {
+  id              Int        @id @default(autoincrement())
+  clienteId       Int
+  cliente         Cliente    @relation(fields: [clienteId], references: [id])
+  entrenadorId    Int
+  entrenador      Entrenador @relation(fields: [entrenadorId], references: [id])
+  fechaAsignacion DateTime   @default(now())
+  activo          Boolean    @default(true)
+
+  @@unique([clienteId, entrenadorId])
+}
+
+model Rutina {
+  id           Int               @id @default(autoincrement())
+  nombre       String
+  objetivo     String?
+  descripcion  String?
+  activo       Boolean           @default(true)
+  entrenadorId Int?
+  entrenador   Entrenador?       @relation(fields: [entrenadorId], references: [id])
+  clienteId    Int?
+  cliente      Cliente?          @relation(fields: [clienteId], references: [id])
+  ejercicios   RutinaEjercicio[]
+  creadoEn     DateTime          @default(now())
+}
+
+model Ejercicio {
+  id            Int               @id @default(autoincrement())
+  nombre        String            @unique
+  grupoMuscular String?
+  descripcion   String?
+  activo        Boolean           @default(true)
+  rutinas       RutinaEjercicio[]
+}
+
+model RutinaEjercicio {
+  id           Int       @id @default(autoincrement())
+  rutinaId     Int
+  rutina       Rutina    @relation(fields: [rutinaId], references: [id], onDelete: Cascade)
+  ejercicioId  Int
+  ejercicio    Ejercicio @relation(fields: [ejercicioId], references: [id])
+  series       Int
+  repeticiones Int
+  orden        Int       @default(1)
+  observacion  String?
+
+  @@unique([rutinaId, ejercicioId])
+}
+
+model Proveedor {
+  id        Int        @id @default(autoincrement())
+  nombre    String
+  ruc       String?    @unique
+  telefono  String?
+  email     String?
+  direccion String?
+  activo    Boolean    @default(true)
+  productos Producto[]
+}
+
+model Producto {
+  id          Int          @id @default(autoincrement())
+  nombre      String
+  tipo        TipoProducto @default(PRODUCTO)
+  precio      Decimal?     @db.Decimal(10, 2)
+  stock       Int          @default(0)
+  stockMinimo Int          @default(0)
+  activo      Boolean      @default(true)
+  proveedorId Int?
+  proveedor   Proveedor?   @relation(fields: [proveedorId], references: [id])
+  movimientos Inventario[]
+}
+
+model Inventario {
+  id          Int            @id @default(autoincrement())
+  productoId  Int
+  producto    Producto       @relation(fields: [productoId], references: [id])
+  tipo        TipoMovimiento
+  cantidad    Int
+  observacion String?
+  usuarioId   Int?
+  usuario     Usuario?       @relation(fields: [usuarioId], references: [id])
+  fecha       DateTime       @default(now())
+}
+
+model Gimnasio {
+  id          Int     @id @default(autoincrement())
+  nombre      String
+  descripcion String?
+  direccion   String?
+  telefono    String?
+  email       String?
+  horario     String?
+}
+
+model Auditoria {
+  id        Int      @id @default(autoincrement())
+  usuarioId Int?
+  usuario   Usuario? @relation(fields: [usuarioId], references: [id])
+  accion    String
+  entidad   String
+  entidadId Int?
+  detalle   String?
+  fecha     DateTime @default(now())
+}

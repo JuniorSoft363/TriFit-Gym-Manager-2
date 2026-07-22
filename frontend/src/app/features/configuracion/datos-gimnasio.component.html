@@ -1,0 +1,41 @@
+<div *ngIf="cargando" class="tf-center tf-loading">
+  <mat-spinner diameter="36"></mat-spinner>
+</div>
+
+<mat-card class="tf-card" *ngIf="!cargando" style="max-width: 560px">
+  <form [formGroup]="form" class="tf-form-grid">
+    <mat-form-field appearance="outline" class="tf-full-width">
+      <mat-label>Nombre del gimnasio</mat-label>
+      <input matInput formControlName="nombre" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="tf-full-width">
+      <mat-label>Descripción</mat-label>
+      <textarea matInput rows="2" formControlName="descripcion"></textarea>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="tf-full-width">
+      <mat-label>Dirección</mat-label>
+      <input matInput formControlName="direccion" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" style="width: 100%">
+      <mat-label>Teléfono</mat-label>
+      <input matInput formControlName="telefono" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" style="width: 100%">
+      <mat-label>Correo de contacto</mat-label>
+      <input matInput formControlName="email" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="tf-full-width">
+      <mat-label>Horario</mat-label>
+      <input matInput formControlName="horario" placeholder="Ej. Lunes a Sábado 06:00 - 22:00" />
+    </mat-form-field>
+  </form>
+
+  <button mat-flat-button color="primary" [disabled]="form.invalid || guardando" (click)="guardar()">
+    Guardar cambios
+  </button>
+</mat-card>

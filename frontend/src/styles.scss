@@ -1,0 +1,295 @@
+@use '@angular/material' as mat;
+
+:root {
+  --tf-primary: #E53935;
+  --tf-primary-hover: #C62828;
+  --tf-bg: #121212;
+  --tf-surface: #1E1E1E;
+  --tf-sidenav: #252525;
+  --tf-text: #FFFFFF;
+  --tf-text-secondary: #BDBDBD;
+  --tf-border: #424242;
+  --tf-font-title: 'Poppins', sans-serif;
+  --tf-font-body: 'Roboto', sans-serif;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: var(--tf-font-body);
+  background: var(--tf-bg);
+  color: var(--tf-text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--tf-font-title);
+  color: var(--tf-text);
+  margin: 0;
+}
+
+a {
+  color: var(--tf-primary);
+  text-decoration: none;
+}
+
+.tf-page {
+  padding: 32px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.tf-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.tf-header h1 {
+  font-size: 24px;
+  font-weight: 600;
+  font-family: var(--tf-font-title);
+}
+
+.tf-card {
+  background: var(--tf-surface) !important;
+  border-radius: 12px !important;
+  border: 1px solid var(--tf-border) !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3) !important;
+}
+
+.tf-card mat-card-header {
+  padding-bottom: 8px;
+}
+
+.tf-card mat-card-title {
+  font-family: var(--tf-font-title);
+  font-weight: 600;
+}
+
+.tf-toolbar-filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.tf-spacer {
+  flex: 1 1 auto;
+}
+
+.tf-full-width {
+  width: 100%;
+}
+
+.tf-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 4px 20px;
+}
+
+.tf-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.tf-kpi-card {
+  background: var(--tf-surface) !important;
+  border-radius: 12px !important;
+  border: 1px solid var(--tf-border) !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3) !important;
+  padding: 20px !important;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  position: relative;
+  overflow: hidden;
+}
+
+.tf-kpi-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: var(--tf-primary);
+  border-radius: 4px 0 0 4px;
+}
+
+.tf-kpi-card .tf-kpi-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.tf-kpi-card .tf-kpi-icon {
+  color: var(--tf-primary);
+  font-size: 28px;
+  width: 28px;
+  height: 28px;
+  opacity: 0.85;
+}
+
+.tf-kpi-card .tf-kpi-valor {
+  font-size: 30px;
+  font-weight: 700;
+  font-family: var(--tf-font-title);
+  color: var(--tf-text);
+}
+
+.tf-kpi-card .tf-kpi-etiqueta {
+  color: var(--tf-text-secondary);
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.tf-table-wrap {
+  overflow-x: auto;
+  margin-top: 8px;
+}
+
+table.mat-mdc-table {
+  width: 100%;
+  background: transparent !important;
+}
+
+.mat-mdc-table .mdc-data-table__header-row {
+  background: rgba(255,255,255,0.03);
+}
+
+.mat-mdc-table .mdc-data-table__row {
+  border-bottom-color: var(--tf-border) !important;
+  transition: background 0.2s ease;
+}
+
+.mat-mdc-table .mdc-data-table__row:hover {
+  background: rgba(255,255,255,0.05) !important;
+}
+
+.mat-mdc-header-cell {
+  color: var(--tf-text-secondary) !important;
+  font-family: var(--tf-font-body);
+  font-weight: 500 !important;
+  font-size: 12px !important;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.mat-mdc-cell {
+  color: var(--tf-text) !important;
+  font-family: var(--tf-font-body);
+  font-size: 14px !important;
+}
+
+.tf-estado-chip {
+  font-size: 12px;
+  padding: 3px 12px;
+  border-radius: 100px;
+  color: #fff;
+  display: inline-block;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+}
+
+.tf-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tf-loading {
+  padding: 60px;
+}
+
+.tf-vacio {
+  color: var(--tf-text-secondary);
+  font-size: 13px;
+  margin: 4px 0 12px;
+}
+
+.mat-mdc-card {
+  background: var(--tf-surface) !important;
+  color: var(--tf-text) !important;
+  border-radius: 12px !important;
+  border: 1px solid var(--tf-border) !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3) !important;
+}
+
+.mat-mdc-form-field {
+  --mdc-outlined-text-field-outline-color: var(--tf-border);
+  --mdc-outlined-text-field-input-text-color: var(--tf-text);
+  --mdc-outlined-text-field-label-text-color: var(--tf-text-secondary);
+  --mdc-outlined-text-field-hover-outline-color: var(--tf-text-secondary);
+  --mdc-outlined-text-field-focus-outline-color: var(--tf-primary);
+  --mdc-outlined-text-field-focus-label-text-color: var(--tf-primary);
+}
+
+.mat-mdc-paginator {
+  background: transparent !important;
+  color: var(--tf-text-secondary) !important;
+  border-top: 1px solid var(--tf-border);
+  margin-top: 8px;
+  padding-top: 8px;
+}
+
+.mat-mdc-dialog-container {
+  --mdc-dialog-container-color: var(--tf-surface) !important;
+  --mdc-dialog-supporting-text-color: var(--tf-text) !important;
+}
+
+.mat-mdc-snack-bar-container {
+  --mdc-snackbar-container-color: var(--tf-surface) !important;
+  --mdc-snackbar-supporting-text-color: var(--tf-text) !important;
+  border: 1px solid var(--tf-border);
+  border-radius: 8px !important;
+}
+
+.mat-mdc-tooltip {
+  --mdc-plain-tooltip-container-color: #333 !important;
+  --mdc-plain-tooltip-supporting-text-color: #fff !important;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--tf-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--tf-border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+.mat-mdc-chip {
+  font-family: var(--tf-font-body) !important;
+}
+
+.mat-mdc-chip.mat-primary {
+  --mdc-chip-elevated-container-color: rgba(229,57,53,0.15) !important;
+  --mdc-chip-elevated-disabled-container-color: rgba(229,57,53,0.15) !important;
+  --mdc-chip-label-text-color: var(--tf-primary) !important;
+}
+
+.mat-mdc-chip.mat-accent {
+  --mdc-chip-elevated-container-color: rgba(189,189,189,0.12) !important;
+  --mdc-chip-label-text-color: var(--tf-text-secondary) !important;
+}

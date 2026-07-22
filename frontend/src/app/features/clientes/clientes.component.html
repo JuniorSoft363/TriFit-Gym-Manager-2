@@ -1,0 +1,16 @@
+<div class="tf-page">
+  <div class="tf-header">
+    <h1>Clientes</h1>
+  </div>
+
+  <app-crud-page
+    recurso="clientes"
+    busquedaPlaceholder="Buscar por cédula o nombre..."
+    [columnas]="columnas"
+    [campos]="campos"
+    [soloLectura]="soloLectura"
+    [accionesExtra]="accionesExtra"
+    textoEliminar="¿Desea desactivar este cliente?"
+  >
+  </app-crud-page>
+</div>

@@ -1,0 +1,103 @@
+<!-- Toolbar -->
+<mat-toolbar class="tf-landing-toolbar">
+  <div class="tf-landing-logo">
+    <div class="tf-landing-logo-icon">
+      <mat-icon>fitness_center</mat-icon>
+    </div>
+    <span class="tf-landing-brand">{{ gimnasio?.nombre || 'TriFit Gym' }}</span>
+  </div>
+  <span class="tf-spacer"></span>
+  <button mat-stroked-button class="tf-landing-btn" routerLink="/login">Iniciar Sesión</button>
+</mat-toolbar>
+
+<!-- Hero -->
+<section class="tf-hero">
+  <div class="tf-hero-overlay"></div>
+  <div class="tf-hero-content">
+    <div class="tf-hero-badge">FITNESS MANAGEMENT</div>
+    <h1 class="tf-hero-title">Entrena con propósito en {{ gimnasio?.nombre || 'TriFit Gym' }}</h1>
+    <p class="tf-hero-subtitle">{{ gimnasio?.descripcion || 'Tu centro de entrenamiento integral: fuerza, cardio y acondicionamiento funcional.' }}</p>
+    <div class="tf-hero-actions">
+      <button mat-flat-button class="tf-btn-primary" routerLink="/login">
+        Acceder al sistema
+        <mat-icon>arrow_forward</mat-icon>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- Beneficios -->
+<section class="tf-section tf-benefits">
+  <div class="tf-section-inner">
+    <div class="tf-section-header">
+      <span class="tf-section-tag">¿Por qué elegirnos?</span>
+      <h2 class="tf-section-title">Beneficios de entrenar con nosotros</h2>
+      <p class="tf-section-desc">Transformamos tu experiencia fitness con tecnología y profesionalismo.</p>
+    </div>
+    <div class="tf-benefits-grid">
+      <div class="tf-benefit-card" *ngFor="let b of beneficios">
+        <div class="tf-benefit-icon">
+          <mat-icon>{{ b.icono }}</mat-icon>
+        </div>
+        <h3 class="tf-benefit-title">{{ b.titulo }}</h3>
+        <p class="tf-benefit-desc">{{ b.desc }}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Servicios -->
+<section class="tf-section tf-services">
+  <div class="tf-section-inner">
+    <div class="tf-section-header">
+      <span class="tf-section-tag">Nuestros servicios</span>
+      <h2 class="tf-section-title">Todo lo que necesitas en un solo lugar</h2>
+    </div>
+    <div class="tf-services-grid">
+      <mat-card class="tf-service-card" *ngFor="let s of servicios">
+        <div class="tf-service-icon">
+          <mat-icon>{{ s.icono }}</mat-icon>
+        </div>
+        <h3 class="tf-service-title">{{ s.titulo }}</h3>
+        <p class="tf-service-desc">{{ s.desc }}</p>
+      </mat-card>
+    </div>
+  </div>
+</section>
+
+<!-- Contacto -->
+<section class="tf-section tf-contact">
+  <div class="tf-section-inner">
+    <div class="tf-section-header">
+      <span class="tf-section-tag">Contacto</span>
+      <h2 class="tf-section-title">Estamos para servirte</h2>
+    </div>
+    <div class="tf-contact-grid">
+      <div class="tf-contact-item" *ngFor="let c of contactos">
+        <div class="tf-contact-icon">
+          <mat-icon>{{ c.icono }}</mat-icon>
+        </div>
+        <div class="tf-contact-text">
+          <span class="tf-contact-label">{{ c.etiqueta }}</span>
+          <span class="tf-contact-value">{{ c.valor }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="tf-footer">
+  <div class="tf-footer-inner">
+    <div class="tf-footer-brand">
+      <div class="tf-footer-logo">
+        <mat-icon>fitness_center</mat-icon>
+        <span>{{ gimnasio?.nombre || 'TriFit Gym' }}</span>
+      </div>
+      <p class="tf-footer-desc">Transformando vidas a través del fitness desde 2024.</p>
+    </div>
+    <div class="tf-footer-bottom">
+      <span>© {{ currentYear }} {{ gimnasio?.nombre || 'TriFit Gym' }}. Todos los derechos reservados.</span>
+    </div>
+  </div>
+</footer>

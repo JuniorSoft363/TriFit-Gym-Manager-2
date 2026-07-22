@@ -1,0 +1,118 @@
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { MATERIAL } from '../../shared/material';
+import { CrudPageComponent } from '../../shared/crud-page/crud-page.component';
+import { Campo, Columna } from '../../shared/campos';
+import { ApiService } from '../../core/services/api.service';
+import { MovimientoDialogComponent } from './movimiento-dialog.component';
+
+@Component({
+  selector: 'app-inventario',
+  standalone: true,
+  imports: [CommonModule, FormsModule, MATERIAL, CrudPageComponent],
+  templateUrl: './inventario.component.html'
+})
+export class InventarioComponent implements OnInit {
+  // --- Pestaña Productos/Equipos ---
+  columnasProductos: Columna[] = [
+    { clave: 'nombre', titulo: 'Nombre' },
+    { clave: 'tipo', titulo: 'Tipo' },
+    { clave: 'precio', titulo: 'Precio', tipo: 'moneda' },
+    { clave: 'stock', titulo: 'Stock' },
+    { clave: 'stockMinimo', titulo: 'Stock mínimo' },
+    { clave: 'proveedor.nombre', titulo: 'Proveedor' }
+  ];
+
+  camposProductos: Campo[] = [];
+
+  // --- Pestaña Proveedores ---
+  columnasProveedores: Columna[] = [
+    { clave: 'nombre', titulo: 'Nombre' },
+    { clave: 'ruc', titulo: 'RUC' },
+    { clave: 'telefono', titulo: 'Teléfono' },
+    { clave: 'email', titulo: 'Correo' }
+  ];
+
+  camposProveedores: Campo[] = [
+    { clave: 'nombre', etiqueta: 'Nombre', tipo: 'texto', requerido: true },
+    { clave: 'ruc', etiqueta: 'RUC', tipo: 'texto' },
+    { clave: 'telefono', etiqueta: 'Teléfono', tipo: 'texto', ancho: 'medio' },
+    { clave: 'email', etiqueta: 'Correo', tipo: 'email', ancho: 'medio' },
+    { clave: 'direccion', etiqueta: 'Dirección', tipo: 'texto' }
+  ];
+
+  // --- Pestaña Movimientos ---
+  movimientos: any[] = [];
+  total = 0;
+  pageIndex = 0;
+  pageSize = 10;
+  cargando = false;
+  columnasMovimientos = ['producto', 'tipo', 'cantidad', 'usuario', 'fecha'];
+
+  constructor(
+    private api: ApiService,
+    private dialog: MatDialog,
+    private snack: MatSnackBar
+  ) {}
+
+  ngOnInit() {
+    this.api.listar('inventario/proveedores', { limit: 100 }).subscribe((res) => {
+      this.camposProductos = [
+        { clave: 'nombre', etiqueta: 'Nombre', tipo: 'texto', requerido: true },
+        {
+          clave: 'tipo',
+          etiqueta: 'Tipo',
+          tipo: 'select',
+          requerido: true,
+          opciones: [
+            { valor: 'PRODUCTO', etiqueta: 'Producto' },
+            { valor: 'EQUIPO', etiqueta: 'Equipo' }
+          ]
+        },
+        { clave: 'precio', etiqueta: 'Precio', tipo: 'numero', ancho: 'medio' },
+        { clave: 'stock', etiqueta: 'Stock inicial', tipo: 'numero', ancho: 'medio' },
+        { clave: 'stockMinimo', etiqueta: 'Stock mínimo', tipo: 'numero', ancho: 'medio' },
+        {
+          clave: 'proveedorId',
+          etiqueta: 'Proveedor',
+          tipo: 'select',
+          ancho: 'medio',
+          opciones: res.datos.map((p: any) => ({ valor: p.id, etiqueta: p.nombre }))
+        }
+      ];
+    });
+    this.cargarMovimientos();
+  }
+
+  cargarMovimientos() {
+    this.cargando = true;
+    this.api.listar('inventario/movimientos', { page: this.pageIndex + 1, limit: this.pageSize }).subscribe({
+      next: (res: any) => {
+        this.movimientos = res.datos;
+        this.total = res.total;
+        this.cargando = false;
+      },
+      error: () => (this.cargando = false)
+    });
+  }
+
+  onPagina(evento: any) {
+    this.pageIndex = evento.pageIndex;
+    this.pageSize = evento.pageSize;
+    this.cargarMovimientos();
+  }
+
+  abrirMovimiento() {
+    this.dialog
+      .open(MovimientoDialogComponent, { width: '480px' })
+      .afterClosed()
+      .subscribe((res) => {
+        if (!res) return;
+        this.snack.open('Movimiento registrado', 'Cerrar', { duration: 3000 });
+        this.cargarMovimientos();
+      });
+  }
+}

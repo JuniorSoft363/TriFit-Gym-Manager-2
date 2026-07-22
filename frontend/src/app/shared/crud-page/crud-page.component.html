@@ -1,0 +1,91 @@
+<div class="tf-toolbar-filtros">
+  <mat-form-field appearance="outline" style="width: 300px">
+    <mat-label>{{ busquedaPlaceholder }}</mat-label>
+    <mat-icon matPrefix>search</mat-icon>
+    <input matInput [value]="busqueda" (input)="onBusqueda($any($event.target).value)" />
+  </mat-form-field>
+
+  <span class="tf-spacer"></span>
+
+  <button *ngIf="permiteCrear && !soloLectura" mat-flat-button color="primary" (click)="abrirCrear()">
+    <mat-icon>add</mat-icon>
+    Nuevo
+  </button>
+</div>
+
+<div class="tf-table-wrap">
+  <div *ngIf="cargando" class="tf-center tf-loading">
+    <mat-spinner diameter="36"></mat-spinner>
+  </div>
+
+  <table mat-table [dataSource]="datos" *ngIf="!cargando">
+    <ng-container *ngFor="let columna of columnas" [matColumnDef]="columna.clave">
+      <th mat-header-cell *matHeaderCellDef>{{ columna.titulo }}</th>
+      <td mat-cell *matCellDef="let fila">
+        <ng-container [ngSwitch]="columna.tipo">
+          <span *ngSwitchCase="'estado'">
+            <span
+              class="tf-estado-chip"
+              [style.background]="(columna.colores && columna.colores[valor(fila, columna)]) || '#607d8b'"
+            >
+              {{ valor(fila, columna) }}
+            </span>
+          </span>
+          <span *ngSwitchCase="'moneda'">{{ valor(fila, columna) | currency: 'USD' }}</span>
+          <span *ngSwitchCase="'fecha'">{{ valor(fila, columna) | date: 'dd/MM/yyyy HH:mm' }}</span>
+          <span *ngSwitchCase="'booleano'">{{ valor(fila, columna) ? 'Sí' : 'No' }}</span>
+          <span *ngSwitchDefault>{{ valor(fila, columna) }}</span>
+        </ng-container>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="acciones">
+      <th mat-header-cell *matHeaderCellDef>Acciones</th>
+      <td mat-cell *matCellDef="let fila">
+        <ng-container *ngFor="let ax of accionesExtra">
+          <button
+            *ngIf="!ax.mostrar || ax.mostrar(fila)"
+            mat-icon-button
+            [matTooltip]="ax.tooltip"
+            (click)="ax.accion(fila)"
+          >
+            <mat-icon>{{ ax.icono }}</mat-icon>
+          </button>
+        </ng-container>
+        <button
+          *ngIf="permiteEditar && !soloLectura"
+          mat-icon-button
+          matTooltip="Editar"
+          (click)="abrirEditar(fila)"
+        >
+          <mat-icon>edit</mat-icon>
+        </button>
+        <button
+          *ngIf="permiteEliminar && !soloLectura"
+          mat-icon-button
+          matTooltip="Desactivar"
+          (click)="confirmarEliminar(fila)"
+        >
+          <mat-icon>block</mat-icon>
+        </button>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="columnasVisibles"></tr>
+    <tr mat-row *matRowDef="let row; columns: columnasVisibles"></tr>
+  </table>
+
+  <p *ngIf="!cargando && !datos.length" class="tf-center" style="padding: 24px; color: var(--tf-text-secondary)">
+    No se encontraron registros.
+  </p>
+</div>
+
+<mat-paginator
+  *ngIf="!cargando"
+  [length]="total"
+  [pageIndex]="pageIndex"
+  [pageSize]="pageSize"
+  [pageSizeOptions]="[5, 10, 25, 50]"
+  (page)="onPagina($event)"
+>
+</mat-paginator>

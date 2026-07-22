@@ -1,0 +1,98 @@
+<div class="tf-page">
+  <div class="tf-header">
+    <h1>Rutinas</h1>
+  </div>
+
+  <mat-tab-group>
+    <mat-tab label="Rutinas">
+      <div style="padding-top: 16px">
+        <div class="tf-toolbar-filtros">
+          <mat-form-field appearance="outline" style="width: 260px">
+            <mat-label>Buscar rutina...</mat-label>
+            <input matInput [(ngModel)]="busqueda" (ngModelChange)="onBusquedaCambio()" />
+            <mat-icon matSuffix>search</mat-icon>
+          </mat-form-field>
+
+          <span class="tf-spacer"></span>
+
+          <button mat-flat-button color="primary" (click)="abrirNueva()">
+            <mat-icon>add</mat-icon>
+            Nueva rutina
+          </button>
+        </div>
+
+        <div *ngIf="cargando" class="tf-center tf-loading">
+          <mat-spinner diameter="36"></mat-spinner>
+        </div>
+
+        <div class="tf-table-wrap" *ngIf="!cargando">
+          <table mat-table [dataSource]="rutinas">
+            <ng-container matColumnDef="nombre">
+              <th mat-header-cell *matHeaderCellDef>Nombre</th>
+              <td mat-cell *matCellDef="let r">{{ r.nombre }}</td>
+            </ng-container>
+            <ng-container matColumnDef="objetivo">
+              <th mat-header-cell *matHeaderCellDef>Objetivo</th>
+              <td mat-cell *matCellDef="let r">{{ r.objetivo || '—' }}</td>
+            </ng-container>
+            <ng-container matColumnDef="entrenador">
+              <th mat-header-cell *matHeaderCellDef>Entrenador</th>
+              <td mat-cell *matCellDef="let r">
+                {{ r.entrenador ? (r.entrenador.nombres + ' ' + r.entrenador.apellidos) : '—' }}
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="cliente">
+              <th mat-header-cell *matHeaderCellDef>Cliente</th>
+              <td mat-cell *matCellDef="let r">
+                {{ r.cliente ? (r.cliente.nombres + ' ' + r.cliente.apellidos) : 'Sin asignar' }}
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="ejercicios">
+              <th mat-header-cell *matHeaderCellDef>Ejercicios</th>
+              <td mat-cell *matCellDef="let r">{{ r.ejercicios?.length || 0 }}</td>
+            </ng-container>
+            <ng-container matColumnDef="acciones">
+              <th mat-header-cell *matHeaderCellDef>Acciones</th>
+              <td mat-cell *matCellDef="let r">
+                <button mat-icon-button matTooltip="Editar" (click)="abrirEditar(r)">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button matTooltip="Desactivar" (click)="confirmarEliminar(r)">
+                  <mat-icon>block</mat-icon>
+                </button>
+              </td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="columnas"></tr>
+            <tr mat-row *matRowDef="let row; columns: columnas"></tr>
+          </table>
+          <p *ngIf="!rutinas.length" class="tf-center" style="padding: 24px; color: rgba(0,0,0,.5)">
+            No se encontraron rutinas.
+          </p>
+        </div>
+
+        <mat-paginator
+          *ngIf="!cargando"
+          [length]="total"
+          [pageIndex]="pageIndex"
+          [pageSize]="pageSize"
+          [pageSizeOptions]="[5, 10, 25, 50]"
+          (page)="onPagina($event)"
+        >
+        </mat-paginator>
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Ejercicios">
+      <div style="padding-top: 16px">
+        <app-crud-page
+          recurso="ejercicios"
+          busquedaPlaceholder="Buscar ejercicio..."
+          [columnas]="columnasEjercicios"
+          [campos]="camposEjercicios"
+          textoEliminar="¿Desea desactivar este ejercicio?"
+        >
+        </app-crud-page>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div>

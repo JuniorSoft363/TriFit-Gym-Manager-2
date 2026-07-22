@@ -1,0 +1,58 @@
+<h2 mat-dialog-title>Registrar pago</h2>
+
+<mat-dialog-content style="min-width: 320px">
+  <form [formGroup]="form" class="tf-form-grid">
+    <div style="display: flex; gap: 8px; align-items: flex-start" class="tf-full-width">
+      <mat-form-field appearance="outline" style="flex: 1">
+        <mat-label>Cédula del cliente</mat-label>
+        <input matInput formControlName="cedula" />
+      </mat-form-field>
+      <button mat-stroked-button type="button" style="margin-top: 8px" [disabled]="buscando" (click)="buscar()">
+        Buscar
+      </button>
+    </div>
+
+    <div *ngIf="cliente" class="tf-full-width" style="margin: -8px 0 8px">
+      <p style="margin: 0">
+        Cliente: <strong>{{ cliente.nombres }} {{ cliente.apellidos }}</strong>
+      </p>
+      <p *ngIf="membresia" style="margin: 0">
+        Plan: {{ membresia.plan?.nombre }} ·
+        <span class="tf-estado-chip" [style.background]="membresia.estado === 'ACTIVA' ? '#2e7d32' : '#757575'">
+          {{ membresia.estado }}
+        </span>
+      </p>
+    </div>
+
+    <mat-form-field appearance="outline" class="tf-full-width" *ngIf="membresia">
+      <mat-label>Monto</mat-label>
+      <input matInput type="number" formControlName="monto" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="tf-full-width" *ngIf="membresia">
+      <mat-label>Método de pago</mat-label>
+      <mat-select formControlName="metodo">
+        <mat-option value="EFECTIVO">Efectivo</mat-option>
+        <mat-option value="TARJETA">Tarjeta</mat-option>
+        <mat-option value="TRANSFERENCIA">Transferencia</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="tf-full-width" *ngIf="membresia">
+      <mat-label>Observación</mat-label>
+      <textarea matInput rows="2" formControlName="observacion"></textarea>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="ref.close()">Cancelar</button>
+  <button
+    mat-flat-button
+    color="primary"
+    [disabled]="form.invalid || !membresia || guardando"
+    (click)="guardar()"
+  >
+    Registrar
+  </button>
+</mat-dialog-actions>

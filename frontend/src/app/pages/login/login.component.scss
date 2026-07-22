@@ -1,0 +1,96 @@
+.tf-login-wrap {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--tf-bg);
+  padding: 16px;
+}
+
+.tf-login-card {
+  width: 100%;
+  max-width: 400px;
+  padding: 40px 32px !important;
+}
+
+.tf-login-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.tf-login-logo-icon {
+  width: 56px;
+  height: 56px;
+  background: var(--tf-primary);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tf-login-logo-icon mat-icon {
+  color: #fff;
+  font-size: 30px;
+  width: 30px;
+  height: 30px;
+}
+
+.tf-login-logo-text {
+  font-family: var(--tf-font-title);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--tf-text);
+  text-align: center;
+}
+
+.tf-login-logo-sub {
+  font-size: 13px;
+  color: var(--tf-text-secondary);
+  margin-top: -4px;
+}
+
+.tf-full-width {
+  width: 100%;
+}
+
+.tf-login-error {
+  color: var(--tf-primary);
+  font-size: 13px;
+  margin: -8px 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tf-login-error mat-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+}
+
+.tf-login-submit {
+  margin-top: 8px;
+  padding: 6px 0 !important;
+  border-radius: 8px !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.tf-volver {
+  display: block;
+  text-align: center;
+  margin-top: 20px;
+  font-size: 13px;
+  color: var(--tf-text-secondary);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.tf-volver:hover {
+  color: var(--tf-primary);
+}

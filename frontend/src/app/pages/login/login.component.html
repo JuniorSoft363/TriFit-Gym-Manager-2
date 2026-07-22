@@ -1,0 +1,46 @@
+<div class="tf-login-wrap">
+  <mat-card class="tf-login-card">
+    <div class="tf-login-logo">
+      <div class="tf-login-logo-icon">
+        <mat-icon>fitness_center</mat-icon>
+      </div>
+      <div class="tf-login-logo-text">TriFit Gym Manager</div>
+      <div class="tf-login-logo-sub">Inicia sesión para continuar</div>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="enviar()">
+      <mat-form-field appearance="outline" class="tf-full-width">
+        <mat-label>Correo electrónico</mat-label>
+        <mat-icon matPrefix>email</mat-icon>
+        <input matInput type="email" formControlName="email" autocomplete="username" />
+        <mat-error *ngIf="form.get('email')?.hasError('required')">El correo es obligatorio</mat-error>
+        <mat-error *ngIf="form.get('email')?.hasError('email')">Ingresa un correo válido</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="tf-full-width">
+        <mat-label>Contraseña</mat-label>
+        <mat-icon matPrefix>lock</mat-icon>
+        <input matInput type="password" formControlName="password" autocomplete="current-password" />
+        <mat-error *ngIf="form.get('password')?.hasError('required')">La contraseña es obligatoria</mat-error>
+      </mat-form-field>
+
+      <p *ngIf="errorMsg" class="tf-login-error">
+        <mat-icon>error_outline</mat-icon>
+        {{ errorMsg }}
+      </p>
+
+      <button
+        mat-flat-button
+        color="primary"
+        class="tf-full-width tf-login-submit"
+        type="submit"
+        [disabled]="form.invalid || cargando"
+      >
+        <mat-spinner *ngIf="cargando" diameter="20"></mat-spinner>
+        <span *ngIf="!cargando">Ingresar</span>
+      </button>
+    </form>
+
+    <a routerLink="/" class="tf-volver">← Volver al inicio</a>
+  </mat-card>
+</div>

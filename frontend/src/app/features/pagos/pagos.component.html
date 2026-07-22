@@ -1,0 +1,111 @@
+<div class="tf-page">
+  <div class="tf-header">
+    <h1>Pagos</h1>
+    <span>Total en resultados: <strong>{{ sumaTotal | currency: 'USD' }}</strong></span>
+  </div>
+
+  <div class="tf-toolbar-filtros">
+    <mat-form-field appearance="outline" style="width: 240px">
+      <mat-label>Buscar por cliente</mat-label>
+      <input matInput [(ngModel)]="busqueda" (ngModelChange)="onFiltroCambio()" />
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" style="width: 180px">
+      <mat-label>Estado</mat-label>
+      <mat-select [(ngModel)]="estadoFiltro" (selectionChange)="onFiltroCambio()">
+        <mat-option value="">Todos</mat-option>
+        <mat-option value="PAGADO">Pagado</mat-option>
+        <mat-option value="PENDIENTE">Pendiente</mat-option>
+        <mat-option value="ANULADO">Anulado</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" style="width: 180px">
+      <mat-label>Método</mat-label>
+      <mat-select [(ngModel)]="metodoFiltro" (selectionChange)="onFiltroCambio()">
+        <mat-option value="">Todos</mat-option>
+        <mat-option value="EFECTIVO">Efectivo</mat-option>
+        <mat-option value="TARJETA">Tarjeta</mat-option>
+        <mat-option value="TRANSFERENCIA">Transferencia</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <span class="tf-spacer"></span>
+
+    <button mat-flat-button color="primary" (click)="abrirRegistrar()">
+      <mat-icon>add</mat-icon>
+      Registrar pago
+    </button>
+  </div>
+
+  <div *ngIf="cargando" class="tf-center tf-loading">
+    <mat-spinner diameter="36"></mat-spinner>
+  </div>
+
+  <div class="tf-table-wrap" *ngIf="!cargando">
+    <table mat-table [dataSource]="pagos">
+      <ng-container matColumnDef="cliente">
+        <th mat-header-cell *matHeaderCellDef>Cliente</th>
+        <td mat-cell *matCellDef="let p">
+          {{ p.membresia?.cliente?.nombres }} {{ p.membresia?.cliente?.apellidos }}
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="plan">
+        <th mat-header-cell *matHeaderCellDef>Plan</th>
+        <td mat-cell *matCellDef="let p">{{ p.membresia?.plan?.nombre }}</td>
+      </ng-container>
+      <ng-container matColumnDef="monto">
+        <th mat-header-cell *matHeaderCellDef>Monto</th>
+        <td mat-cell *matCellDef="let p">{{ p.monto | currency: 'USD' }}</td>
+      </ng-container>
+      <ng-container matColumnDef="metodo">
+        <th mat-header-cell *matHeaderCellDef>Método</th>
+        <td mat-cell *matCellDef="let p">{{ p.metodo }}</td>
+      </ng-container>
+      <ng-container matColumnDef="estado">
+        <th mat-header-cell *matHeaderCellDef>Estado</th>
+        <td mat-cell *matCellDef="let p">
+          <span
+            class="tf-estado-chip"
+            [style.background]="p.estado === 'PAGADO' ? '#2e7d32' : p.estado === 'ANULADO' ? '#c62828' : '#ef6c00'"
+          >
+            {{ p.estado }}
+          </span>
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="fecha">
+        <th mat-header-cell *matHeaderCellDef>Fecha</th>
+        <td mat-cell *matCellDef="let p">{{ p.fecha | date: 'dd/MM/yyyy HH:mm' }}</td>
+      </ng-container>
+      <ng-container matColumnDef="acciones">
+        <th mat-header-cell *matHeaderCellDef>Acciones</th>
+        <td mat-cell *matCellDef="let p">
+          <button
+            mat-icon-button
+            matTooltip="Anular"
+            [disabled]="p.estado === 'ANULADO'"
+            (click)="anular(p)"
+          >
+            <mat-icon>cancel</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="columnas"></tr>
+      <tr mat-row *matRowDef="let row; columns: columnas"></tr>
+    </table>
+    <p *ngIf="!pagos.length" class="tf-center" style="padding: 24px; color: rgba(0,0,0,.5)">
+      No se encontraron pagos.
+    </p>
+  </div>
+
+  <mat-paginator
+    *ngIf="!cargando"
+    [length]="total"
+    [pageIndex]="pageIndex"
+    [pageSize]="pageSize"
+    [pageSizeOptions]="[5, 10, 25, 50]"
+    (page)="onPagina($event)"
+  >
+  </mat-paginator>
+</div>

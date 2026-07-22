@@ -1,0 +1,38 @@
+<h2 mat-dialog-title>Registrar movimiento</h2>
+
+<mat-dialog-content style="min-width: 320px">
+  <form [formGroup]="form" class="tf-form-grid">
+    <mat-form-field appearance="outline" class="tf-full-width">
+      <mat-label>Producto / Equipo</mat-label>
+      <mat-select formControlName="productoId">
+        <mat-option *ngFor="let p of productos" [value]="p.id">{{ p.nombre }} (stock: {{ p.stock }})</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="tf-full-width">
+      <mat-label>Tipo de movimiento</mat-label>
+      <mat-select formControlName="tipo">
+        <mat-option value="ENTRADA">Entrada</mat-option>
+        <mat-option value="SALIDA">Salida</mat-option>
+        <mat-option value="AJUSTE">Ajuste (fija el stock exacto)</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="tf-full-width">
+      <mat-label>Cantidad</mat-label>
+      <input matInput type="number" formControlName="cantidad" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="tf-full-width">
+      <mat-label>Observación</mat-label>
+      <textarea matInput rows="2" formControlName="observacion"></textarea>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="ref.close()">Cancelar</button>
+  <button mat-flat-button color="primary" [disabled]="form.invalid || guardando" (click)="guardar()">
+    Registrar
+  </button>
+</mat-dialog-actions>

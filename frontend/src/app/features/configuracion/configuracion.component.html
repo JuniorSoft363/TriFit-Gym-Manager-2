@@ -1,0 +1,32 @@
+<div class="tf-page">
+  <div class="tf-header">
+    <h1>Configuración</h1>
+  </div>
+
+  <mat-tab-group>
+    <mat-tab label="Usuarios">
+      <div style="padding-top: 16px">
+        <app-crud-page
+          recurso="usuarios"
+          busquedaPlaceholder="Buscar por nombre o correo..."
+          [columnas]="columnasUsuarios"
+          [campos]="camposUsuarios"
+          textoEliminar="¿Desea desactivar este usuario?"
+        >
+        </app-crud-page>
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Datos del gimnasio">
+      <div style="padding-top: 16px">
+        <app-datos-gimnasio></app-datos-gimnasio>
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Auditoría">
+      <div style="padding-top: 16px">
+        <app-auditoria></app-auditoria>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div>

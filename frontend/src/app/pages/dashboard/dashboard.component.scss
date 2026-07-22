@@ -1,0 +1,25 @@
+.tf-quick-access {
+  display: flex !important;
+  align-items: center;
+  gap: 10px !important;
+  padding: 16px !important;
+  border-color: var(--tf-border) !important;
+  color: var(--tf-text) !important;
+  border-radius: 10px !important;
+  font-weight: 500 !important;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.tf-quick-access:hover {
+  border-color: var(--tf-primary) !important;
+  background: rgba(229,57,53,0.08) !important;
+  color: var(--tf-primary) !important;
+}
+
+.tf-quick-access mat-icon {
+  color: var(--tf-primary);
+  font-size: 22px;
+  width: 22px;
+  height: 22px;
+}

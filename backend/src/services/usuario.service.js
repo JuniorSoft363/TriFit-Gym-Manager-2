@@ -1,0 +1,40 @@
+// Gestión de usuarios del sistema y roles
+const prisma = require('../config/prisma');
+const { HttpError } = require('../utils/httpError');
+const { hashPassword } = require('../utils/password');
+const { crudService, limpiarDatos } = require('../utils/crud');
+
+const base = crudService('usuario', { camposBusqueda: ['nombre', 'email'], incluir: { rol: true } });
+
+const sinHash = ({ passwordHash, ...resto }) => resto;
+
+async function listar(query) {
+  const r = await base.listar(query);
+  return { ...r, datos: r.datos.map(sinHash) };
+}
+
+async function crear(data) {
+  const { password, ...resto } = limpiarDatos(data);
+  if (!password) throw new HttpError(400, 'La contraseña es obligatoria');
+  const usuario = await prisma.usuario.create({
+    data: { ...resto, passwordHash: await hashPassword(password) },
+    include: { rol: true }
+  });
+  return sinHash(usuario);
+}
+
+async function editar(id, data) {
+  const { password, ...resto } = limpiarDatos(data);
+  const cambios = { ...resto };
+  if (password) cambios.passwordHash = await hashPassword(password);
+  const usuario = await prisma.usuario.update({
+    where: { id: Number(id) },
+    data: cambios,
+    include: { rol: true }
+  });
+  return sinHash(usuario);
+}
+
+const roles = () => prisma.rol.findMany({ orderBy: { id: 'asc' } });
+
+module.exports = { ...base, listar, crear, editar, roles };

@@ -1,0 +1,117 @@
+<div class="tf-page">
+  <div class="tf-header">
+    <h1>Planes y Membresías</h1>
+  </div>
+
+  <mat-tab-group (selectedIndexChange)="onTabChange($event)">
+    <mat-tab label="Planes">
+      <div style="padding-top: 16px">
+        <app-crud-page
+          recurso="planes"
+          busquedaPlaceholder="Buscar plan..."
+          [columnas]="columnasPlanes"
+          [campos]="camposPlanes"
+          [soloLectura]="soloLecturaPlanes"
+          textoEliminar="¿Desea desactivar este plan?"
+        >
+        </app-crud-page>
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Membresías">
+      <div style="padding-top: 16px">
+        <div class="tf-toolbar-filtros">
+          <mat-form-field appearance="outline" style="width: 260px">
+            <mat-label>Buscar por cédula o nombre</mat-label>
+            <input matInput [(ngModel)]="busqueda" (ngModelChange)="onFiltroCambio()" />
+            <mat-icon matSuffix>search</mat-icon>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" style="width: 200px">
+            <mat-label>Estado</mat-label>
+            <mat-select [(ngModel)]="estadoFiltro" (selectionChange)="onFiltroCambio()">
+              <mat-option value="">Todos</mat-option>
+              <mat-option value="ACTIVA">Activa</mat-option>
+              <mat-option value="VENCIDA">Vencida</mat-option>
+              <mat-option value="SUSPENDIDA">Suspendida</mat-option>
+              <mat-option value="CANCELADA">Cancelada</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <span class="tf-spacer"></span>
+
+          <button mat-flat-button color="primary" (click)="abrirAsignar()">
+            <mat-icon>add</mat-icon>
+            Asignar membresía
+          </button>
+        </div>
+
+        <div *ngIf="cargando" class="tf-center tf-loading">
+          <mat-spinner diameter="36"></mat-spinner>
+        </div>
+
+        <div class="tf-table-wrap" *ngIf="!cargando">
+          <table mat-table [dataSource]="membresias">
+            <ng-container matColumnDef="cliente">
+              <th mat-header-cell *matHeaderCellDef>Cliente</th>
+              <td mat-cell *matCellDef="let m">{{ m.cliente?.nombres }} {{ m.cliente?.apellidos }}</td>
+            </ng-container>
+            <ng-container matColumnDef="cedula">
+              <th mat-header-cell *matHeaderCellDef>Cédula</th>
+              <td mat-cell *matCellDef="let m">{{ m.cliente?.cedula }}</td>
+            </ng-container>
+            <ng-container matColumnDef="plan">
+              <th mat-header-cell *matHeaderCellDef>Plan</th>
+              <td mat-cell *matCellDef="let m">{{ m.plan?.nombre }}</td>
+            </ng-container>
+            <ng-container matColumnDef="inicio">
+              <th mat-header-cell *matHeaderCellDef>Inicio</th>
+              <td mat-cell *matCellDef="let m">{{ m.fechaInicio | date: 'dd/MM/yyyy' }}</td>
+            </ng-container>
+            <ng-container matColumnDef="fin">
+              <th mat-header-cell *matHeaderCellDef>Fin</th>
+              <td mat-cell *matCellDef="let m">{{ m.fechaFin | date: 'dd/MM/yyyy' }}</td>
+            </ng-container>
+            <ng-container matColumnDef="estado">
+              <th mat-header-cell *matHeaderCellDef>Estado</th>
+              <td mat-cell *matCellDef="let m">
+                <span class="tf-estado-chip" [style.background]="colorEstado(m.estado)">{{ m.estado }}</span>
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="acciones">
+              <th mat-header-cell *matHeaderCellDef>Acciones</th>
+              <td mat-cell *matCellDef="let m">
+                <button mat-icon-button matTooltip="Renovar" (click)="renovar(m)">
+                  <mat-icon>autorenew</mat-icon>
+                </button>
+                <button mat-icon-button matTooltip="Cambiar estado" [matMenuTriggerFor]="menuEstado">
+                  <mat-icon>more_vert</mat-icon>
+                </button>
+                <mat-menu #menuEstado="matMenu">
+                  <button mat-menu-item (click)="cambiarEstado(m, 'ACTIVA')">Marcar Activa</button>
+                  <button mat-menu-item (click)="cambiarEstado(m, 'SUSPENDIDA')">Suspender</button>
+                  <button mat-menu-item (click)="cambiarEstado(m, 'CANCELADA')">Cancelar</button>
+                </mat-menu>
+              </td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="columnasMembresias"></tr>
+            <tr mat-row *matRowDef="let row; columns: columnasMembresias"></tr>
+          </table>
+          <p *ngIf="!membresias.length" class="tf-center" style="padding: 24px; color: rgba(0,0,0,.5)">
+            No se encontraron membresías.
+          </p>
+        </div>
+
+        <mat-paginator
+          *ngIf="!cargando"
+          [length]="total"
+          [pageIndex]="pageIndex"
+          [pageSize]="pageSize"
+          [pageSizeOptions]="[5, 10, 25, 50]"
+          (page)="onPagina($event)"
+        >
+        </mat-paginator>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div>

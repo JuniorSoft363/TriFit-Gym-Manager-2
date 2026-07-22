@@ -1,0 +1,51 @@
+<div class="tf-toolbar-filtros">
+  <mat-form-field appearance="outline" style="width: 240px">
+    <mat-label>Filtrar por entidad (ej. Cliente)</mat-label>
+    <input matInput [(ngModel)]="entidad" (ngModelChange)="onFiltroCambio()" />
+    <mat-icon matSuffix>search</mat-icon>
+  </mat-form-field>
+</div>
+
+<div *ngIf="cargando" class="tf-center tf-loading">
+  <mat-spinner diameter="36"></mat-spinner>
+</div>
+
+<div class="tf-table-wrap" *ngIf="!cargando">
+  <table mat-table [dataSource]="registros">
+    <ng-container matColumnDef="fecha">
+      <th mat-header-cell *matHeaderCellDef>Fecha</th>
+      <td mat-cell *matCellDef="let a">{{ a.fecha | date: 'dd/MM/yyyy HH:mm' }}</td>
+    </ng-container>
+    <ng-container matColumnDef="usuario">
+      <th mat-header-cell *matHeaderCellDef>Usuario</th>
+      <td mat-cell *matCellDef="let a">{{ a.usuario?.nombre || 'Sistema' }}</td>
+    </ng-container>
+    <ng-container matColumnDef="accion">
+      <th mat-header-cell *matHeaderCellDef>Acción</th>
+      <td mat-cell *matCellDef="let a">{{ a.accion }}</td>
+    </ng-container>
+    <ng-container matColumnDef="entidad">
+      <th mat-header-cell *matHeaderCellDef>Entidad</th>
+      <td mat-cell *matCellDef="let a">{{ a.entidad }} #{{ a.entidadId }}</td>
+    </ng-container>
+    <ng-container matColumnDef="detalle">
+      <th mat-header-cell *matHeaderCellDef>Detalle</th>
+      <td mat-cell *matCellDef="let a">{{ a.detalle || '—' }}</td>
+    </ng-container>
+    <tr mat-header-row *matHeaderRowDef="columnas"></tr>
+    <tr mat-row *matRowDef="let row; columns: columnas"></tr>
+  </table>
+  <p *ngIf="!registros.length" class="tf-center" style="padding: 24px; color: rgba(0,0,0,.5)">
+    No se encontraron registros de auditoría.
+  </p>
+</div>
+
+<mat-paginator
+  *ngIf="!cargando"
+  [length]="total"
+  [pageIndex]="pageIndex"
+  [pageSize]="pageSize"
+  [pageSizeOptions]="[10, 15, 25, 50]"
+  (page)="onPagina($event)"
+>
+</mat-paginator>

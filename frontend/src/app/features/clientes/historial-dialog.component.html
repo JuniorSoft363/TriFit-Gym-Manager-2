@@ -1,0 +1,48 @@
+<h2 mat-dialog-title>
+  Historial de {{ historial?.nombres }} {{ historial?.apellidos }}
+</h2>
+
+<mat-dialog-content style="min-width: 320px; max-width: 640px">
+  <div *ngIf="cargando" class="tf-center tf-loading">
+    <mat-spinner diameter="32"></mat-spinner>
+  </div>
+
+  <ng-container *ngIf="!cargando && historial">
+    <h3>Membresías</h3>
+    <div *ngFor="let m of historial.membresias" style="margin-bottom: 8px">
+      <span class="tf-estado-chip" [style.background]="m.estado === 'ACTIVA' ? '#2e7d32' : '#757575'">
+        {{ m.estado }}
+      </span>
+      {{ m.plan?.nombre }} · {{ m.fechaInicio | date: 'dd/MM/yyyy' }} → {{ m.fechaFin | date: 'dd/MM/yyyy' }}
+      ({{ m.pagos?.length || 0 }} pagos)
+    </div>
+    <p *ngIf="!historial.membresias?.length" class="tf-vacio">Sin membresías registradas.</p>
+
+    <mat-divider style="margin: 12px 0"></mat-divider>
+
+    <h3>Entrenadores asignados</h3>
+    <div *ngFor="let e of historial.entrenadores">
+      {{ e.entrenador?.nombres }} {{ e.entrenador?.apellidos }}
+    </div>
+    <p *ngIf="!historial.entrenadores?.length" class="tf-vacio">Sin entrenador asignado.</p>
+
+    <mat-divider style="margin: 12px 0"></mat-divider>
+
+    <h3>Rutinas activas</h3>
+    <div *ngFor="let r of historial.rutinas">{{ r.nombre }}</div>
+    <p *ngIf="!historial.rutinas?.length" class="tf-vacio">Sin rutinas asignadas.</p>
+
+    <mat-divider style="margin: 12px 0"></mat-divider>
+
+    <h3>Últimas asistencias</h3>
+    <div *ngFor="let a of historial.asistencias">
+      {{ a.horaEntrada | date: 'dd/MM/yyyy HH:mm' }} →
+      {{ a.horaSalida ? (a.horaSalida | date: 'HH:mm') : 'en curso' }}
+    </div>
+    <p *ngIf="!historial.asistencias?.length" class="tf-vacio">Sin asistencias registradas.</p>
+  </ng-container>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Cerrar</button>
+</mat-dialog-actions>
