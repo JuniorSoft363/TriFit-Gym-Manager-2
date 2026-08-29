@@ -1,0 +1,71 @@
+<div class="tf-detalle">
+  <button mat-icon-button class="tf-detalle-cerrar" (click)="ref.close()">
+    <mat-icon>close</mat-icon>
+  </button>
+
+  <div class="tf-detalle-imagen-wrap">
+    <ng-container *ngIf="urlImagen(); else sinImagen">
+      <img [src]="urlImagen()!" [alt]="data.producto.nombre" />
+    </ng-container>
+    <ng-template #sinImagen>
+      <div class="tf-detalle-sin-imagen">
+        <mat-icon>image_not_supported</mat-icon>
+        <span>Sin imagen</span>
+      </div>
+    </ng-template>
+  </div>
+
+  <div class="tf-detalle-cuerpo">
+    <div class="tf-detalle-encabezado">
+      <span class="tf-detalle-tipo">{{ data.producto.tipo }}</span>
+      <span [ngClass]="badgeStock().clase">{{ badgeStock().texto }}</span>
+    </div>
+    <h2>{{ data.producto.nombre }}</h2>
+    <div class="tf-detalle-precio" *ngIf="data.producto.precio != null">
+      $ {{ data.producto.precio }}
+    </div>
+    <p class="tf-detalle-descripcion" *ngIf="data.producto.descripcion">
+      {{ data.producto.descripcion }}
+    </p>
+    <p class="tf-detalle-sin-descripcion" *ngIf="!data.producto.descripcion">
+      <em>Este producto no tiene descripción.</em>
+    </p>
+
+    <div class="tf-detalle-grid">
+      <div>
+        <span class="tf-detalle-label">Stock actual</span>
+        <span class="tf-detalle-valor">{{ data.producto.stock }}</span>
+      </div>
+      <div>
+        <span class="tf-detalle-label">Stock mínimo</span>
+        <span class="tf-detalle-valor">{{ data.producto.stockMinimo || '—' }}</span>
+      </div>
+      <div>
+        <span class="tf-detalle-label">Proveedor</span>
+        <span class="tf-detalle-valor">{{ data.producto.proveedor?.nombre || '—' }}</span>
+      </div>
+      <div>
+        <span class="tf-detalle-label">Estado</span>
+        <span class="tf-detalle-valor">{{ data.producto.activo ? 'Activo' : 'Inactivo' }}</span>
+      </div>
+    </div>
+
+    <div class="tf-detalle-movs">
+      <h3>Movimientos recientes</h3>
+      <div *ngIf="cargandoMov()" class="tf-center" style="padding: 20px">
+        <mat-spinner diameter="28"></mat-spinner>
+      </div>
+      <p *ngIf="!cargandoMov() && !movimientos().length" class="tf-detalle-vacio">
+        Sin movimientos registrados.
+      </p>
+      <ul *ngIf="!cargandoMov() && movimientos().length" class="tf-detalle-lista">
+        <li *ngFor="let m of movimientos()">
+          <span class="tf-detalle-mov-tipo" [style.background]="colorTipo(m.tipo)">{{ m.tipo }}</span>
+          <span class="tf-detalle-mov-cantidad">{{ m.cantidad }}</span>
+          <span class="tf-detalle-mov-fecha">{{ m.fecha | date: 'dd/MM/yyyy HH:mm' }}</span>
+          <span class="tf-detalle-mov-usuario">{{ m.usuario?.nombre || '—' }}</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>

@@ -1,6 +1,7 @@
 const asyncHandler = require('../utils/asyncHandler');
 const { auditar } = require('../utils/auditoria');
 const { crudController } = require('../utils/crud');
+const upload = require('../middlewares/uploads');
 const inventarioService = require('../services/inventario.service');
 
 module.exports = {
@@ -13,5 +14,13 @@ module.exports = {
     const r = await inventarioService.registrarMovimiento(req.body, req.usuario.id);
     auditar(req, 'MOVIMIENTO_' + req.body.tipo, 'Inventario', r.id);
     res.status(201).json(r);
-  })
+  }),
+  subirImagen: asyncHandler(async (req, res) => {
+    const r = await inventarioService.actualizarImagenProducto(req.params.id, req.file);
+    auditar(req, 'PRODUCTO_IMAGEN', 'Producto', r.id);
+    res.json(r);
+  }),
+  movimientosPorProducto: asyncHandler(async (req, res) =>
+    res.json(await inventarioService.listarMovimientosProducto(req.params.id))
+  )
 };

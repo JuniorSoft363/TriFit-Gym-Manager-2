@@ -4,16 +4,9 @@
   </div>
 
   <mat-tab-group>
-    <mat-tab label="Productos y equipos">
+    <mat-tab label="Catálogo">
       <div style="padding-top: 16px">
-        <app-crud-page
-          recurso="inventario/productos"
-          busquedaPlaceholder="Buscar producto o equipo..."
-          [columnas]="columnasProductos"
-          [campos]="camposProductos"
-          textoEliminar="¿Desea desactivar este producto?"
-        >
-        </app-crud-page>
+        <app-catalogo-productos></app-catalogo-productos>
       </div>
     </mat-tab>
 

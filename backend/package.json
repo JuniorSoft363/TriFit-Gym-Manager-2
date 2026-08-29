@@ -9,7 +9,8 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "seed": "node prisma/seed.js",
-    "seed:dataset": "node prisma/seed-dataset.js"
+    "seed:dataset": "node prisma/seed-dataset.js",
+    "seed:productos": "node prisma/seed-productos.js"
   },
   "prisma": {
     "seed": "node prisma/seed.js"
