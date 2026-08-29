@@ -1,0 +1,81 @@
+<div class="tf-catalogo">
+  <div class="tf-catalogo-toolbar">
+    <mat-form-field appearance="outline" class="tf-catalogo-buscar">
+      <mat-label>Buscar producto</mat-label>
+      <input matInput [(ngModel)]="busqueda" placeholder="Ej. proteína" />
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Tipo</mat-label>
+      <mat-select [(ngModel)]="filtroTipo">
+        <mat-option value="">Todos</mat-option>
+        <mat-option value="PRODUCTO">Producto</mat-option>
+        <mat-option value="EQUIPO">Equipo</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Stock</mat-label>
+      <mat-select [(ngModel)]="filtroStock">
+        <mat-option value="todos">Todos</mat-option>
+        <mat-option value="bajo">Stock bajo</mat-option>
+        <mat-option value="agotados">Agotados</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Ordenar por</mat-label>
+      <mat-select [(ngModel)]="orden">
+        <mat-option value="nombre">Nombre</mat-option>
+        <mat-option value="precio">Precio</mat-option>
+        <mat-option value="stock">Stock</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <span class="tf-spacer"></span>
+
+    <button mat-flat-button color="primary" (click)="abrirFormulario()">
+      <mat-icon>add</mat-icon>
+      Nuevo producto
+    </button>
+  </div>
+
+  <div *ngIf="cargando()" class="tf-center tf-loading">
+    <mat-spinner diameter="36"></mat-spinner>
+  </div>
+
+  <div *ngIf="!cargando() && !productosFiltrados.length" class="tf-vacio">
+    <mat-icon>inventory_2</mat-icon>
+    <p>No hay productos que coincidan con los filtros.</p>
+  </div>
+
+  <div class="tf-catalogo-grid" *ngIf="!cargando() && productosFiltrados.length">
+    <article class="tf-card-producto" *ngFor="let p of productosFiltrados" (click)="verDetalle(p)">
+      <div class="tf-card-imagen">
+        <ng-container *ngIf="urlImagen(p); else sinImagen">
+          <img [src]="urlImagen(p)!" [alt]="p.nombre" />
+        </ng-container>
+        <ng-template #sinImagen>
+          <div class="tf-card-imagen-vacia">
+            <mat-icon>image_not_supported</mat-icon>
+          </div>
+        </ng-template>
+        <span class="tf-card-tipo">{{ p.tipo }}</span>
+      </div>
+      <div class="tf-card-cuerpo">
+        <h3 class="tf-card-nombre">{{ p.nombre }}</h3>
+        <div class="tf-card-precio">
+          <span *ngIf="p.precio != null">$ {{ p.precio }}</span>
+          <span *ngIf="p.precio == null" class="tf-card-sin-precio">Sin precio</span>
+        </div>
+        <div class="tf-card-footer">
+          <span [ngClass]="badgeStock(p).clase">{{ badgeStock(p).texto }}</span>
+          <button mat-icon-button color="primary" (click)="$event.stopPropagation(); abrirFormulario(p)" matTooltip="Editar">
+            <mat-icon>edit</mat-icon>
+          </button>
+        </div>
+      </div>
+    </article>
+  </div>
+</div>

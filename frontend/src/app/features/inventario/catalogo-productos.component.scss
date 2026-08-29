@@ -1,0 +1,179 @@
+.tf-catalogo {
+  padding: 16px 0;
+}
+
+.tf-catalogo-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.tf-catalogo-buscar {
+  min-width: 260px;
+  flex: 1;
+}
+
+.tf-catalogo-toolbar mat-form-field {
+  width: 180px;
+}
+
+.tf-catalogo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.tf-card-producto {
+  background: var(--tf-surface);
+  border: 1px solid var(--tf-border);
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.tf-card-producto:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  border-color: var(--tf-primary);
+}
+
+.tf-card-imagen {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  background: var(--tf-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.tf-card-imagen img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.tf-card-imagen-vacia {
+  color: var(--tf-text-secondary);
+  opacity: 0.4;
+}
+
+.tf-card-imagen-vacia mat-icon {
+  font-size: 64px;
+  width: 64px;
+  height: 64px;
+}
+
+.tf-card-tipo {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 100px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.tf-card-cuerpo {
+  padding: 14px 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+
+.tf-card-nombre {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--tf-text);
+  font-family: var(--tf-font-body);
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.tf-card-precio {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--tf-primary);
+}
+
+.tf-card-sin-precio {
+  font-size: 12px;
+  color: var(--tf-text-secondary);
+  font-weight: 400;
+  font-style: italic;
+}
+
+.tf-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+  padding-top: 8px;
+  border-top: 1px solid var(--tf-border);
+}
+
+.tf-tag {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 100px;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
+.tf-tag-verde {
+  background: rgba(46, 204, 113, 0.18);
+  color: #2ecc71;
+}
+
+.tf-tag-naranja {
+  background: rgba(243, 156, 18, 0.18);
+  color: #f39c12;
+}
+
+.tf-tag-rojo {
+  background: rgba(231, 76, 60, 0.18);
+  color: #e74c3c;
+}
+
+.tf-vacio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: var(--tf-text-secondary);
+  gap: 8px;
+}
+
+.tf-vacio mat-icon {
+  font-size: 48px;
+  width: 48px;
+  height: 48px;
+  opacity: 0.5;
+}
+
+@media (max-width: 700px) {
+  .tf-catalogo-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .tf-catalogo-toolbar mat-form-field {
+    width: 100%;
+  }
+}

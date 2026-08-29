@@ -5,29 +5,18 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MATERIAL } from '../../shared/material';
 import { CrudPageComponent } from '../../shared/crud-page/crud-page.component';
-import { Campo, Columna } from '../../shared/campos';
+import { Columna } from '../../shared/campos';
 import { ApiService } from '../../core/services/api.service';
 import { MovimientoDialogComponent } from './movimiento-dialog.component';
+import { CatalogoProductosComponent } from './catalogo-productos.component';
 
 @Component({
   selector: 'app-inventario',
   standalone: true,
-  imports: [CommonModule, FormsModule, MATERIAL, CrudPageComponent],
+  imports: [CommonModule, FormsModule, MATERIAL, CrudPageComponent, CatalogoProductosComponent],
   templateUrl: './inventario.component.html'
 })
 export class InventarioComponent implements OnInit {
-  // --- Pestaña Productos/Equipos ---
-  columnasProductos: Columna[] = [
-    { clave: 'nombre', titulo: 'Nombre' },
-    { clave: 'tipo', titulo: 'Tipo' },
-    { clave: 'precio', titulo: 'Precio', tipo: 'moneda' },
-    { clave: 'stock', titulo: 'Stock' },
-    { clave: 'stockMinimo', titulo: 'Stock mínimo' },
-    { clave: 'proveedor.nombre', titulo: 'Proveedor' }
-  ];
-
-  camposProductos: Campo[] = [];
-
   // --- Pestaña Proveedores ---
   columnasProveedores: Columna[] = [
     { clave: 'nombre', titulo: 'Nombre' },
@@ -36,7 +25,7 @@ export class InventarioComponent implements OnInit {
     { clave: 'email', titulo: 'Correo' }
   ];
 
-  camposProveedores: Campo[] = [
+  camposProveedores = [
     { clave: 'nombre', etiqueta: 'Nombre', tipo: 'texto', requerido: true },
     { clave: 'ruc', etiqueta: 'RUC', tipo: 'texto' },
     { clave: 'telefono', etiqueta: 'Teléfono', tipo: 'texto', ancho: 'medio' },
@@ -59,31 +48,6 @@ export class InventarioComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.api.listar('inventario/proveedores', { limit: 100 }).subscribe((res) => {
-      this.camposProductos = [
-        { clave: 'nombre', etiqueta: 'Nombre', tipo: 'texto', requerido: true },
-        {
-          clave: 'tipo',
-          etiqueta: 'Tipo',
-          tipo: 'select',
-          requerido: true,
-          opciones: [
-            { valor: 'PRODUCTO', etiqueta: 'Producto' },
-            { valor: 'EQUIPO', etiqueta: 'Equipo' }
-          ]
-        },
-        { clave: 'precio', etiqueta: 'Precio', tipo: 'numero', ancho: 'medio' },
-        { clave: 'stock', etiqueta: 'Stock inicial', tipo: 'numero', ancho: 'medio' },
-        { clave: 'stockMinimo', etiqueta: 'Stock mínimo', tipo: 'numero', ancho: 'medio' },
-        {
-          clave: 'proveedorId',
-          etiqueta: 'Proveedor',
-          tipo: 'select',
-          ancho: 'medio',
-          opciones: res.datos.map((p: any) => ({ valor: p.id, etiqueta: p.nombre }))
-        }
-      ];
-    });
     this.cargarMovimientos();
   }
 

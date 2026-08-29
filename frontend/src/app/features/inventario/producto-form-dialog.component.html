@@ -1,0 +1,100 @@
+<h2 mat-dialog-title>{{ esEdicion ? 'Editar producto' : 'Nuevo producto' }}</h2>
+
+<mat-dialog-content class="tf-form">
+  <form [formGroup]="form">
+    <div class="tf-form-imagen">
+      <ng-container *ngIf="imagenPreview(); else placeholder">
+        <img [src]="imagenPreview()!" alt="Vista previa" />
+        <button mat-mini-fab color="warn" type="button" (click)="eliminarImagenPreview()" class="tf-form-imagen-eliminar">
+          <mat-icon>close</mat-icon>
+        </button>
+      </ng-container>
+      <ng-template #placeholder>
+        <div class="tf-form-imagen-placeholder">
+          <mat-icon>add_photo_alternate</mat-icon>
+          <span>Sin imagen</span>
+        </div>
+      </ng-template>
+      <label class="tf-form-imagen-boton" mat-stroked-button>
+        <mat-icon>upload</mat-icon>
+        <span>{{ imagenPreview() ? 'Cambiar imagen' : 'Subir imagen' }}</span>
+        <input
+          type="file"
+          accept="image/*"
+          hidden
+          (change)="onFileSelected($event)"
+          [disabled]="subiendo()"
+        />
+      </label>
+    </div>
+
+    <div class="tf-form-grid">
+      <mat-form-field appearance="outline" class="tf-full-width">
+        <mat-label>Nombre</mat-label>
+        <input matInput formControlName="nombre" maxlength="120" />
+        <mat-error *ngIf="form.get('nombre')?.hasError('required')">El nombre es obligatorio</mat-error>
+        <mat-error *ngIf="form.get('nombre')?.hasError('maxlength')">Máx. 120 caracteres</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Tipo</mat-label>
+        <mat-select formControlName="tipo">
+          <mat-option value="PRODUCTO">Producto</mat-option>
+          <mat-option value="EQUIPO">Equipo</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Precio (USD)</mat-label>
+        <input matInput type="number" step="0.01" formControlName="precio" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Stock inicial</mat-label>
+        <input matInput type="number" formControlName="stock" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Stock mínimo</mat-label>
+        <input matInput type="number" formControlName="stockMinimo" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="tf-full-width">
+        <mat-label>Proveedor</mat-label>
+        <mat-select formControlName="proveedorId">
+          <mat-option [value]="null">— Sin proveedor —</mat-option>
+          <mat-option *ngFor="let p of proveedores" [value]="p.id">{{ p.nombre }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="tf-full-width">
+        <mat-label>Descripción</mat-label>
+        <textarea matInput formControlName="descripcion" rows="3" maxlength="500"></textarea>
+        <mat-hint>Opcional. Detalla uso, ingredientes, especificaciones, etc.</mat-hint>
+      </mat-form-field>
+
+      <div class="tf-form-activo" *ngIf="esEdicion">
+        <mat-slide-toggle formControlName="activo">Producto activo</mat-slide-toggle>
+      </div>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="ref.close()">Cancelar</button>
+  <button
+    mat-flat-button
+    color="primary"
+    type="button"
+    [disabled]="form.invalid || guardando()"
+    (click)="guardar()"
+  >
+    <mat-icon *ngIf="!guardando() && !subiendo()">save</mat-icon>
+    <mat-progress-spinner *ngIf="guardando() || subiendo()" diameter="18" mode="indeterminate"></mat-progress-spinner>
+    <span>
+      <ng-container *ngIf="subiendo()">Subiendo imagen...</ng-container>
+      <ng-container *ngIf="!subiendo() && guardando()">Guardando...</ng-container>
+      <ng-container *ngIf="!subiendo() && !guardando()">{{ esEdicion ? 'Actualizar' : 'Crear' }}</ng-container>
+    </span>
+  </button>
+</mat-dialog-actions>

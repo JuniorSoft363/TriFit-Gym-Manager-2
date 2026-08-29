@@ -1,0 +1,80 @@
+.tf-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 8px 4px;
+  min-width: 320px;
+}
+
+.tf-form-imagen {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px;
+  background: var(--tf-bg);
+  border: 1px dashed var(--tf-border);
+  border-radius: 10px;
+  position: relative;
+}
+
+.tf-form-imagen img {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid var(--tf-border);
+}
+
+.tf-form-imagen-placeholder {
+  width: 100px;
+  height: 100px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--tf-surface);
+  border: 1px dashed var(--tf-border);
+  border-radius: 8px;
+  color: var(--tf-text-secondary);
+  font-size: 11px;
+  text-align: center;
+  gap: 4px;
+}
+
+.tf-form-imagen-placeholder mat-icon {
+  font-size: 28px;
+  width: 28px;
+  height: 28px;
+  opacity: 0.6;
+}
+
+.tf-form-imagen-boton {
+  flex: 1;
+  display: inline-flex !important;
+  align-items: center;
+  gap: 6px;
+  justify-content: center;
+}
+
+.tf-form-imagen-eliminar {
+  position: absolute;
+  top: 4px;
+  left: 84px;
+  transform: scale(0.6);
+  transform-origin: top left;
+}
+
+.tf-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 12px;
+}
+
+.tf-full-width {
+  grid-column: 1 / -1;
+}
+
+.tf-form-activo {
+  grid-column: 1 / -1;
+  padding: 8px 0;
+}

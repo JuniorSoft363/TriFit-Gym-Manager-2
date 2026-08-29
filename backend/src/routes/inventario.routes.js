@@ -3,6 +3,7 @@ const ctrl = require('../controllers/inventario.controller');
 const { autenticar } = require('../middlewares/auth');
 const { permitirRoles } = require('../middlewares/roles');
 const { validar } = require('../middlewares/validar');
+const upload = require('../middlewares/uploads');
 const v = require('../validators');
 
 const router = Router();
@@ -15,6 +16,8 @@ router.get('/productos/:id', ctrl.productos.obtener);
 router.post('/productos', v.producto, validar, ctrl.productos.crear);
 router.put('/productos/:id', v.producto, validar, ctrl.productos.editar);
 router.delete('/productos/:id', ctrl.productos.eliminar);
+router.post('/productos/:id/imagen', upload.single('imagen'), ctrl.subirImagen);
+router.get('/productos/:id/movimientos', ctrl.movimientosPorProducto);
 
 // Proveedores
 router.get('/proveedores', ctrl.proveedores.listar);
