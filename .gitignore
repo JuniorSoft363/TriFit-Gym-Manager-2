@@ -27,6 +27,9 @@ frontend/test-results/
 frontend/blob-report/
 frontend/playwright/.cache/
 
+# Evidencias de pruebas manuales (capturas locales)
+docs/evidencias/
+
 # IDEs y SO
 .vscode/
 .idea/
