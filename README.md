@@ -11,7 +11,6 @@ TriFit-Gym-Manager/
 ├── backend/     API REST (Node/Express/Prisma)
 └── frontend/    Aplicación Angular
 ```
-## ñ
 ## 1. Backend
 
 ### Requisitos
