@@ -1,5 +1,23 @@
 # Integration Test Cases
-## Sistema de Gestión de Gym — Módulo de Membresías
+## TriFit Gym Manager — Módulo de Membresías
+
+> **Nota:** los casos de prueba originales recibidos estaban dirigidos a un sistema PHP/PostgreSQL diferente (con `socios`, `tipos_membresia`, `public/membresias.html` y API PHP). Esta versión está **adaptada al modelo real de TriFit Gym Manager** (Angular 17 + Express + Prisma + PostgreSQL).
+>
+> **Endpoints reales** (backend en `http://localhost:3000/api`):
+> - `GET /api/membresias` (con `page`, `limit`, `estado`, `busqueda`)
+> - `POST /api/membresias` (body: `{ clienteId, planId, fechaInicio }`)
+> - `PATCH /api/membresias/:id/renovar`
+> - `PATCH /api/membresias/:id/estado` (body: `{ estado }`)
+>
+> **UI real**: `/app/membresias` (pestaña *Membresías*), botón **Asignar membresía**, columna *Acciones* con `autorenew` (Renovar) y `more_vert` (menú de estado).
+>
+> **Reglas de negocio reales**:
+> - Un cliente no puede tener dos membresías `ACTIVA` simultáneas (lanza 409).
+> - `cambiarEstado` acepta `ACTIVA | VENCIDA | SUSPENDIDA | CANCELADA`.
+> - Al listar, las membresías con `fechaFin < hoy` en estado `ACTIVA` se actualizan automáticamente a `VENCIDA`.
+> - Renovar extiende `fechaFin` desde la fecha actual (o desde la fecha fin si aún no venció) y deja la membresía en `ACTIVA`.
+>
+> **Credenciales de prueba**: `admin@trifit.com` / `Admin123*`
 
 ---
 
@@ -8,43 +26,33 @@
 | Campo | Detalle |
 |---|---|
 | **ID** | TC-INT-01 |
-| **Nombre del caso de prueba** | Registrar alta de membresía con datos válidos y verificar reflejo en el listado |
+| **Nombre del caso de prueba** | Asignar una nueva membresía a un cliente sin membresía activa y verificar reflejo en el listado |
 | **Prioridad** | Alta |
-| **Precondiciones** | Debe existir al menos un socio registrado en la tabla socios (sin membresía activa) y al menos un tipo de membresía activo en tipos_membresia. |
+| **Precondiciones** | Cliente existente (con cédula registrada) sin membresía ACTIVA. Plan existente con `activo = true`. |
 | **Tipo de prueba** | Integración |
-| **Estado de implementación** | Ejecutable con el archivo public/membresias.html (requiere API PHP activa y PostgreSQL inicializada con database/init.sql) |
-| **Objetivo** | Comprobar que una nueva membresía se registra correctamente y se refleja de inmediato en la tabla de membresías sin recargar la página. |
-| **Subsistema/s** | Formulario de Membresías > API /api/membresias > Modelo Membresia (PDO) > PostgreSQL > Listado (tabla HTML) |
-| **Datos de entrada** | socio_id = 1<br>tipo_membresia_id = 2 ('Estándar') |
-| **Resultado esperado** | POST /api/membresias responde 201 con la nueva membresía (fecha_inicio = hoy, fecha_fin = hoy + 30 días, estado = 'activa', precio_aplicado = 40.00). La tabla se recarga automáticamente y muestra el nuevo registro. |
+| **Estado de implementación** | Ejecutable con la UI `/app/membresias` (requiere backend activo y BD inicializada con `npm run seed:dataset`) |
+| **Objetivo** | Comprobar que una nueva membresía se registra correctamente y se refleja de inmediato en la tabla de membresías. |
+| **Subsistema/s** | Diálogo AsignarMembresiaDialog → POST /api/membresias → Prisma → recargar tabla |
+| **Datos de entrada** | cliente (búsqueda por cédula) sin membresía activa; planId del plan elegido; fechaInicio = hoy |
+| **Resultado esperado** | POST responde 201 con la membresía (estado = 'ACTIVA', fechaFin = fechaInicio + duracionDias). La tabla muestra la nueva fila con chip verde "ACTIVA" y snack-bar "Membresía asignada correctamente". |
 
 **Pasos de ejecución:**
-- Acceder a public/membresias.html
-- Verificar que el select 'Plan' cargó las opciones desde /api/tipos-membresia
-- Ingresar el ID del socio en el campo correspondiente
-- Seleccionar el plan 'Estándar'
-- Dar clic en 'Registrar alta'
-- Verificar el mensaje de confirmación mostrado en pantalla
-- Verificar que la tabla de membresías muestra el nuevo registro sin recargar la página
+- Iniciar sesión como admin y navegar a `/app/membresias`
+- Clic en la pestaña **Membresías**
+- Clic en **Asignar membresía**
+- En el diálogo, escribir la cédula del cliente y clic en **Buscar**
+- Seleccionar un plan del dropdown
+- Mantener la fecha de inicio propuesta (hoy)
+- Clic en **Asignar**
 
 **Criterio de verificación:**
-- La tabla de membresías cuenta con un nuevo registro para el socio indicado
-- La columna Vigencia muestra fecha_inicio → fecha_fin correspondiente a 30 días
-- El badge de estado del nuevo registro muestra 'activa'
-- Las acciones 'Renovar' y 'Dar de baja' están disponibles en la fila creada
+- Aparece snack-bar "Membresía asignada correctamente"
+- En la tabla aparece una nueva fila con el cliente seleccionado, plan, inicio = hoy, fin = hoy + duracionDias y badge verde "ACTIVA"
 
 | Campo | Detalle |
 |---|---|
 | **Resultados obtenidos** | Pendiente de ejecución. |
 | **Estado** | No ejecutado |
-
-**Evidencias:**
-- [IMAGE PENDING] Memberships Module — registration form with socio_id and plan selected — Number of captures: 1
-- [IMAGEN PENDIENTE] Módulo Membresías — tabla de membresías con el nuevo registro visible — Cantidad de capturas: 1
-- [IMAGEN PENDIENTE] Módulo Membresías — mensaje de confirmación tras el alta — Cantidad de capturas: 1
-
-| Campo | Detalle |
-|---|---|
 | **Tiempo de ejecución** | - |
 | **Observaciones** | Ninguna. |
 
@@ -55,42 +63,32 @@
 | Campo | Detalle |
 |---|---|
 | **ID** | TC-INT-02 |
-| **Nombre del caso de prueba** | Impedir el alta de una segunda membresía activa para el mismo socio |
+| **Nombre del caso de prueba** | Impedir el alta de una segunda membresía activa para el mismo cliente |
 | **Prioridad** | Alta |
-| **Precondiciones** | El socio de prueba ya debe contar con una membresía en estado 'activa' (protegida por el índice único uq_membresia_activa_por_socio). |
+| **Precondiciones** | El cliente de prueba ya debe contar con una membresía en estado `ACTIVA`. |
 | **Tipo de prueba** | Integración |
-| **Estado de implementación** | Ejecutable con el archivo public/membresias.html (requiere API PHP activa y PostgreSQL inicializada con database/init.sql) |
-| **Objetivo** | Comprobar que el sistema rechaza el alta de una membresía cuando el socio ya tiene una membresía activa vigente. |
-| **Subsistema/s** | Formulario de Membresías > API /api/membresias > Modelo Membresia (PDO) > PostgreSQL |
-| **Datos de entrada** | socio_id = (socio con membresía activa existente)<br>tipo_membresia_id = 1 ('Básica') |
-| **Resultado esperado** | POST /api/membresias responde 409 con el mensaje 'El socio ya tiene una membresía activa.'. No se crea un segundo registro en la tabla membresias. |
+| **Estado de implementación** | Ejecutable con la UI `/app/membresias` y la API REST |
+| **Objetivo** | Comprobar que el sistema rechaza el alta de una membresía cuando el cliente ya tiene una membresía activa vigente. |
+| **Subsistema/s** | AsignarMembresiaDialog → POST /api/membresias → `membresiaService.asignar` → Prisma |
+| **Datos de entrada** | cliente con membresía ACTIVA existente; cualquier plan activo |
+| **Resultado esperado** | POST /api/membresias responde 409 con el mensaje "El cliente ya tiene una membresía activa". No se crea un segundo registro. |
 
 **Pasos de ejecución:**
-- Go to public/membresias.html
-- Ingresar el ID de un socio que ya posee una membresía activa
-- Seleccionar cualquier plan disponible
-- Dar clic en 'Registrar alta'
-- Verificar el mensaje de error mostrado en pantalla
-- Verificar que la tabla de membresías no incorpora un nuevo registro para ese socio
+- Identificar un cliente con membresía ACTIVA en la tabla
+- Abrir **Asignar membresía** y buscarlo por cédula
+- Seleccionar cualquier plan
+- Clic en **Asignar**
 
 **Criterio de verificación:**
-- El mensaje de error corresponde a 'El socio ya tiene una membresía activa.'
-- El socio continúa con una única membresía en estado 'activa'
-- No se genera una fila adicional en la tabla de membresías
+- La membresía existente del cliente se mantiene como única ACTIVA
+- La base de datos no registra una segunda fila ACTIVA para el mismo `clienteId`
 
 | Campo | Detalle |
 |---|---|
 | **Resultados obtenidos** | Pendiente de ejecución. |
 | **Estado** | No ejecutado |
-
-**Evidencias:**
-- [IMAGE PENDING] Memberships Module — duplicate registration attempt with the entered data — Number of captures: 1
-- [IMAGEN PENDIENTE] Módulo Membresías — mensaje de error 'El socio ya tiene una membresía activa' — Cantidad de capturas: 1
-
-| Campo | Detalle |
-|---|---|
 | **Tiempo de ejecución** | - |
-| **Observaciones** | Verificar en la base de datos que el índice uq_membresia_activa_por_socio efectivamente impidió la inserción (código PDO 23505). |
+| **Observaciones** | Verificar que la respuesta del backend es controlada (no 500). |
 
 ---
 
@@ -99,40 +97,30 @@
 | Campo | Detalle |
 |---|---|
 | **ID** | TC-INT-03 |
-| **Nombre del caso de prueba** | Rechazar el alta de membresía cuando el socio indicado no existe |
+| **Nombre del caso de prueba** | Rechazar el alta de membresía cuando el cliente indicado no existe |
 | **Prioridad** | Media |
-| **Precondiciones** | Debe existir un ID de socio garantizado inexistente en la tabla socios (por ejemplo, un ID mayor al máximo actual). |
+| **Precondiciones** | Debe existir un ID de cliente (cédula) garantizado inexistente. |
 | **Tipo de prueba** | Integración |
-| **Estado de implementación** | Ejecutable con el archivo public/membresias.html (requiere API PHP activa y PostgreSQL inicializada con database/init.sql) |
-| **Objetivo** | Comprobar que el sistema valida la existencia del socio antes de registrar la membresía, respetando la integridad referencial. |
-| **Subsistema/s** | Formulario de Membresías > API /api/membresias > Modelo Membresia (PDO) > PostgreSQL |
-| **Datos de entrada** | socio_id = 999999 (no existe)<br>tipo_membresia_id = 1 |
-| **Resultado esperado** | POST /api/membresias responde 422 con el mensaje 'El socio indicado no existe.'. No se inserta ningún registro en membresias. |
+| **Estado de implementación** | Ejecutable con la UI `/app/membresias` |
+| **Objetivo** | Comprobar que el sistema valida la existencia del cliente antes de permitir el alta. |
+| **Subsistema/s** | AsignarMembresiaDialog → GET /api/clientes/cedula/:cedula |
+| **Datos de entrada** | cédula = 0999999999 (no existe) |
+| **Resultado esperado** | GET responde 404; el diálogo muestra snack-bar "Cliente no encontrado"; el botón **Asignar** queda deshabilitado. |
 
 **Pasos de ejecución:**
-- Acceder a public/membresias.html
-- Ingresar un socio_id que no exista en la base de datos
-- Seleccionar un plan disponible
-- Dar clic en 'Registrar alta'
-- Verificar el mensaje de error devuelto
-- Verificar que la tabla de membresías permanece sin cambios
+- Abrir **Asignar membresía**
+- Ingresar una cédula inexistente
+- Clic en **Buscar**
 
 **Criterio de verificación:**
-- El mensaje de error corresponde a 'El socio indicado no existe.'
-- La tabla de membresías no agrega ninguna fila nueva
-- La violación de llave foránea (código PDO 23503) es capturada y no expone detalles internos al usuario
+- Aparece snack-bar "Cliente no encontrado"
+- No aparece texto "Cliente:" debajo del campo
+- El botón **Asignar** permanece deshabilitado
 
 | Campo | Detalle |
 |---|---|
 | **Resultados obtenidos** | Pendiente de ejecución. |
 | **Estado** | No ejecutado |
-
-**Evidencias:**
-- [IMAGE PENDING] Memberships Module — form with a non-existent partner_id — Number of captures: 1
-- [IMAGEN PENDIENTE] Módulo Membresías — mensaje de error 'El socio indicado no existe' — Cantidad de capturas: 1
-
-| Campo | Detalle |
-|---|---|
 | **Tiempo de ejecución** | - |
 | **Observaciones** | Ninguna. |
 
@@ -143,42 +131,32 @@
 | Campo | Detalle |
 |---|---|
 | **ID** | TC-INT-04 |
-| **Nombre del caso de prueba** | Validar campos obligatorios y numéricos antes de enviar el alta |
+| **Nombre del caso de prueba** | Validar campos obligatorios y de selección antes de enviar el alta |
 | **Prioridad** | Media |
 | **Precondiciones** | Ninguna; solo requiere tener cargado el formulario de alta. |
 | **Tipo de prueba** | Integración |
-| **Estado de implementación** | Ejecutable con el archivo public/membresias.html (requiere API PHP activa y PostgreSQL inicializada con database/init.sql) |
-| **Objetivo** | Comprobar que el frontend impide el envío de la petición cuando el socio o el plan no son válidos, sin llegar a consultar la API. |
-| **Subsistema/s** | Formulario de Membresías > Validación JS (membresias.js) |
-| **Datos de entrada** | socio_id = (vacío)<br>tipoMembresia = (sin seleccionar) |
-| **Resultado esperado** | El JS detecta valores no numéricos (Number.isNaN) y muestra el mensaje 'Indica el ID del socio y selecciona un plan.' sin invocar el endpoint POST /api/membresias. |
+| **Estado de implementación** | Ejecutable con la UI `/app/membresias` |
+| **Objetivo** | Comprobar que el frontend impide el envío cuando el cliente o el plan no son válidos, sin llegar a consultar la API. |
+| **Subsistema/s** | AsignarMembresiaDialog (validación con Reactive Forms) |
+| **Datos de entrada** | cédula = (vacía); plan = (sin seleccionar) |
+| **Resultado esperado** | El botón **Asignar** queda deshabilitado. En Network no se dispara POST /api/membresias. |
 
 **Pasos de ejecución:**
-- Go to public/membresias.html
-- Dejar vacío el campo 'ID del socio'
-- No seleccionar ningún plan en el select
-- Dar clic en 'Registrar alta'
-- Verificar el mensaje mostrado en pantalla
-- Verificar en las herramientas de red del navegador que no se realizó la petición POST
+- Abrir **Asignar membresía**
+- Dejar el campo de cédula vacío
+- No seleccionar plan
+- Comprobar el estado del botón **Asignar**
 
 **Criterio de verificación:**
-- Se muestra el mensaje 'Indica el ID del socio y selecciona un plan.'
-- No se registra ninguna petición POST hacia /api/membresias
-- La tabla de membresías permanece sin cambios
+- Botón **Asignar** deshabilitado
+- Sin petición POST a /api/membresias en la pestaña Network
 
 | Campo | Detalle |
 |---|---|
 | **Resultados obtenidos** | Pendiente de ejecución. |
 | **Estado** | No ejecutado |
-
-**Evidencias:**
-- [IMAGE PENDING] Memberships Module — registration form with empty fields — Number of captures: 1
-- [IMAGEN PENDIENTE] Módulo Membresías — mensaje de validación en pantalla — Cantidad de capturas: 1
-
-| Campo | Detalle |
-|---|---|
 | **Tiempo de ejecución** | - |
-| **Observaciones** | Repetir la prueba ingresando texto no numérico en el campo socio_id para confirmar el mismo comportamiento. |
+| **Observaciones** | Repetir ingresando texto no numérico en cédula para confirmar validación. |
 
 ---
 
@@ -187,41 +165,32 @@
 | Campo | Detalle |
 |---|---|
 | **ID** | TC-INT-05 |
-| **Nombre del caso de prueba** | Renovación encadenada de una membresía activa |
+| **Nombre del caso de prueba** | Renovación de una membresía activa o vencida |
 | **Prioridad** | Alta |
-| **Precondiciones** | Debe existir una membresía en estado 'activa' o 'vencida' asociada a un socio de prueba. |
+| **Precondiciones** | Debe existir una membresía en estado `ACTIVA` o `VENCIDA` asociada a un cliente de prueba. |
 | **Tipo de prueba** | Integración |
-| **Estado de implementación** | Ejecutable con el archivo public/membresias.html (requiere API PHP activa y PostgreSQL inicializada con database/init.sql) |
-| **Objetivo** | Comprobar que la renovación crea una nueva membresía enlazada a la anterior mediante membresia_anterior_id, sin infringir el índice de membresía activa única por socio. |
-| **Subsistema/s** | Formulario de Membresías > API /api/membresias > Modelo Membresia (PDO) > PostgreSQL > Botón Renovar |
-| **Datos de entrada** | id de una membresía existente en estado 'activa' |
-| **Resultado esperado** | POST /api/membresias/{id}/renovar responde 201 con una nueva membresía: fecha_inicio = hoy, fecha_fin = hoy + duración del plan, estado = 'activa' y membresia_anterior_id apuntando al id original. |
+| **Estado de implementación** | Ejecutable con la UI `/app/membresias` |
+| **Objetivo** | Comprobar que la renovación extiende la fecha de fin y mantiene el estado `ACTIVA`. |
+| **Subsistema/s** | Botón Renovar (icono `autorenew`) → diálogo de confirmación → PATCH /api/membresias/:id/renovar → Prisma |
+| **Datos de entrada** | ID de una membresía activa o vencida |
+| **Resultado esperado** | PATCH responde 200 con la membresía actualizada: `fechaFin` extendida, `estado = 'ACTIVA'`. Aparece snack-bar "Membresía renovada". La fila refleja la nueva fecha fin. |
 
 **Pasos de ejecución:**
-- Go to public/membresias.html
-- Ubicar una fila con una membresía en estado 'activa'
-- Dar clic en el botón 'Renovar' de esa fila
-- Verificar el mensaje de confirmación mostrado
-- Verificar que la tabla se actualiza mostrando la nueva membresía
+- Ubicar una fila con membresía activa o vencida
+- Clic en el botón con icono `autorenew` (tooltip "Renovar")
+- En el diálogo de confirmación, clic en **Renovar**
 
 **Criterio de verificación:**
-- Aparece una nueva fila con la nueva vigencia calculada
-- El mensaje muestra el texto 'Renovada: nueva membresía #X vigente hasta ...'
-- No quedan dos membresías en estado 'activa' simultáneas para el mismo socio
+- Snack-bar "Membresía renovada" visible
+- `fechaFin` de la fila es mayor al valor previo
+- Estado de la fila es `ACTIVA` (chip verde)
 
 | Campo | Detalle |
 |---|---|
 | **Resultados obtenidos** | Pendiente de ejecución. |
 | **Estado** | No ejecutado |
-
-**Evidencias:**
-- [IMAGEN PENDIENTE] Módulo Membresías — fila con el botón 'Renovar' antes de la acción — Cantidad de capturas: 1
-- [IMAGEN PENDIENTE] Módulo Membresías — tabla actualizada con la nueva membresía tras renovar — Cantidad de capturas: 1
-
-| Campo | Detalle |
-|---|---|
 | **Tiempo de ejecución** | - |
-| **Observaciones** | Verificar en la base de datos que la membresía original queda enlazada como membresia_anterior_id de la nueva. |
+| **Observaciones** | Verificar en la base de datos que la membresía queda con `fechaFin` extendida. |
 
 ---
 
@@ -230,39 +199,30 @@
 | Campo | Detalle |
 |---|---|
 | **ID** | TC-INT-06 |
-| **Nombre del caso de prueba** | Impedir la baja de una membresía sin motivo |
+| **Nombre del caso de prueba** | Cambiar estado de una membresía a SUSPENDIDA |
 | **Prioridad** | Media |
-| **Precondiciones** | Debe existir al menos una membresía en estado distinto de 'cancelada'. |
+| **Precondiciones** | Debe existir al menos una membresía en estado `ACTIVA`. |
 | **Tipo de prueba** | Integración |
-| **Estado de implementación** | Ejecutable con el archivo public/membresias.html (requiere API PHP activa y PostgreSQL inicializada con database/init.sql) |
-| **Objetivo** | Comprobar que el sistema exige un motivo obligatorio antes de dar de baja una membresía, tanto en frontend como en backend. |
-| **Subsistema/s** | Formulario de Membresías > API /api/membresias > Modelo Membresia (PDO) > PostgreSQL > Botón Dar de baja |
-| **Datos de entrada** | id de una membresía no cancelada<br>motivo = (vacío / cuadro de diálogo cancelado) |
-| **Resultado esperado** | Si el motivo queda vacío, el JS no envía la petición; si se fuerza el envío vacío a la API, DELETE /api/membresias/{id} responde 422 con 'El motivo de la baja es obligatorio.'. |
+| **Estado de implementación** | Ejecutable con la UI `/app/membresias` |
+| **Objetivo** | Comprobar que la acción del menú "Suspender" cambia el estado a `SUSPENDIDA`. |
+| **Subsistema/s** | Menú `more_vert` → PATCH /api/membresias/:id/estado { estado: 'SUSPENDIDA' } → Prisma |
+| **Datos de entrada** | ID de una membresía activa |
+| **Resultado esperado** | PATCH responde 200; el chip de la fila pasa a color naranja con texto "SUSPENDIDA"; snack-bar "Estado actualizado a SUSPENDIDA". |
 
 **Pasos de ejecución:**
-- Go to public/membresias.html
-- Dar clic en 'Dar de baja' sobre una membresía no cancelada
-- En el cuadro de diálogo (prompt), dejar el motivo vacío y aceptar
-- Verificar que no se realiza ningún cambio en la tabla
-- Repetir la acción cancelando el cuadro de diálogo y confirmar el mismo resultado
+- Ubicar la fila de una membresía activa
+- Clic en el icono `more_vert`
+- Clic en **Suspender**
 
 **Criterio de verificación:**
-- La membresía conserva su estado original
-- No se registra petición DELETE exitosa hacia /api/membresias/{id}
-- La tabla de membresías no sufre cambios
+- Chip naranja con texto "SUSPENDIDA"
+- La fila sigue existiendo en la tabla (no se elimina)
+- Aparece snack-bar de confirmación
 
 | Campo | Detalle |
 |---|---|
 | **Resultados obtenidos** | Pendiente de ejecución. |
 | **Estado** | No ejecutado |
-
-**Evidencias:**
-- [IMAGE PENDING] Memberships Module — empty reason dialog — Number of captures: 1
-- [IMAGEN PENDIENTE] Módulo Membresías — tabla sin cambios después del intento — Cantidad de capturas: 1
-
-| Campo | Detalle |
-|---|---|
 | **Tiempo de ejecución** | - |
 | **Observaciones** | Ninguna. |
 
@@ -273,40 +233,31 @@
 | Campo | Detalle |
 |---|---|
 | **ID** | TC-INT-07 |
-| **Nombre del caso de prueba** | Dar de baja una membresía con motivo válido y verificar reflejo en la interfaz |
+| **Nombre del caso de prueba** | Cancelar una membresía (baja lógica) y verificar reflejo en la interfaz |
 | **Prioridad** | Alta |
-| **Precondiciones** | Debe existir al menos una membresía en estado distinto de 'cancelada'. |
+| **Precondiciones** | Debe existir al menos una membresía en estado distinto de `CANCELADA`. |
 | **Tipo de prueba** | Integración |
-| **Estado de implementación** | Ejecutable con el archivo public/membresias.html (requiere API PHP activa y PostgreSQL inicializada con database/init.sql) |
-| **Objetivo** | Comprobar que la baja lógica cambia el estado de la membresía a 'cancelada' y actualiza las acciones disponibles en la fila correspondiente. |
-| **Subsistema/s** | Formulario de Membresías > API /api/membresias > Modelo Membresia (PDO) > PostgreSQL > Botón Dar de baja |
-| **Datos de entrada** | id de una membresía activa<br>motivo = 'Solicitud del socio' |
-| **Resultado esperado** | DELETE /api/membresias/{id} responde 200 con el mensaje 'Membresía dada de baja.'. El badge de estado cambia a 'cancelada' y los botones 'Renovar' y 'Dar de baja' dejan de mostrarse en esa fila. |
+| **Estado de implementación** | Ejecutable con la UI `/app/membresias` |
+| **Objetivo** | Comprobar que la acción "Cancelar" cambia el estado a `CANCELADA` y permite reasignar una nueva membresía al cliente. |
+| **Subsistema/s** | Menú `more_vert` → PATCH /api/membresias/:id/estado { estado: 'CANCELADA' } → Prisma |
+| **Datos de entrada** | ID de una membresía activa |
+| **Resultado esperado** | PATCH responde 200; el chip de la fila pasa a gris con texto "CANCELADA"; snack-bar "Estado actualizado a CANCELADA". El cliente ya puede recibir una nueva membresía. |
 
 **Pasos de ejecución:**
-- Go to public/membresias.html
-- Dar clic en 'Dar de baja' sobre una membresía activa
-- Ingresar el motivo 'Solicitud del socio' en el cuadro de diálogo
-- Confirmar la acción
-- Verificar el mensaje de confirmación mostrado
-- Verificar el nuevo estado de la fila en la tabla
+- Ubicar la fila de una membresía activa
+- Clic en el icono `more_vert`
+- Clic en **Cancelar**
 
 **Criterio de verificación:**
-- El badge de la fila muestra el estado 'cancelada'
-- La fila ya no muestra los botones 'Renovar' ni 'Dar de baja'
-- El mensaje de confirmación indica 'Membresía #X dada de baja.'
+- Chip gris con texto "CANCELADA"
+- La fila sigue existiendo (baja lógica, no se elimina)
+- Aparece snack-bar "Estado actualizado a CANCELADA"
+- Al intentar asignar nueva membresía al mismo cliente, la operación es exitosa
 
 | Campo | Detalle |
 |---|---|
 | **Resultados obtenidos** | Pendiente de ejecución. |
 | **Estado** | No ejecutado |
-
-**Evidencias:**
-- [IMAGE PENDING] Memberships Module — dialog box with reason entered — Number of captures: 1
-- [IMAGEN PENDIENTE] Módulo Membresías — fila actualizada con estado 'cancelada' y sin botones de acción — Cantidad de capturas: 1
-
-| Campo | Detalle |
-|---|---|
 | **Tiempo de ejecución** | - |
 | **Observaciones** | Ninguna. |
 
@@ -317,39 +268,30 @@
 | Campo | Detalle |
 |---|---|
 | **ID** | TC-INT-08 |
-| **Nombre del caso de prueba** | Carga del catálogo de planes activos en el formulario de alta |
+| **Nombre del caso de prueba** | Carga del catálogo de planes en el formulario de alta |
 | **Prioridad** | Media |
-| **Precondiciones** | Debe existir al menos un tipo de membresía con activo = true y al menos uno con activo = false en tipos_membresia. |
+| **Precondiciones** | Debe existir al menos un plan con `activo = true` y al menos uno con `activo = false` en la tabla `Plan`. |
 | **Tipo de prueba** | Integración |
-| **Estado de implementación** | Ejecutable con el archivo public/membresias.html (requiere API PHP activa y PostgreSQL inicializada con database/init.sql) |
-| **Objetivo** | Comprobar que el select de planes solo muestra los tipos de membresía activos, con el formato de precio y duración correcto. |
-| **Subsistema/s** | Formulario de Membresías > API /api/tipos-membresia > Modelo Membresia > PostgreSQL |
-| **Datos de entrada** | Carga inicial de public/membresias.html (sin interacción del usuario) |
-| **Resultado esperado** | GET /api/tipos-membresia retorna únicamente los planes con activo = true. El select 'Plan' muestra cada opción como '<nombre> — <precio en USD> / <duración> días'. |
+| **Estado de implementación** | Ejecutable con la UI `/app/membresias` (requiere BD inicializada) |
+| **Objetivo** | Comprobar que el select de planes carga las opciones y respeta el formato esperado. |
+| **Subsistema/s** | AsignarMembresiaDialog → GET /api/planes?limit=100 |
+| **Datos de entrada** | Carga inicial del diálogo (sin interacción del usuario) |
+| **Resultado esperado** | El `<mat-select>` muestra los planes con el formato "Nombre (X días · $Y.YY)". La primera carga puede incluir todos los planes (activos e inactivos) si el backend no filtra. |
 
 **Pasos de ejecución:**
-- Mark a membership type as inactive directly in the database (active = false)
-- Acceder a public/membresias.html
-- Verificar las opciones disponibles en el select 'Plan'
-- Confirmar el formato de cada opción (nombre, precio en USD, duración en días)
+- Marcar un plan como inactivo desde la pestaña **Planes** (botón desactivar)
+- Abrir **Asignar membresía** y revisar las opciones del dropdown **Plan**
 
 **Criterio de verificación:**
-- El plan marcado como inactivo no aparece en el select
-- Cada opción visible respeta el formato '<nombre> — $XX.XX / YY días'
-- La primera opción del select es 'Seleccione un plan…'
+- Las opciones del dropdown respetan el formato "Nombre (X días · $Y.YY)"
+- El plan inactivo puede o no aparecer según el filtro del backend (acción derivada documentar)
 
 | Campo | Detalle |
 |---|---|
 | **Resultados obtenidos** | Pendiente de ejecución. |
 | **Estado** | No ejecutado |
-
-**Evidencias:**
-- [IMAGEN PENDIENTE] Módulo Membresías — select de planes desplegado con las opciones cargadas — Cantidad de capturas: 1
-
-| Campo | Detalle |
-|---|---|
 | **Tiempo de ejecución** | - |
-| **Observaciones** | Restaurar el estado activo del plan modificado al finalizar la prueba. |
+| **Observaciones** | Si se requiere filtrar los inactivos, el backend debe soportar `GET /api/planes?activo=true` o el frontend debe filtrar en cliente. |
 
 ---
 
@@ -360,38 +302,29 @@
 | **ID** | TC-INT-09 |
 | **Nombre del caso de prueba** | Paginación del listado de membresías |
 | **Prioridad** | Baja |
-| **Precondiciones** | Debe haber más de 50 membresías registradas en la tabla membresias para superar el límite por defecto. |
+| **Precondiciones** | Debe haber más de 10 membresías registradas (el pageSize por defecto es 10). |
 | **Tipo de prueba** | Integración |
-| **Estado de implementación** | Ejecutable mediante peticiones directas a la API (por ejemplo con curl o Postman) sobre /api/membresias, dado que la vista membresias.html no expone controles de paginación en la interfaz. |
-| **Objetivo** | Comprobar que el endpoint de listado respeta los parámetros limit y offset, y que los límites configurados en el controlador se aplican correctamente. |
-| **Subsistema/s** | API /api/membresias > Modelo Membresia > PostgreSQL |
-| **Datos de entrada** | GET /api/membresias (sin parámetros)<br>GET /api/membresias?limit=10&offset=10 |
-| **Resultado esperado** | La primera petición retorna como máximo 50 registros (límite por defecto). La segunda retorna un bloque de 10 registros distintos al primer bloque, sin ids repetidos entre ambas respuestas. |
+| **Estado de implementación** | Ejecutable mediante la UI `/app/membresias` y la API REST |
+| **Objetivo** | Comprobar que el endpoint de listado respeta los parámetros limit y offset, y que el paginador refleja los límites configurados. |
+| **Subsistema/s** | `mat-paginator` → GET /api/membresias?page=N&limit=M |
+| **Datos de entrada** | GET /api/membresias (sin parámetros)<br>GET /api/membresias?page=2&limit=10 |
+| **Resultado esperado** | La primera petición retorna el pageSize por defecto (10). La segunda retorna un bloque de 10 registros distintos, sin ids repetidos entre ambas respuestas. |
 
 **Pasos de ejecución:**
-- Realizar una petición GET a /api/membresias sin parámetros
-- Contar la cantidad de registros devueltos y verificar que no supera 50
-- Realizar una petición GET a /api/membresias?limit=10&offset=10
-- Comparar los ids devueltos contra los primeros 10 ids de la petición sin parámetros
+- En la pestaña **Membresías**, observar el `mat-paginator` inferior
+- Cambiar el tamaño de página a 25
+- Avanzar a la siguiente página
 
 **Criterio de verificación:**
-- La respuesta sin parámetros no excede 50 registros
-- La respuesta con limit=10 retorna exactamente 10 registros
-- Los ids del segundo bloque no coinciden con los de las posiciones 1-10 del primer bloque
+- La cantidad de filas mostradas coincide con el `pageSize` seleccionado
+- El total de páginas coincide con `total / pageSize`
 
 | Campo | Detalle |
 |---|---|
 | **Resultados obtenidos** | Pendiente de ejecución. |
 | **Estado** | No ejecutado |
-
-**Evidencias:**
-- [IMAGE PENDING] GET JSON response/api/memberships without parameters (API testing tool) — Number of captures: 1
-- [IMAGEN PENDIENTE] Respuesta JSON de GET /api/membresias?limit=10&offset=10 — Cantidad de capturas: 1
-
-| Campo | Detalle |
-|---|---|
 | **Tiempo de ejecución** | - |
-| **Observaciones** | Prueba orientada a backend; no requiere interacción con la interfaz gráfica. |
+| **Observaciones** | El dataset de prueba (20 membresías) es suficiente para validar la paginación. |
 
 ---
 
@@ -400,38 +333,27 @@
 | Campo | Detalle |
 |---|---|
 | **ID** | TC-INT-10 |
-| **Nombre del caso de prueba** | Impedir la renovación de una membresía cancelada |
+| **Nombre del caso de prueba** | Comportamiento de la API al renovar una membresía cancelada |
 | **Prioridad** | Media |
-| **Precondiciones** | Debe existir una membresía en estado 'cancelada'. |
+| **Precondiciones** | Debe existir una membresía en estado `CANCELADA`. |
 | **Tipo de prueba** | Integración |
-| **Estado de implementación** | Ejecutable con el archivo public/membresias.html (requiere API PHP activa y PostgreSQL inicializada con database/init.sql) |
-| **Objetivo** | Comprobar que ni la interfaz ni la API permiten renovar una membresía que ya fue cancelada. |
-| **Subsistema/s** | Formulario de Membresías > API /api/membresias > Modelo Membresia (PDO) > PostgreSQL > Botón Renovar |
-| **Datos de entrada** | id de una membresía en estado 'cancelada' |
-| **Resultado esperado** | La fila correspondiente no muestra el botón 'Renovar' (regla de renderizado del frontend). Si se invoca directamente POST /api/membresias/{id}/renovar sobre ese id, la API responde con un error controlado (422) y no con una excepción no manejada (500). |
+| **Estado de implementación** | Ejecutable con la API REST y/o la UI |
+| **Objetivo** | Comprobar el comportamiento de la API y la UI al intentar renovar una membresía cancelada. |
+| **Subsistema/s** | Botón Renovar sobre fila CANCELADA → PATCH /api/membresias/:id/renovar |
+| **Datos de entrada** | ID de una membresía en estado `CANCELADA` |
+| **Resultado esperado** | PATCH responde 200 (Prisma `update` no valida estado) y la membresía pasa a `ACTIVA` con nueva `fechaFin`. Decisión de diseño: la UI debería deshabilitar el botón "Renovar" si la membresía está cancelada. |
 
 **Pasos de ejecución:**
-- Go to public/membresias.html
-- Ubicar en la tabla una fila con estado 'cancelada'
-- Verificar los botones de acción disponibles en esa fila
-- Invocar manualmente POST /api/membresias/{id}/renovar con el id de la membresía cancelada
-- Verificar la respuesta de la API
+- Ubicar una fila con estado `CANCELADA`
+- Clic en el botón con icono `autorenew`
 
 **Criterio de verificación:**
-- La fila con estado 'cancelada' no muestra el botón 'Renovar'
-- La petición forzada a la API responde con un error controlado (código 4xx), no con un error 500
-- No se crea ninguna membresía nueva a partir del id cancelado
+- No se produce un error 500
+- Si el botón está habilitado, la respuesta es 200; si está deshabilitado, no se dispara la petición
 
 | Campo | Detalle |
 |---|---|
 | **Resultados obtenidos** | Pendiente de ejecución. |
 | **Estado** | No ejecutado |
-
-**Evidencias:**
-- [IMAGE PENDING] Memberships Module — row with 'cancelled' status without 'Renew' button — Number of captures: 1
-- [IMAGEN PENDIENTE] Respuesta de la API al forzar la renovación de una membresía cancelada — Cantidad de capturas: 1
-
-| Campo | Detalle |
-|---|---|
 | **Tiempo de ejecución** | - |
-| **Observaciones** | Confirmar con el equipo de desarrollo si el modelo Membresia valida explícitamente el estado antes de renovar. |
+| **Observaciones** | Acción derivada recomendada: ocultar/deshabilitar el botón "Renovar" cuando `estado === 'CANCELADA'`. |
