@@ -5,6 +5,12 @@ function noEncontrado(req, res) {
 
 function manejadorErrores(err, req, res, next) {
   if (err.status) return res.status(err.status).json({ mensaje: err.message });
+  if (err.code === 'LIMIT_FILE_SIZE') {
+    return res.status(400).json({ mensaje: 'La imagen no puede superar 5MB' });
+  }
+  if (err.code === 'LIMIT_UNEXPECTED_FILE') {
+    return res.status(400).json({ mensaje: 'Campo de archivo inválido' });
+  }
   if (err.code === 'P2002') {
     return res.status(409).json({ mensaje: 'Ya existe un registro con esos datos únicos' });
   }

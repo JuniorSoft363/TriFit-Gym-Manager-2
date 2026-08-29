@@ -50,6 +50,9 @@ model Usuario {
   nombre        String
   email         String       @unique
   passwordHash  String
+  telefono      String?
+  direccion     String?
+  fotoUrl       String?
   activo        Boolean      @default(true)
   rolId         Int
   rol           Rol          @relation(fields: [rolId], references: [id])

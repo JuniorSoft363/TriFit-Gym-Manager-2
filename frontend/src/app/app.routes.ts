@@ -81,6 +81,10 @@ export const routes: Routes = [
         data: { roles: ['ADMINISTRADOR'] },
         loadComponent: () =>
           import('./features/configuracion/configuracion.component').then((m) => m.ConfiguracionComponent)
+      },
+      {
+        path: 'perfil',
+        loadComponent: () => import('./pages/perfil/perfil.component').then((m) => m.PerfilComponent)
       }
     ]
   },

@@ -23,24 +23,50 @@
         <span matListItemTitle>{{ item.etiqueta }}</span>
       </a>
     </mat-nav-list>
-    <span class="tf-sidenav-spacer"></span>
-    <div class="tf-sidenav-footer">
-      <button mat-button class="tf-logout-btn" (click)="cerrarSesion()">
-        <mat-icon>logout</mat-icon>
-        <span>Cerrar sesión</span>
-      </button>
-    </div>
   </mat-sidenav>
 
   <mat-sidenav-content>
     <mat-toolbar class="tf-topbar">
       <span class="tf-topbar-title">TriFit Gym Manager</span>
       <span class="tf-spacer"></span>
-      <div class="tf-user-info">
-        <mat-icon class="tf-user-icon">account_circle</mat-icon>
+
+      <button type="button" class="tf-user-trigger" [matMenuTriggerFor]="menuUsuario" aria-label="Menú de usuario">
+        <ng-container *ngIf="urlFoto(); else inicialesTpl">
+          <img [src]="urlFoto()!" alt="Foto de perfil" class="tf-user-avatar" />
+        </ng-container>
+        <ng-template #inicialesTpl>
+          <div class="tf-user-avatar tf-user-avatar-iniciales">{{ iniciales() }}</div>
+        </ng-template>
         <span class="tf-user-name">{{ auth.usuario()?.nombre }}</span>
-        <span class="tf-user-rol">{{ auth.usuario()?.rol }}</span>
-      </div>
+        <mat-icon class="tf-user-chevron">expand_more</mat-icon>
+      </button>
+
+      <mat-menu #menuUsuario="matMenu" class="tf-usuario-menu" xPosition="before">
+        <div class="tf-menu-header" mat-menu-item disabled>
+          <div class="tf-menu-avatar-wrap">
+            <ng-container *ngIf="urlFoto(); else menuIniciales">
+              <img [src]="urlFoto()!" alt="Foto de perfil" class="tf-menu-avatar" />
+            </ng-container>
+            <ng-template #menuIniciales>
+              <div class="tf-menu-avatar tf-menu-avatar-iniciales">{{ iniciales() }}</div>
+            </ng-template>
+          </div>
+          <div class="tf-menu-info">
+            <div class="tf-menu-nombre">{{ auth.usuario()?.nombre }}</div>
+            <div class="tf-menu-correo">{{ auth.usuario()?.email }}</div>
+            <div class="tf-menu-rol">{{ auth.usuario()?.rol }}</div>
+          </div>
+        </div>
+        <mat-divider></mat-divider>
+        <button mat-menu-item routerLink="/app/perfil">
+          <mat-icon>person</mat-icon>
+          <span>Ver perfil</span>
+        </button>
+        <button mat-menu-item (click)="cerrarSesion()">
+          <mat-icon>logout</mat-icon>
+          <span>Cerrar sesión</span>
+        </button>
+      </mat-menu>
     </mat-toolbar>
 
     <main class="tf-main-content">

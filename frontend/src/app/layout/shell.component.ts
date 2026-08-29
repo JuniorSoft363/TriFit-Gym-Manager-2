@@ -53,4 +53,16 @@ export class ShellComponent {
   cerrarSesion() {
     this.auth.cerrarSesion();
   }
+
+  iniciales(): string {
+    const nombre = this.auth.usuario()?.nombre || '';
+    const partes = nombre.trim().split(/\s+/);
+    if (partes.length === 0) return '?';
+    if (partes.length === 1) return partes[0].slice(0, 2).toUpperCase();
+    return (partes[0][0] + partes[1][0]).toUpperCase();
+  }
+
+  urlFoto(): string | null {
+    return this.auth.urlFoto(this.auth.usuario()?.fotoUrl);
+  }
 }

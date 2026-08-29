@@ -1,0 +1,44 @@
+import { defineConfig, devices } from '@playwright/test';
+
+/**
+ * Configuración de Playwright para TriFit Gym Manager.
+ *
+ * - Asume que el backend (http://localhost:3000) y el frontend
+ *   (http://localhost:4200) están disponibles. Si el frontend no
+ *   está corriendo, el `webServer` lo levanta automáticamente con
+ *   `npm start`. Para el backend, ajusta `reuseExistingServer` o
+ *   lánzalo en otra terminal.
+ */
+export default defineConfig({
+  testDir: './e2e',
+  fullyParallel: true,
+  forbidOnly: !!process.env.CI,
+  retries: process.env.CI ? 2 : 0,
+  workers: process.env.CI ? 1 : undefined,
+  reporter: [['list'], ['html', { open: 'never', outputFolder: 'playwright-report' }]],
+
+  use: {
+    baseURL: 'http://localhost:4200',
+    trace: 'on-first-retry',
+    screenshot: 'only-on-failure',
+    video: 'retain-on-failure',
+    actionTimeout: 10_000,
+    navigationTimeout: 30_000
+  },
+
+  projects: [
+    {
+      name: 'chromium',
+      use: { ...devices['Desktop Chrome'] }
+    }
+  ],
+
+  webServer: {
+    command: 'npm start',
+    url: 'http://localhost:4200',
+    reuseExistingServer: !process.env.CI,
+    timeout: 180_000,
+    stdout: 'ignore',
+    stderr: 'pipe'
+  }
+});

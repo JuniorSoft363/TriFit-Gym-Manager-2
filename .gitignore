@@ -1,0 +1,45 @@
+# Node / npm
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json.bak
+
+# Angular
+frontend/.angular/
+frontend/dist/
+frontend/.angular/cache/
+frontend/out-tsc/
+
+# Backend
+backend/dist/
+backend/uploads/
+backend/uploads/perfiles/
+backend/uploads/tmp/
+
+# Variables de entorno
+backend/.env
+frontend/src/environments/environment.prod.ts
+
+# Pruebas E2E
+frontend/playwright-report/
+frontend/test-results/
+frontend/blob-report/
+frontend/playwright/.cache/
+
+# IDEs y SO
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+*.iml
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.slnproj
+
+# Logs
+logs/
+*.log

@@ -2,7 +2,7 @@ import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
-import { RespuestaLogin, RolNombre, UsuarioSesion } from '../models';
+import { PerfilCompleto, RespuestaLogin, RolNombre, UsuarioSesion } from '../models';
 
 const CLAVE_TOKEN = 'tf_token';
 const CLAVE_USUARIO = 'tf_usuario';
@@ -31,6 +31,19 @@ export class AuthService {
     this.usuario.set(respuesta.usuario);
   }
 
+  actualizarSesion(datos: Partial<UsuarioSesion>) {
+    const actual = this.usuario();
+    if (!actual) return;
+    const merged: UsuarioSesion = {
+      ...actual,
+      ...datos,
+      id: actual.id,
+      rol: actual.rol
+    };
+    localStorage.setItem(CLAVE_USUARIO, JSON.stringify(merged));
+    this.usuario.set(merged);
+  }
+
   cerrarSesion() {
     localStorage.removeItem(CLAVE_TOKEN);
     localStorage.removeItem(CLAVE_USUARIO);
@@ -49,5 +62,32 @@ export class AuthService {
   tieneRol(...roles: RolNombre[]): boolean {
     const u = this.usuario();
     return !!u && roles.includes(u.rol);
+  }
+
+  obtenerPerfil() {
+    return this.http.get<PerfilCompleto>(`${environment.apiUrl}/auth/perfil`);
+  }
+
+  actualizarPerfil(datos: { nombre?: string; email?: string; telefono?: string; direccion?: string }) {
+    return this.http.put<PerfilCompleto>(`${environment.apiUrl}/auth/perfil`, datos);
+  }
+
+  cambiarPassword(passwordActual: string, passwordNuevo: string) {
+    return this.http.put<{ ok: boolean; mensaje: string }>(`${environment.apiUrl}/auth/perfil/password`, {
+      passwordActual,
+      passwordNuevo
+    });
+  }
+
+  subirFoto(archivo: File) {
+    const fd = new FormData();
+    fd.append('foto', archivo);
+    return this.http.post<PerfilCompleto>(`${environment.apiUrl}/auth/perfil/foto`, fd);
+  }
+
+  urlFoto(fotoUrl?: string | null): string | null {
+    if (!fotoUrl) return null;
+    if (fotoUrl.startsWith('http')) return fotoUrl;
+    return `http://localhost:3000${fotoUrl}`;
   }
 }

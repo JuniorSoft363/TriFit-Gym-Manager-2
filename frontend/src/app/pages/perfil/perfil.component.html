@@ -1,0 +1,173 @@
+<div class="tf-perfil-wrap" *ngIf="!cargando; else cargandoTpl">
+  <div class="tf-perfil-header">
+    <h1 class="tf-perfil-title">Mi perfil</h1>
+    <p class="tf-perfil-sub">Gestiona tu información personal y credenciales de acceso</p>
+  </div>
+
+  <div class="tf-perfil-success" *ngIf="mensajeExito">
+    <mat-icon>check_circle</mat-icon>
+    <span>{{ mensajeExito }}</span>
+  </div>
+  <div class="tf-perfil-error" *ngIf="errorMsg">
+    <mat-icon>error_outline</mat-icon>
+    <span>{{ errorMsg }}</span>
+  </div>
+
+  <div class="tf-perfil-grid">
+    <!-- Tarjeta de foto -->
+    <mat-card class="tf-card tf-card-foto">
+      <div class="tf-foto-contenedor">
+        <ng-container *ngIf="urlFoto(); else avatarIniciales">
+          <img [src]="urlFoto()!" alt="Foto de perfil" class="tf-foto-img" />
+        </ng-container>
+        <ng-template #avatarIniciales>
+          <div class="tf-avatar-iniciales">{{ iniciales() }}</div>
+        </ng-template>
+        <label class="tf-foto-btn" mat-flat-button color="primary">
+          <mat-icon *ngIf="!subiendoFoto">photo_camera</mat-icon>
+          <mat-icon *ngIf="subiendoFoto" class="tf-spin">progress_activity</mat-icon>
+          <span>{{ subiendoFoto ? 'Subiendo...' : 'Cambiar foto' }}</span>
+          <input
+            type="file"
+            accept="image/*"
+            hidden
+            (change)="onFileSelected($event)"
+            [disabled]="subiendoFoto"
+          />
+        </label>
+      </div>
+      <div class="tf-foto-info">
+        <div class="tf-foto-rol">{{ perfil()?.rol }}</div>
+        <div class="tf-foto-ayuda">JPG, PNG o WEBP. Máx. 5MB.</div>
+      </div>
+    </mat-card>
+
+    <!-- Tarjeta de datos personales -->
+    <mat-card class="tf-card">
+      <div class="tf-card-head">
+        <mat-icon>person</mat-icon>
+        <h2>Datos personales</h2>
+      </div>
+
+      <form [formGroup]="datosForm" (ngSubmit)="guardarDatos()">
+        <div class="tf-row">
+          <mat-form-field appearance="outline" class="tf-full-width">
+            <mat-label>Nombre completo</mat-label>
+            <input matInput formControlName="nombre" autocomplete="name" />
+            <mat-error *ngIf="datosForm.get('nombre')?.hasError('required')">El nombre es obligatorio</mat-error>
+            <mat-error *ngIf="datosForm.get('nombre')?.hasError('minlength')">Mínimo 2 caracteres</mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="tf-row">
+          <mat-form-field appearance="outline" class="tf-full-width">
+            <mat-label>Correo electrónico</mat-label>
+            <input matInput type="email" formControlName="email" autocomplete="email" />
+            <mat-error *ngIf="datosForm.get('email')?.hasError('required')">El correo es obligatorio</mat-error>
+            <mat-error *ngIf="datosForm.get('email')?.hasError('email')">Ingresa un correo válido</mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="tf-row tf-row-2">
+          <mat-form-field appearance="outline">
+            <mat-label>Teléfono</mat-label>
+            <input matInput formControlName="telefono" autocomplete="tel" maxlength="30" />
+            <mat-icon matPrefix>phone</mat-icon>
+            <mat-error *ngIf="datosForm.get('telefono')?.hasError('maxlength')">Máx. 30 caracteres</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Dirección</mat-label>
+            <input matInput formControlName="direccion" autocomplete="street-address" maxlength="200" />
+            <mat-icon matPrefix>home</mat-icon>
+            <mat-error *ngIf="datosForm.get('direccion')?.hasError('maxlength')">Máx. 200 caracteres</mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="tf-actions">
+          <button
+            mat-flat-button
+            color="primary"
+            type="submit"
+            [disabled]="guardandoDatos || datosForm.pristine"
+          >
+            <mat-icon>save</mat-icon>
+            <span>{{ guardandoDatos ? 'Guardando...' : 'Guardar cambios' }}</span>
+          </button>
+        </div>
+      </form>
+    </mat-card>
+
+    <!-- Tarjeta de cambio de contraseña -->
+    <mat-card class="tf-card tf-card-password">
+      <div class="tf-card-head">
+        <mat-icon>lock</mat-icon>
+        <h2>Cambiar contraseña</h2>
+      </div>
+
+      <p class="tf-password-intro">Por seguridad, ingresa tu contraseña actual para modificarla.</p>
+
+      <form [formGroup]="passwordForm" (ngSubmit)="cambiarPassword()">
+        <div class="tf-row">
+          <mat-form-field appearance="outline" class="tf-full-width">
+            <mat-label>Contraseña actual</mat-label>
+            <input matInput [type]="hideActual ? 'password' : 'text'" formControlName="passwordActual" autocomplete="current-password" />
+            <mat-icon matPrefix>lock</mat-icon>
+            <button type="button" mat-icon-button matSuffix (click)="hideActual = !hideActual"
+              [attr.aria-label]="hideActual ? 'Mostrar contraseña' : 'Ocultar contraseña'">
+              <mat-icon>{{ hideActual ? 'visibility_off' : 'visibility' }}</mat-icon>
+            </button>
+            <mat-error *ngIf="passwordForm.get('passwordActual')?.hasError('required')">Ingresa tu contraseña actual</mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="tf-row tf-row-2">
+          <mat-form-field appearance="outline">
+            <mat-label>Nueva contraseña</mat-label>
+            <input matInput [type]="hideNueva ? 'password' : 'text'" formControlName="passwordNuevo" autocomplete="new-password" />
+            <mat-icon matPrefix>lock</mat-icon>
+            <button type="button" mat-icon-button matSuffix (click)="hideNueva = !hideNueva"
+              [attr.aria-label]="hideNueva ? 'Mostrar contraseña' : 'Ocultar contraseña'">
+              <mat-icon>{{ hideNueva ? 'visibility_off' : 'visibility' }}</mat-icon>
+            </button>
+            <mat-error *ngIf="passwordForm.get('passwordNuevo')?.hasError('required')">Ingresa la nueva contraseña</mat-error>
+            <mat-error *ngIf="passwordForm.get('passwordNuevo')?.hasError('minlength')">Mínimo 6 caracteres</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Confirmar nueva contraseña</mat-label>
+            <input matInput [type]="hideConfirmar ? 'password' : 'text'" formControlName="confirmar" autocomplete="new-password" />
+            <mat-icon matPrefix>lock</mat-icon>
+            <button type="button" mat-icon-button matSuffix (click)="hideConfirmar = !hideConfirmar"
+              [attr.aria-label]="hideConfirmar ? 'Mostrar contraseña' : 'Ocultar contraseña'">
+              <mat-icon>{{ hideConfirmar ? 'visibility_off' : 'visibility' }}</mat-icon>
+            </button>
+            <mat-error *ngIf="passwordForm.get('confirmar')?.hasError('required')">Confirma la nueva contraseña</mat-error>
+            <mat-error *ngIf="passwordForm.hasError('noCoinciden') && passwordForm.get('confirmar')?.touched">
+              Las contraseñas no coinciden
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="tf-password-error" *ngIf="passwordErrorMsg">
+          <mat-icon>error_outline</mat-icon>
+          <span>{{ passwordErrorMsg }}</span>
+        </div>
+
+        <div class="tf-actions">
+          <button mat-flat-button color="warn" type="submit" [disabled]="guardandoPassword || passwordForm.invalid">
+            <mat-icon>key</mat-icon>
+            <span>{{ guardandoPassword ? 'Actualizando...' : 'Actualizar contraseña' }}</span>
+          </button>
+        </div>
+      </form>
+    </mat-card>
+  </div>
+</div>
+
+<ng-template #cargandoTpl>
+  <div class="tf-perfil-cargando">
+    <mat-spinner diameter="40"></mat-spinner>
+    <span>Cargando perfil...</span>
+  </div>
+</ng-template>

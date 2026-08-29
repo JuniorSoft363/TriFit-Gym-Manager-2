@@ -78,7 +78,20 @@ const movimiento = [
   body('cantidad').isInt({ min: 0 }).withMessage('La cantidad debe ser un entero mayor o igual a 0').toInt()
 ];
 
+const actualizarPerfil = [
+  body('nombre').optional().trim().notEmpty().withMessage('El nombre no puede estar vacío'),
+  body('email').optional().isEmail().withMessage('Email inválido'),
+  body('telefono').optional({ values: 'falsy' }).isString().isLength({ max: 30 }).withMessage('Teléfono demasiado largo'),
+  body('direccion').optional({ values: 'falsy' }).isString().isLength({ max: 200 }).withMessage('Dirección demasiado larga')
+];
+
+const cambiarPassword = [
+  body('passwordActual').notEmpty().withMessage('La contraseña actual es obligatoria'),
+  body('passwordNuevo').isLength({ min: 6 }).withMessage('La nueva contraseña debe tener al menos 6 caracteres')
+];
+
 module.exports = {
   login, cliente, plan, membresia, estadoMembresia, pago, asistencia,
-  entrenador, usuario, rutina, ejercicio, producto, proveedor, movimiento
+  entrenador, usuario, rutina, ejercicio, producto, proveedor, movimiento,
+  actualizarPerfil, cambiarPassword
 };
