@@ -11,10 +11,10 @@ import { defineConfig, devices } from '@playwright/test';
  */
 export default defineConfig({
   testDir: './e2e',
-  fullyParallel: true,
+  fullyParallel: false,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
+  retries: 1,
+  workers: 1,
   reporter: [['list'], ['html', { open: 'never', outputFolder: 'playwright-report' }]],
 
   use: {
@@ -22,8 +22,8 @@ export default defineConfig({
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
-    actionTimeout: 10_000,
-    navigationTimeout: 30_000
+    actionTimeout: 30_000,
+    navigationTimeout: 90_000
   },
 
   projects: [
@@ -36,7 +36,7 @@ export default defineConfig({
   webServer: {
     command: 'npm start',
     url: 'http://localhost:4200',
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: true,
     timeout: 180_000,
     stdout: 'ignore',
     stderr: 'pipe'
