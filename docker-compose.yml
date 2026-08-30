@@ -1,0 +1,83 @@
+# TriFit Gym Manager — Orquestación con Docker
+# Uso:
+#   docker compose up -d --build   (arranca todo en segundo plano)
+#   docker compose logs -f         (ver logs en vivo)
+#   docker compose down            (detener todo)
+#
+# El frontend queda en http://localhost:4200
+# El backend queda en http://localhost:3000
+# Las credenciales por defecto son admin@trifit.com / Admin123*
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: trifit-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-trifit}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    # Solo accesible dentro de la red de Docker.
+    # Si necesitas conectarte desde el host con pgAdmin u otro cliente,
+    # cambia "expose" por "ports: - 5432:5432".
+    expose:
+      - "5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-trifit}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - trifit-net
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: trifit-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-trifit}
+      JWT_SECRET: ${JWT_SECRET:-cambia_este_secreto_en_produccion}
+      JWT_EXPIRES: ${JWT_EXPIRES:-8h}
+    ports:
+      - "3000:3000"
+    volumes:
+      - backend_uploads:/app/uploads
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 30s
+    networks:
+      - trifit-net
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: trifit-frontend
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "4200:80"
+    networks:
+      - trifit-net
+
+volumes:
+  postgres_data:
+  backend_uploads:
+
+networks:
+  trifit-net:
+    driver: bridge
