@@ -1,4 +1,4 @@
-﻿import { test, expect, Page, APIRequestContext } from '@playwright/test';
+import { test, expect, Page, APIRequestContext } from '@playwright/test';
 
 /**
  * Casos TC-INT-01..TC-INT-10 — Módulo Membresías de TriFit Gym Manager.
@@ -11,16 +11,14 @@
  *    en http://localhost:3000. Si no, los tests fallarán con error de red.
  *
  * Variables de entorno opcionales:
- *   TEST_CEDULA             cédula del cliente para TC-INT-01 (default 1712345678)
+ *   TEST_CEDULA             cédula del cliente para TC-INT-01 (default 1956789012, sin membresía)
  *   TEST_CEDULA_INEXISTENTE cédula que no existe (default 0999999999)
  *   TEST_PLAN_ID            id del plan activo (default 1)
- *   TEST_CLIENTE_ID_2       id del cliente para TC-INT-10 (default 2)
  */
 
-const CEDULA = process.env.TEST_CEDULA || '1956789012'; // Paola (sin membresía activa)
+const CEDULA = process.env.TEST_CEDULA || '1956789012';
 const CEDULA_INEXISTENTE = process.env.TEST_CEDULA_INEXISTENTE || '0999999999';
 const PLAN_ID = Number(process.env.TEST_PLAN_ID || 1);
-const CLIENTE_ID_2 = Number(process.env.TEST_CLIENTE_ID_2 || 2);
 const API = 'http://localhost:3000/api';
 
 async function loginComoAdmin(page: Page, request: APIRequestContext) {
@@ -30,42 +28,34 @@ async function loginComoAdmin(page: Page, request: APIRequestContext) {
   expect(resp.ok(), `Login API falló: ${resp.status()}`).toBeTruthy();
   const body = await resp.json();
 
-  // Inyectar token y usuario en localStorage antes de cargar la app
   await page.addInitScript(({ token, usuario }) => {
     localStorage.setItem('tf_token', token);
     localStorage.setItem('tf_usuario', JSON.stringify(usuario));
   }, { token: body.token, usuario: body.usuario });
 
-  // Devolver el token para los tests que usan request directamente
   return body.token;
+}
+
+function authed(request: APIRequestContext, token: string) {
+  const headers = { Authorization: `Bearer ${token}` };
+  return {
+    get: (url: string) => request.get(url, { headers }),
+    post: (url: string, data: any) => request.post(url, { headers, data }),
+    patch: (url: string, data: any) => request.patch(url, { headers, data })
+  };
 }
 
 async function irAMembresias(page: Page) {
   await page.goto('/app/membresias', { waitUntil: 'networkidle' });
-  // Esperar a que cargue al menos una pestaña
   await page.waitForSelector('mat-tab-group', { timeout: 15_000 });
-  // Clic en pestaña Membresías
   await page.getByRole('tab', { name: 'Membresías' }).click();
-  // Esperar a que aparezca el botón "Asignar membresía"
   await expect(page.getByRole('button', { name: /Asignar membresía/i })).toBeVisible({ timeout: 15_000 });
 }
 
 test.describe('Módulo Membresías (TC-INT-01..10)', () => {
   test.beforeEach(async ({ page, request }) => {
-    const token = await loginComoAdmin(page, request);
-    // Adjuntar el token a las request de Playwright para los tests que usan API directamente
-    (request as any).token = token;
+    await loginComoAdmin(page, request);
   });
-
-  // Helper para hacer request autenticados
-  function authedRequest(request: APIRequestContext) {
-    const token = (request as any).token;
-    return {
-      get: (url: string) => request.get(url, { headers: { Authorization: `Bearer ${token}` } }),
-      post: (url: string, data: any) => request.post(url, { headers: { Authorization: `Bearer ${token}` }, data }),
-      patch: (url: string, data: any) => request.patch(url, { headers: { Authorization: `Bearer ${token}` }, data })
-    };
-  }
 
   test('TC-INT-01 — Asignar membresía con datos válidos', async ({ page }) => {
     await irAMembresias(page);
@@ -76,7 +66,7 @@ test.describe('Módulo Membresías (TC-INT-01..10)', () => {
     await page.getByRole('button', { name: 'Buscar' }).click();
     await expect(page.getByText(/Cliente:/)).toBeVisible({ timeout: 10_000 });
 
-    // Seleccionar plan dentro del diálogo (no el filtro de la pestaña)
+    // Selector de plan dentro del diálogo (evita ambigüedad con el filtro de pestaña)
     const dialogPlan = page.locator('mat-dialog-content').getByLabel('Plan');
     await dialogPlan.click();
     await page.getByRole('option').first().click();
@@ -85,9 +75,12 @@ test.describe('Módulo Membresías (TC-INT-01..10)', () => {
     await expect(page.getByText(/Membresía asignada correctamente/i)).toBeVisible({ timeout: 10_000 });
   });
 
-  test('TC-INT-02 — Bloquea segunda membresía activa para el mismo cliente', async ({ request }) => {
-    const r = authedRequest(request);
-    // Buscar el primer cliente que tenga membresía ACTIVA
+  test('TC-INT-02 — Bloquea segunda membresía activa para el mismo cliente', async ({ page, request }) => {
+    // Re-autenticar con token de API porque la página no afecta al request context
+    const token = await loginComoAdmin(page, request);
+    const r = authed(request, token);
+
+    // Buscar la primera membresía activa del seed
     const lista = await r.get(`${API}/membresias?estado=ACTIVA&limit=50`);
     if (!lista.ok()) {
       test.skip(true, `No se pudo listar membresías: ${lista.status()}`);
@@ -97,7 +90,7 @@ test.describe('Módulo Membresías (TC-INT-01..10)', () => {
     const activa = data.datos?.[0];
     test.skip(!activa, 'No hay membresías activas (ejecuta npm run seed:dataset)');
 
-    // Intentar crear duplicado para el mismo cliente
+    // Intentar duplicado
     const dup = await r.post(`${API}/membresias`, { clienteId: activa.clienteId, planId: PLAN_ID });
     expect(dup.status()).toBe(409);
     const body = await dup.json();
@@ -110,7 +103,6 @@ test.describe('Módulo Membresías (TC-INT-01..10)', () => {
     await page.getByLabel('Cédula del cliente').fill(CEDULA_INEXISTENTE);
     await page.getByRole('button', { name: 'Buscar' }).click();
 
-    // El snack-bar contiene el mensaje de error
     await expect(page.locator('mat-snack-bar-container').getByText(/Cliente no encontrado/i).first()).toBeVisible({ timeout: 10_000 });
     await expect(page.getByRole('button', { name: 'Asignar' })).toBeDisabled();
   });
@@ -151,7 +143,6 @@ test.describe('Módulo Membresías (TC-INT-01..10)', () => {
   test('TC-INT-08 — El selector de planes carga el catálogo', async ({ page }) => {
     await irAMembresias(page);
     await page.getByRole('button', { name: /Asignar membresía/i }).click();
-    // Solo el plan del diálogo
     const dialogPlan = page.locator('mat-dialog-content').getByLabel('Plan');
     await dialogPlan.click();
     const opciones = page.getByRole('option');
@@ -161,14 +152,14 @@ test.describe('Módulo Membresías (TC-INT-01..10)', () => {
 
   test('TC-INT-09 — Paginación funciona al cambiar el tamaño de página', async ({ page }) => {
     await irAMembresias(page);
-    // El paginator está dentro del mat-tab activo (Membresías)
     const paginator = page.locator('mat-paginator').first();
     await expect(paginator).toBeVisible({ timeout: 10_000 });
   });
 
-  test('TC-INT-10 — Renovar una membresía cancelada no produce error 500', async ({ request }) => {
-    const r = authedRequest(request);
-    // Buscar una membresía cancelada existente (el seed incluye 2)
+  test('TC-INT-10 — Renovar una membresía cancelada no produce error 500', async ({ page, request }) => {
+    const token = await loginComoAdmin(page, request);
+    const r = authed(request, token);
+
     const lista = await r.get(`${API}/membresias?estado=CANCELADA&limit=1`);
     if (!lista.ok()) {
       test.skip(true, `No se pudo listar membresías canceladas: ${lista.status()}`);
