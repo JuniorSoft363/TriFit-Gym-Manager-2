@@ -22,8 +22,7 @@
                 "src/theme.scss",
                 "src/styles.scss"
               ],
-            "scripts": [],
-            "exclude": ["e2e/**", "playwright.config.ts", "tsconfig.e2e.json"]
+            "scripts": []
           },
           "configurations": {
             "production": {

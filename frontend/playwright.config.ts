@@ -10,7 +10,7 @@ import { defineConfig, devices } from '@playwright/test';
  *   lánzalo en otra terminal.
  */
 export default defineConfig({
-  testDir: './e2e',
+  testDir: './tests',
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: 1,
