@@ -22,13 +22,11 @@ backend/.env
 frontend/src/environments/environment.prod.ts
 
 # Pruebas E2E
-frontend/playwright-report/
 frontend/test-results/
+
+# Caches internos de Playwright que no son evidencia
 frontend/blob-report/
 frontend/playwright/.cache/
-
-# Evidencias de pruebas manuales (capturas locales)
-docs/evidencias/
 
 # IDEs y SO
 .vscode/
