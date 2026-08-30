@@ -11,7 +11,7 @@ import { test, expect, Page, APIRequestContext } from '@playwright/test';
  *    en http://localhost:3000. Si no, los tests fallarán con error de red.
  *
  * Variables de entorno opcionales:
- *   TEST_customer ID CARD for TC-INT-01 (default 1956789012, no membership)
+ *   TEST_CEDULA             cédula del cliente para TC-INT-01 (default 1956789012, sin membresía)
  *   TEST_CEDULA_INEXISTENTE cédula que no existe (default 0999999999)
  *   TEST_PLAN_ID            id del plan activo (default 1)
  */
@@ -57,23 +57,7 @@ test.describe('Módulo Membresías (TC-INT-01..10)', () => {
     await loginComoAdmin(page, request);
   });
 
-  test('TC-INT-01 — Asignar membresía con datos válidos', async ({ page, request }) => {
-    // Verificar precondición: el cliente no debe tener membresía activa.
-    // Si ya la tiene (por una corrida previa del test), omitir para mantener
-    // idempotencia. Para resetear la BD entre corridas: npm run seed:dataset.
-    const token = await loginComoAdmin(page, request);
-    const r = authed(request, token);
-    const cliente = await r.get(`${API}/clientes/cedula/${CEDULA}`);
-    if (cliente.ok()) {
-      const cli = await cliente.json();
-      const membresias = await r.get(`${API}/membresias?busqueda=${cli.cedula}&limit=5`);
-      if (membresias.ok()) {
-        const data = await membresias.json();
-        const tieneActiva = data.datos?.some((m: any) => m.estado === 'ACTIVA');
-        test.skip(tieneActiva, 'El cliente de prueba ya tiene una membresía activa. Ejecuta npm run seed:dataset para reiniciar.');
-      }
-    }
-
+  test('TC-INT-01 — Asignar membresía con datos válidos', async ({ page }) => {
     await irAMembresias(page);
     await page.getByRole('button', { name: /Asignar membresía/i }).click();
     await expect(page.getByRole('heading', { name: 'Asignar membresía' })).toBeVisible();
@@ -82,6 +66,7 @@ test.describe('Módulo Membresías (TC-INT-01..10)', () => {
     await page.getByRole('button', { name: 'Buscar' }).click();
     await expect(page.getByText(/Cliente:/)).toBeVisible({ timeout: 10_000 });
 
+    // Selector de plan dentro del diálogo (evita ambigüedad con el filtro de pestaña)
     const dialogPlan = page.locator('mat-dialog-content').getByLabel('Plan');
     await dialogPlan.click();
     await page.getByRole('option').first().click();
