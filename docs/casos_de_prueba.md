@@ -28,12 +28,12 @@
 | **ID** | TC-INT-01 |
 | **Nombre del caso de prueba** | Asignar una nueva membresía a un cliente sin membresía activa y verificar reflejo en el listado |
 | **Prioridad** | Alta |
-| **Precondiciones** | Cliente existente (con cédula registrada) sin membresía ACTIVA. Plan existente con `activo = true`. |
+| **Precondiciones** | Cliente existente (con cédula registrada) sin membresía ACTIVA. Plan existente con `activo = true`. **Importante:** ejecutar `npm run seed:dataset` antes de la prueba para garantizar un cliente sin membresía activa (cédula `1956789012`, Paola Sánchez). |
 | **Tipo de prueba** | Integración |
 | **Estado de implementación** | Ejecutable con la UI `/app/membresias` (requiere backend activo y BD inicializada con `npm run seed:dataset`) |
 | **Objetivo** | Comprobar que una nueva membresía se registra correctamente y se refleja de inmediato en la tabla de membresías. |
 | **Subsistema/s** | Diálogo AsignarMembresiaDialog → POST /api/membresias → Prisma → recargar tabla |
-| **Datos de entrada** | cliente (búsqueda por cédula) sin membresía activa; planId del plan elegido; fechaInicio = hoy |
+| **Datos de entrada** | cédula = `1956789012` (Paola Sánchez, sin membresía activa); planId = cualquier plan activo del listado; fechaInicio = hoy |
 | **Resultado esperado** | POST responde 201 con la membresía (estado = 'ACTIVA', fechaFin = fechaInicio + duracionDias). La tabla muestra la nueva fila con chip verde "ACTIVA" y snack-bar "Membresía asignada correctamente". |
 
 **Pasos de ejecución:**
@@ -270,28 +270,29 @@
 | **ID** | TC-INT-08 |
 | **Nombre del caso de prueba** | Carga del catálogo de planes en el formulario de alta |
 | **Prioridad** | Media |
-| **Precondiciones** | Debe existir al menos un plan con `activo = true` y al menos uno con `activo = false` en la tabla `Plan`. |
+| **Precondiciones** | Debe existir al menos un plan con `activo = true` y al menos uno con `activo = false` en la tabla `Plan` (el seed incluye "Promoción Descontinuada" como inactivo). |
 | **Tipo de prueba** | Integración |
 | **Estado de implementación** | Ejecutable con la UI `/app/membresias` (requiere BD inicializada) |
-| **Objetivo** | Comprobar que el select de planes carga las opciones y respeta el formato esperado. |
+| **Objetivo** | Comprobar que el select de planes carga las opciones desde el backend. |
 | **Subsistema/s** | AsignarMembresiaDialog → GET /api/planes?limit=100 |
 | **Datos de entrada** | Carga inicial del diálogo (sin interacción del usuario) |
-| **Resultado esperado** | El `<mat-select>` muestra los planes con el formato "Nombre (X días · $Y.YY)". La primera carga puede incluir todos los planes (activos e inactivos) si el backend no filtra. |
+| **Resultado esperado** | El `<mat-select>` muestra al menos una opción. La implementación actual **no valida el formato del texto** (puede incluir planes inactivos), por lo que esta prueba se centra en verificar la disponibilidad del catálogo, no su contenido filtrado. |
 
 **Pasos de ejecución:**
-- Marcar un plan como inactivo desde la pestaña **Planes** (botón desactivar)
-- Abrir **Asignar membresía** y revisar las opciones del dropdown **Plan**
+- Abrir **Asignar membresía**
+- Hacer clic en el dropdown **Plan**
+- Verificar que aparecen opciones
 
 **Criterio de verificación:**
-- Las opciones del dropdown respetan el formato "Nombre (X días · $Y.YY)"
-- El plan inactivo puede o no aparecer según el filtro del backend (acción derivada documentar)
+- El dropdown abre y muestra al menos una opción
+- Las opciones se obtienen del backend (no están hardcodeadas)
 
 | Campo | Detalle |
 |---|---|
 | **Resultados obtenidos** | Pendiente de ejecución. |
 | **Estado** | No ejecutado |
 | **Tiempo de ejecución** | - |
-| **Observaciones** | Si se requiere filtrar los inactivos, el backend debe soportar `GET /api/planes?activo=true` o el frontend debe filtrar en cliente. |
+| **Observaciones** | **Acción derivada:** si se requiere filtrar los planes inactivos, el backend debe soportar `GET /api/planes?activo=true` o el frontend debe filtrar en cliente. |
 
 ---
 
