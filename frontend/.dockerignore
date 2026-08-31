@@ -1,0 +1,12 @@
+node_modules
+.angular
+dist
+e2e
+playwright-report
+test-results
+*.log
+.git
+.gitignore
+.vscode
+.idea
+README.md

@@ -2,15 +2,80 @@
 
 Sistema web de gestión de gimnasios desarrollado como proyecto universitario.
 
-**Stack:** Angular 17 (standalone) + Angular Material · Node.js + Express · PostgreSQL + Prisma ORM · JWT + bcrypt
+**Stack:** Angular 17 (standalone) + Angular Material · Node.js + Express · PostgreSQL + Prisma ORM · JWT + bcrypt · Docker
 
 ## Estructura
 
 ```
 TriFit-Gym-Manager/
-├── backend/     API REST (Node/Express/Prisma)
-└── frontend/    Aplicación Angular
+├── backend/            API REST (Node/Express/Prisma)
+├── frontend/           Aplicación Angular
+├── docker-compose.yml  Orquestación de los 3 servicios
+├── backend/Dockerfile  Imagen del backend (Node 20 alpine + Prisma)
+├── frontend/Dockerfile Imagen del frontend (build Angular + nginx)
+├── frontend/nginx.conf Configuración de nginx (proxy a /api)
+└── .env.example        Variables de entorno para Docker
 ```
+
+## Opción 1: Ejecución con Docker (recomendada)
+
+Única forma de garantizar que la app corra igual en cualquier máquina sin instalar Node, Angular ni PostgreSQL localmente.
+
+**Requisitos:** Docker Desktop o Docker Engine + Docker Compose v2.
+
+### Pasos
+
+```bash
+# 1. (Opcional) Copiar y ajustar variables de entorno
+cp .env.example .env
+
+# 2. Construir y levantar los servicios
+docker compose up -d --build
+
+# 3. Esperar ~30 segundos a que todo arranque
+
+# 4. Abrir en el navegador
+#    http://localhost:4200
+#    Usuario: admin@trifit.com
+#    Contraseña: Admin123*
+```
+
+Los datos iniciales (planes, ejercicios, cliente admin) se crean automáticamente al arrancar el backend. Si necesitas el dataset completo de 25 clientes, 5 entrenadores y 20 membresías, ejecuta dentro del contenedor del backend:
+
+```bash
+docker exec trifit-backend node prisma/seed-dataset.js
+docker exec trifit-backend node prisma/seed-productos.js
+```
+
+### Comandos útiles
+
+| Acción | Comando |
+|---|---|
+| Ver logs en vivo | `docker compose logs -f` |
+| Ver logs solo del backend | `docker compose logs -f backend` |
+| Detener todo | `docker compose down` |
+| Detener y borrar volúmenes (BD) | `docker compose down -v` |
+| Reconstruir tras cambios | `docker compose up -d --build` |
+| Reiniciar un servicio | `docker compose restart backend` |
+
+### Servicios incluidos
+
+| Servicio | Puerto (host) | Puerto (contenedor) | Descripción |
+|---|---|---|---|
+| `trifit-frontend` | 4200 | 80 (nginx) | App Angular servida por nginx, hace proxy a /api y /uploads al backend |
+| `trifit-backend` | 3000 | 3000 | API REST en Node 20 (alpine) + Prisma + OpenSSL |
+| `trifit-postgres` | (no expuesto) | 5432 | PostgreSQL 16 alpine, solo accesible dentro de la red Docker |
+
+**Volúmenes persistentes:**
+- `postgres_data` — datos de la base
+- `backend_uploads` — fotos de perfil y productos subidas
+
+---
+
+## Opción 2: Ejecución local (sin Docker)
+
+Requiere instalar Node.js 18+ y PostgreSQL 16 localmente.
+
 ## 1. Backend
 
 ### Requisitos
