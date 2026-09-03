@@ -183,8 +183,3 @@ Si el backend corre en una URL distinta a `http://localhost:3000/api`, edítala 
 - El registro de asistencia es únicamente por número de cédula (sin QR, según alcance del proyecto).
 - La exportación a PDF se genera en el navegador con `jsPDF` + `jspdf-autotable`, tomando hasta 1000 registros filtrados.
 - Toda acción de creación/edición/desactivación queda registrada en la tabla de Auditoría.
-
-
-
-## COMMAND TO RELEASE PERMISSIONS ON THE CONSOLE
-- Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process
