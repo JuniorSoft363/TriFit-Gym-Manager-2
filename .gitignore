@@ -44,3 +44,6 @@ Thumbs.db
 # Logs
 logs/
 *.log
+
+# Respaldos de la base de datos (contienen datos reales del negocio)
+backups/*.dump.gz

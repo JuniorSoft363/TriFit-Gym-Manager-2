@@ -65,10 +65,40 @@ docker exec trifit-backend node prisma/seed-productos.js
 | `trifit-frontend` | 4200 | 80 (nginx) | App Angular servida por nginx, hace proxy a /api y /uploads al backend |
 | `trifit-backend` | 3000 | 3000 | API REST en Node 20 (alpine) + Prisma + OpenSSL |
 | `trifit-postgres` | (no expuesto) | 5432 | PostgreSQL 16 alpine, solo accesible dentro de la red Docker |
+| `trifit-backup` | — | — | Respaldo automático diario de la BD en `./backups/` (retención 14 días) |
 
 **Volúmenes persistentes:**
 - `postgres_data` — datos de la base
 - `backend_uploads` — fotos de perfil y productos subidas
+- `./backups/` — dumps `trifit_AAAAMMDD_HHMMSS.dump.gz` (NO se suben a git)
+
+### Respaldos y restauración
+
+El servicio `backup` genera un dump comprimido al arrancar y luego cada 24 h.
+Variables opcionales en `.env`: `BACKUP_RETENTION_DAYS` (defecto 14),
+`BACKUP_INTERVAL_SECONDS` (defecto 86400).
+
+```bash
+# Ver dumps disponibles
+ls backups/
+
+# Restaurar un dump en una BD de prueba (verificación)
+docker compose exec postgres psql -U postgres -d postgres -c "CREATE DATABASE restauro_prueba;"
+docker run --rm --network trifit-gym-manager_trifit-net -v ./backups:/backups:ro \
+  -e PGPASSWORD=postgres postgres:16-alpine \
+  sh -c "gunzip -c /backups/trifit_AAAAMMDD_HHMMSS.dump.gz | pg_restore -h postgres -U postgres -d restauro_prueba"
+
+# Restauración total ante desastre (detiene el backend primero)
+docker compose stop backend backup
+docker run --rm --network trifit-gym-manager_trifit-net -v ./backups:/backups:ro \
+  -e PGPASSWORD=postgres postgres:16-alpine \
+  sh -c "gunzip -c /backups/trifit_AAAAMMDD_HHMMSS.dump.gz | pg_restore -h postgres -U postgres -d trifit -c"
+docker compose start backend backup
+```
+
+> Ajusta `-U`, `-e PGPASSWORD` y `-d` si cambiaste `POSTGRES_USER`,
+> `POSTGRES_PASSWORD` o `POSTGRES_DB`. Guarda copias de `./backups/`
+> fuera del servidor periódicamente.
 
 ---
 
