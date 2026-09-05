@@ -10,6 +10,9 @@ export const rolGuard: CanActivateFn = (route) => {
 
   if (!rolesPermitidos.length || auth.tieneRol(...rolesPermitidos)) return true;
 
-  router.navigate(['/app/dashboard']);
+  // Redirige al inicio propio de cada rol para evitar un bucle
+  // (p. ej. ENTRENADOR no tiene acceso a /app/dashboard).
+  const destino = auth.usuario()?.rol === 'ENTRENADOR' ? '/app/clientes' : '/app/dashboard';
+  router.navigate([destino]);
   return false;
 };
