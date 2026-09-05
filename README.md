@@ -62,7 +62,7 @@ docker exec trifit-backend node prisma/seed-productos.js
 
 | Servicio | Puerto (host) | Puerto (contenedor) | Descripción |
 |---|---|---|---|
-| `trifit-frontend` | 4200 | 80 (nginx) | App Angular servida por nginx, hace proxy a /api y /uploads al backend |
+| `trifit-frontend` | 4200 → 80, 8443 → 443 | 80 (redirect a HTTPS), 443 (nginx TLS) | App Angular servida por nginx con TLS, hace proxy a /api y /uploads al backend |
 | `trifit-backend` | 3000 | 3000 | API REST en Node 20 (alpine) + Prisma + OpenSSL |
 | `trifit-postgres` | (no expuesto) | 5432 | PostgreSQL 16 alpine, solo accesible dentro de la red Docker |
 | `trifit-backup` | — | — | Respaldo automático diario de la BD en `./backups/` (retención 14 días) |
@@ -99,6 +99,22 @@ docker compose start backend backup
 > Ajusta `-U`, `-e PGPASSWORD` y `-d` si cambiaste `POSTGRES_USER`,
 > `POSTGRES_PASSWORD` o `POSTGRES_DB`. Guarda copias de `./backups/`
 > fuera del servidor periódicamente.
+
+### HTTPS / TLS
+
+La app se sirve **solo por HTTPS** (`https://localhost:8443`).
+El puerto 80 (4200 en el host) únicamente redirige a HTTPS.
+Incluye certificado autofirmado generado en el build (el navegador pedirá
+aceptarlo la primera vez), HSTS y solo TLS 1.2/1.3.
+
+**Producción:** en `docker-compose.yml`, cambia el mapeo a `"443:443"`,
+`HTTPS_PORT: "443"` y monta certificados reales (p. ej. Let's Encrypt):
+
+```yaml
+volumes:
+  - ./certs/trifit.crt:/etc/nginx/certs/trifit.crt:ro
+  - ./certs/trifit.key:/etc/nginx/certs/trifit.key:ro
+```
 
 ---
 
