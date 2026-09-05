@@ -107,6 +107,19 @@ El puerto 80 (4200 en el host) únicamente redirige a HTTPS.
 Incluye certificado autofirmado generado en el build (el navegador pedirá
 aceptarlo la primera vez), HSTS y solo TLS 1.2/1.3.
 
+### Contraseñas iniciales y secretos
+
+- Los usuarios creados por un admin (y el admin de fábrica) entran con
+  `debeCambiarPassword`: la API bloquea todo (403 `PASSWORD_CAMBIAR_REQUERIDO`)
+  excepto ver perfil y cambiar contraseña, y el frontend los lleva a `/app/perfil`.
+- El backend **no arranca en producción** con un `JWT_SECRET` de ejemplo.
+  Si no defines uno, genera uno aleatorio y lo persiste en el volumen `backend_data`.
+- Si el admin aún usa `Admin123*` al correr el seed, queda marcado para cambio obligatorio.
+
+**Checklist antes de producción:** `POSTGRES_PASSWORD` fuerte en `.env`,
+`JWT_SECRET` propio (o deja el autogenerado), `CORS_ORIGIN` con tu dominio,
+certificados reales (sección HTTPS) y copia externa de `./backups/`.
+
 ### Seguridad HTTP de la API
 
 - **Helmet**: cabeceras seguras (CSP, HSTS, nosniff, anti-clickjacking).

@@ -52,6 +52,9 @@ services:
       - "3000:3000"
     volumes:
       - backend_uploads:/app/uploads
+      # Persiste el JWT_SECRET autogenerado (ver backend/entrypoint.sh).
+      # Si defines tu propio JWT_SECRET, este volumen solo guarda ese caso.
+      - backend_data:/app/data
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/"]
       interval: 10s
@@ -112,6 +115,7 @@ services:
 volumes:
   postgres_data:
   backend_uploads:
+  backend_data:
 
 networks:
   trifit-net:

@@ -29,5 +29,7 @@ EXPOSE 3000
 HEALTHCHECK --interval=10s --timeout=5s --start-period=30s --retries=10 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:3000/ || exit 1
 
-# Script de inicio: aplica el schema y arranca el server
-CMD sh -c "npx prisma db push --skip-generate --accept-data-loss && node src/server.js"
+# Entrypoint: asegura JWT_SECRET real, aplica el schema y arranca el server
+COPY entrypoint.sh /app/entrypoint.sh
+VOLUME /app/data
+CMD ["sh", "/app/entrypoint.sh"]

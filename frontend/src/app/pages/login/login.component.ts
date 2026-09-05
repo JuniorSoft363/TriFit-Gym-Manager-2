@@ -43,6 +43,11 @@ export class LoginComponent {
       next: (res) => {
         this.auth.guardarSesion(res);
         this.cargando = false;
+        if (res.usuario.debeCambiarPassword) {
+          this.errorMsg = '';
+          this.router.navigateByUrl('/app/perfil');
+          return;
+        }
         const destino = res.usuario.rol === 'ENTRENADOR' ? '/app/clientes' : '/app/dashboard';
         this.router.navigateByUrl(destino);
       },

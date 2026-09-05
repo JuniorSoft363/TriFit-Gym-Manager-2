@@ -55,7 +55,7 @@ async function cambiarPassword(id, passwordActual, passwordNuevo) {
     throw new HttpError(400, 'La nueva contraseña debe ser diferente a la actual');
   }
   const passwordHash = await hashPassword(passwordNuevo);
-  await prisma.usuario.update({ where: { id }, data: { passwordHash } });
+  await prisma.usuario.update({ where: { id }, data: { passwordHash, debeCambiarPassword: false } });
   return { ok: true };
 }
 

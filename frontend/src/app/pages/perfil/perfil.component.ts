@@ -122,6 +122,8 @@ export class PerfilComponent implements OnInit {
       next: () => {
         this.guardandoPassword = false;
         this.passwordForm.reset();
+        this.auth.actualizarSesion({ debeCambiarPassword: false });
+        this.perfil.update((p) => (p ? { ...p, debeCambiarPassword: false } : p));
         this.mensajeExito = 'Contraseña actualizada correctamente';
         setTimeout(() => (this.mensajeExito = ''), 3500);
       },

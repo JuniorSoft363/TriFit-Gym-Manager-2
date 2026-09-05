@@ -12,7 +12,8 @@ function shapeBasico(u) {
     telefono: u.telefono || '',
     direccion: u.direccion || '',
     fotoUrl: u.fotoUrl || '',
-    rol: u.rol.nombre
+    rol: u.rol.nombre,
+    debeCambiarPassword: !!u.debeCambiarPassword
   };
 }
 

@@ -17,7 +17,7 @@ async function crear(data) {
   const { password, ...resto } = limpiarDatos(data);
   if (!password) throw new HttpError(400, 'La contraseña es obligatoria');
   const usuario = await prisma.usuario.create({
-    data: { ...resto, passwordHash: await hashPassword(password) },
+    data: { ...resto, passwordHash: await hashPassword(password), debeCambiarPassword: true },
     include: { rol: true }
   });
   return sinHash(usuario);
@@ -26,7 +26,11 @@ async function crear(data) {
 async function editar(id, data) {
   const { password, ...resto } = limpiarDatos(data);
   const cambios = { ...resto };
-  if (password) cambios.passwordHash = await hashPassword(password);
+  if (password) {
+    cambios.passwordHash = await hashPassword(password);
+    // Si el admin resetea la contraseña, el usuario debe cambiarla al entrar.
+    cambios.debeCambiarPassword = true;
+  }
   const usuario = await prisma.usuario.update({
     where: { id: Number(id) },
     data: cambios,

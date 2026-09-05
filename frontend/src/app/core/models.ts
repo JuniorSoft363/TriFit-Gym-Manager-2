@@ -8,6 +8,7 @@ export interface UsuarioSesion {
   direccion?: string;
   fotoUrl?: string;
   rol: RolNombre;
+  debeCambiarPassword?: boolean;
 }
 
 export interface PerfilCompleto extends UsuarioSesion {

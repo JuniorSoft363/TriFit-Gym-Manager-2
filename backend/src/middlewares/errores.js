@@ -4,7 +4,11 @@ function noEncontrado(req, res) {
 }
 
 function manejadorErrores(err, req, res, next) {
-  if (err.status) return res.status(err.status).json({ mensaje: err.message });
+  if (err.status) {
+    const cuerpo = { mensaje: err.message };
+    if (err.codigo) cuerpo.codigo = err.codigo;
+    return res.status(err.status).json(cuerpo);
+  }
   if (err.code === 'LIMIT_FILE_SIZE') {
     return res.status(400).json({ mensaje: 'La imagen no puede superar 5MB' });
   }

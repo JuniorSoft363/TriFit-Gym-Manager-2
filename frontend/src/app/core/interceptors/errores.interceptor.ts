@@ -19,6 +19,11 @@ export const erroresInterceptor: HttpInterceptorFn = (req, next) => {
         router.navigate(['/login']);
       }
 
+      if (error.status === 403 && error?.error?.codigo === 'PASSWORD_CAMBIAR_REQUERIDO') {
+        auth.actualizarSesion({ debeCambiarPassword: true });
+        router.navigate(['/app/perfil']);
+      }
+
       const detalle = Array.isArray(error?.error?.errores) ? `: ${error.error.errores.join(', ')}` : '';
       snackBar.open(mensaje + detalle, 'Cerrar', { duration: 4000 });
 

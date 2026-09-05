@@ -9,14 +9,21 @@ async function main() {
   }
 
   const rolAdmin = await prisma.rol.findUnique({ where: { nombre: 'ADMINISTRADOR' } });
+  const PASSWORD_FABRICA = 'Admin123*';
+  const adminExistente = await prisma.usuario.findUnique({ where: { email: 'admin@trifit.com' } });
+  // Si el admin aún usa la contraseña de fábrica (pública en el README),
+  // se le exige cambiarla al siguiente inicio de sesión.
+  const sigueConFabrica =
+    adminExistente && (await bcrypt.compare(PASSWORD_FABRICA, adminExistente.passwordHash));
   await prisma.usuario.upsert({
     where: { email: 'admin@trifit.com' },
-    update: {},
+    update: sigueConFabrica ? { debeCambiarPassword: true } : {},
     create: {
       nombre: 'Administrador',
       email: 'admin@trifit.com',
-      passwordHash: await bcrypt.hash('Admin123*', 10),
-      rolId: rolAdmin.id
+      passwordHash: await bcrypt.hash(PASSWORD_FABRICA, 10),
+      rolId: rolAdmin.id,
+      debeCambiarPassword: true
     }
   });
 

@@ -23,7 +23,8 @@
 }
 
 .tf-perfil-success,
-.tf-perfil-error {
+.tf-perfil-error,
+.tf-perfil-aviso {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -44,6 +45,12 @@
   background: rgba(231, 76, 60, 0.12);
   color: #e74c3c;
   border: 1px solid rgba(231, 76, 60, 0.3);
+}
+
+.tf-perfil-aviso {
+  background: rgba(241, 196, 15, 0.12);
+  color: #b7950b;
+  border: 1px solid rgba(241, 196, 15, 0.4);
 }
 
 .tf-perfil-grid {

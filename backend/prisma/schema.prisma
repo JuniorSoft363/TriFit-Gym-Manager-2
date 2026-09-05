@@ -54,6 +54,7 @@ model Usuario {
   direccion     String?
   fotoUrl       String?
   activo        Boolean      @default(true)
+  debeCambiarPassword Boolean @default(false)
   rolId         Int
   rol           Rol          @relation(fields: [rolId], references: [id])
   entrenador    Entrenador?
