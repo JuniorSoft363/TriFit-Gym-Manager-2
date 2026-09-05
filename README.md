@@ -107,6 +107,14 @@ El puerto 80 (4200 en el host) únicamente redirige a HTTPS.
 Incluye certificado autofirmado generado en el build (el navegador pedirá
 aceptarlo la primera vez), HSTS y solo TLS 1.2/1.3.
 
+### Seguridad HTTP de la API
+
+- **Helmet**: cabeceras seguras (CSP, HSTS, nosniff, anti-clickjacking).
+- **CORS restringido** a los orígenes del frontend. En producción, define
+  `CORS_ORIGIN="https://app.midominio.com"` en el entorno de `docker compose`.
+- **Rate-limit**: `/api/auth/login` → 10 intentos / 15 min por IP (429 tras
+  excederlo); resto de la API → 300 req / 15 min por IP.
+
 **Producción:** en `docker-compose.yml`, cambia el mapeo a `"443:443"`,
 `HTTPS_PORT: "443"` y monta certificados reales (p. ej. Let's Encrypt):
 

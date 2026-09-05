@@ -47,6 +47,7 @@ services:
       DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-trifit}
       JWT_SECRET: ${JWT_SECRET:-cambia_este_secreto_en_produccion}
       JWT_EXPIRES: ${JWT_EXPIRES:-8h}
+      CORS_ORIGIN: ${CORS_ORIGIN:-https://localhost:8443,http://localhost:4200}
     ports:
       - "3000:3000"
     volumes:
