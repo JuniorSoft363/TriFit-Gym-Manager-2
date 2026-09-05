@@ -74,6 +74,9 @@
           <button mat-icon-button color="primary" (click)="$event.stopPropagation(); abrirFormulario(p)" matTooltip="Editar">
             <mat-icon>edit</mat-icon>
           </button>
+          <button mat-icon-button color="warn" (click)="$event.stopPropagation(); confirmarDesactivar(p)" matTooltip="Desactivar">
+            <mat-icon>delete</mat-icon>
+          </button>
         </div>
       </div>
     </article>

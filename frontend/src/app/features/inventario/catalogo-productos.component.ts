@@ -7,6 +7,7 @@ import { MATERIAL } from '../../shared/material';
 import { ApiService } from '../../core/services/api.service';
 import { ProductoDetalleComponent } from './producto-detalle.component';
 import { ProductoFormDialogComponent } from './producto-form-dialog.component';
+import { ConfirmDialogComponent } from '../../shared/confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'app-catalogo-productos',
@@ -76,6 +77,21 @@ export class CatalogoProductosComponent implements OnInit {
         if (!r) return;
         this.snack.open(r.mensaje || 'Producto guardado', 'Cerrar', { duration: 2500 });
         this.cargar();
+      });
+  }
+
+  confirmarDesactivar(p: any) {
+    this.dialog
+      .open(ConfirmDialogComponent, {
+        data: { titulo: 'Confirmar', mensaje: `¿Desea desactivar el producto "${p.nombre}"?`, textoConfirmar: 'Desactivar' }
+      })
+      .afterClosed()
+      .subscribe((ok) => {
+        if (!ok) return;
+        this.api.eliminar('inventario/productos', p.id).subscribe(() => {
+          this.snack.open('Producto desactivado', 'Cerrar', { duration: 2500 });
+          this.cargar();
+        });
       });
   }
 
