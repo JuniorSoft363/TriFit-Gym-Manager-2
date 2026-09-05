@@ -19,6 +19,7 @@ export interface PerfilCompleto extends UsuarioSesion {
 
 export interface RespuestaLogin {
   token: string;
+  refreshToken: string;
   usuario: UsuarioSesion;
 }
 

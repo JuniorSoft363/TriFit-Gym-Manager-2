@@ -8,6 +8,8 @@ const prisma = require('../config/prisma');
 // Rutas que un usuario con cambio pendiente SÍ puede usar.
 const RUTAS_EXENTAS = new Set([
   'POST /api/auth/login',
+  'POST /api/auth/refresh',
+  'POST /api/auth/logout',
   'GET /api/auth/perfil',
   'PUT /api/auth/perfil/password'
 ]);

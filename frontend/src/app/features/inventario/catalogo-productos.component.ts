@@ -23,7 +23,7 @@ export class CatalogoProductosComponent implements OnInit {
   filtroTipo = '';
   filtroStock: 'todos' | 'agotados' | 'bajo' = 'todos';
   orden: 'nombre' | 'precio' | 'stock' = 'nombre';
-  apiBase = 'http://localhost:3000';
+  apiBase = '';
 
   constructor(
     private api: ApiService,

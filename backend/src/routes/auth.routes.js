@@ -10,6 +10,8 @@ const v = require('../validators');
 const router = Router();
 
 router.post('/login', limiteLogin, v.login, validar, ctrl.login);
+router.post('/refresh', v.refreshToken, validar, ctrl.refrescar);
+router.post('/logout', ctrl.cerrarSesion);
 router.get('/perfil', autenticar, ctrl.perfil);
 router.put('/perfil', autenticar, v.actualizarPerfil, validar, perfilCtrl.actualizar);
 router.put('/perfil/password', autenticar, v.cambiarPassword, validar, perfilCtrl.cambiarPassword);

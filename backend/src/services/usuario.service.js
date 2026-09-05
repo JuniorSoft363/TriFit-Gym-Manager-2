@@ -3,6 +3,7 @@ const prisma = require('../config/prisma');
 const { HttpError } = require('../utils/httpError');
 const { hashPassword } = require('../utils/password');
 const { crudService, limpiarDatos } = require('../utils/crud');
+const sesionService = require('./sesion.service');
 
 const base = crudService('usuario', { camposBusqueda: ['nombre', 'email'], incluir: { rol: true } });
 
@@ -36,6 +37,8 @@ async function editar(id, data) {
     data: cambios,
     include: { rol: true }
   });
+  // Si el admin cambió la contraseña, se cierran las sesiones del usuario.
+  if (password) await sesionService.revocarTodas(Number(id));
   return sinHash(usuario);
 }
 

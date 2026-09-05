@@ -12,6 +12,10 @@ const login = [
   body('password').notEmpty().withMessage('La contraseña es obligatoria')
 ];
 
+const refreshToken = [
+  body('refreshToken').notEmpty().withMessage('refreshToken es obligatorio')
+];
+
 const cliente = [
   cedulaRegla(),
   body('nombres').trim().notEmpty().withMessage('Los nombres son obligatorios'),
@@ -91,7 +95,7 @@ const cambiarPassword = [
 ];
 
 module.exports = {
-  login, cliente, plan, membresia, estadoMembresia, pago, asistencia,
+  login, refreshToken, cliente, plan, membresia, estadoMembresia, pago, asistencia,
   entrenador, usuario, rutina, ejercicio, producto, proveedor, movimiento,
   actualizarPerfil, cambiarPassword
 };

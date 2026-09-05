@@ -19,7 +19,7 @@ export class ProductoFormDialogComponent implements OnInit {
   subiendo = signal(false);
   imagenPreview = signal<string | null>(null);
   imagenFile: File | null = null;
-  apiBase = 'http://localhost:3000';
+  apiBase = '';
   esEdicion = false;
 
   constructor(

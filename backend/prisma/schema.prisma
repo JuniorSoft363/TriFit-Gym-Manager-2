@@ -62,8 +62,22 @@ model Usuario {
   asistencias   Asistencia[]
   movimientos   Inventario[]
   auditorias    Auditoria[]
-  creadoEn      DateTime     @default(now())
-  actualizadoEn DateTime     @updatedAt
+  creadoEn      DateTime      @default(now())
+  actualizadoEn DateTime      @updatedAt
+  sesiones      SesionRefresh[]
+}
+
+// Sesión de refresco (token opaco con rotación). Solo se guarda el hash SHA-256.
+model SesionRefresh {
+  id         Int       @id @default(autoincrement())
+  tokenHash  String    @unique
+  usuarioId  Int
+  usuario    Usuario   @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  expiraEn   DateTime
+  creadoEn   DateTime  @default(now())
+  revocadoEn DateTime?
+
+  @@index([usuarioId])
 }
 
 model Cliente {

@@ -107,6 +107,18 @@ El puerto 80 (4200 en el host) únicamente redirige a HTTPS.
 Incluye certificado autofirmado generado en el build (el navegador pedirá
 aceptarlo la primera vez), HSTS y solo TLS 1.2/1.3.
 
+### Sesiones y tokens
+
+- **Access token corto** (`JWT_EXPIRES`, por defecto 30 min) + **refresh token**
+  opaco de 7 días (`REFRESH_EXPIRES_DIAS`) almacenado como hash SHA-256.
+- El frontend **rota el refresh en cada uso** y reintenta las peticiones con
+  401 automáticamente. Si se detecta el **reuso** de un refresh ya rotado, se
+  revocan **todas** las sesiones del usuario (protección ante robo).
+- Cerrar sesión y cambiar la contraseña revocan el refresh. Cierre automático
+  por inactividad (30 min).
+- El login tiene rate-limit (10/15 min por IP), por lo que los tests e2e hacen
+  **un solo login** y obtienen los tokens siguientes vía `/auth/refresh`.
+
 ### Contraseñas iniciales y secretos
 
 - Los usuarios creados por un admin (y el admin de fábrica) entran con

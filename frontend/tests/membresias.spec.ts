@@ -25,19 +25,55 @@ const CEDULA_INEXISTENTE = process.env.TEST_CEDULA_INEXISTENTE || '0999999999';
 const PLAN_ID = Number(process.env.TEST_PLAN_ID || 1);
 const API = 'http://localhost:3000/api';
 
-async function loginComoAdmin(page: Page, request: APIRequestContext) {
+// Sesión única por corrida: un solo POST /auth/login (respeta el rate-limit de
+// 10 intentos/15 min). Cada test obtiene su token vía /auth/refresh (rotación).
+let tokenSesion = '';
+let refreshSesion = '';
+let usuarioSesion: any = null;
+
+async function loginReal(request: APIRequestContext) {
   const resp = await request.post(`${API}/auth/login`, {
     data: { email: 'admin@trifit.com', password: 'Admin123*' }
   });
   expect(resp.ok(), `Login API falló: ${resp.status()}`).toBeTruthy();
   const body = await resp.json();
+  tokenSesion = body.token;
+  refreshSesion = body.refreshToken;
+  usuarioSesion = body.usuario;
+}
 
-  await page.addInitScript(({ token, usuario }) => {
-    localStorage.setItem('tf_token', token);
-    localStorage.setItem('tf_usuario', JSON.stringify(usuario));
-  }, { token: body.token, usuario: body.usuario });
+async function refrescarSesion(request: APIRequestContext) {
+  if (!refreshSesion) {
+    await loginReal(request);
+    return;
+  }
+  const resp = await request.post(`${API}/auth/refresh`, {
+    data: { refreshToken: refreshSesion }
+  });
+  if (!resp.ok()) {
+    await loginReal(request);
+    return;
+  }
+  const body = await resp.json();
+  tokenSesion = body.token;
+  refreshSesion = body.refreshToken;
+  usuarioSesion = body.usuario;
+}
 
-  return body.token;
+async function asegurarToken(request: APIRequestContext) {
+  await refrescarSesion(request);
+  return tokenSesion;
+}
+
+async function inyectarSesion(page: Page) {
+  await page.addInitScript(
+    ({ token, refresh, usuario }) => {
+      localStorage.setItem('tf_token', token);
+      localStorage.setItem('tf_refresh', refresh);
+      localStorage.setItem('tf_usuario', JSON.stringify(usuario));
+    },
+    { token: tokenSesion, refresh: refreshSesion, usuario: usuarioSesion }
+  );
 }
 
 function authed(request: APIRequestContext, token: string) {
@@ -57,15 +93,20 @@ async function irAMembresias(page: Page) {
 }
 
 test.describe('Módulo Membresías (TC-INT-01..10)', () => {
+  test.beforeAll(async ({ request }) => {
+    await loginReal(request);
+  });
+
   test.beforeEach(async ({ page, request }) => {
-    await loginComoAdmin(page, request);
+    await refrescarSesion(request);
+    await inyectarSesion(page);
   });
 
   test('TC-INT-01 — Assign membership with valid data', async ({ page, request }) => {
     // Verificar precondición: el cliente no debe tener membresía activa.
     // Si ya la tiene (por una corrida previa del test), omitir para mantener
     // idempotencia. Para resetear la BD entre corridas: npm run seed:dataset.
-    const token = await loginComoAdmin(page, request);
+    const token = await asegurarToken(request);
     const r = authed(request, token);
     const cliente = await r.get(`${API}/clientes/cedula/${CEDULA}`);
     if (cliente.ok()) {
@@ -96,7 +137,7 @@ test.describe('Módulo Membresías (TC-INT-01..10)', () => {
 
   test('TC-INT-02 — Bloquea segunda membresía activa para el mismo cliente', async ({ page, request }) => {
     // Re-autenticar con token de API porque la página no afecta al request context
-    const token = await loginComoAdmin(page, request);
+    const token = await asegurarToken(request);
     const r = authed(request, token);
 
     // Buscar la primera membresía activa del seed
@@ -176,7 +217,7 @@ test.describe('Módulo Membresías (TC-INT-01..10)', () => {
   });
 
   test('TC-INT-10 — Renovar una membresía cancelada no produce error 500', async ({ page, request }) => {
-    const token = await loginComoAdmin(page, request);
+    const token = await asegurarToken(request);
     const r = authed(request, token);
 
     const lista = await r.get(`${API}/membresias?estado=CANCELADA&limit=1`);
