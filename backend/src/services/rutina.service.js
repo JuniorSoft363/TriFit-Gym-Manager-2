@@ -1,6 +1,7 @@
 // Gestión de rutinas y sus ejercicios
 const prisma = require('../config/prisma');
 const { getPaginacion } = require('../utils/paginacion');
+const { HttpError } = require('../utils/httpError');
 
 const incluir = {
   ejercicios: { include: { ejercicio: true }, orderBy: { orden: 'asc' } },
@@ -12,7 +13,8 @@ async function listar(query) {
   const { skip, take, page, limit } = getPaginacion(query);
   const where = {};
   if (query.busqueda) where.nombre = { contains: query.busqueda, mode: 'insensitive' };
-  if (query.activo !== undefined) where.activo = query.activo === 'true';
+  // Por defecto se ocultan las desactivadas; ?activo=true/false filtra explícito
+  where.activo = query.activo !== undefined ? query.activo === 'true' : true;
   if (query.entrenadorId) where.entrenadorId = Number(query.entrenadorId);
   if (query.clienteId) where.clienteId = Number(query.clienteId);
   const [total, datos] = await Promise.all([
@@ -81,4 +83,15 @@ function eliminar(id) {
   return prisma.rutina.update({ where: { id: Number(id) }, data: { activo: false } });
 }
 
-module.exports = { listar, crear, editar, asignar, eliminar };
+async function eliminarFisico(id) {
+  try {
+    // RutinaEjercicio tiene onDelete Cascade: se borran sus ejercicios asociados
+    return await prisma.rutina.delete({ where: { id: Number(id) } });
+  } catch (e) {
+    if (e.code === 'P2003')
+      throw new HttpError(409, 'No se puede eliminar: la rutina tiene datos relacionados');
+    throw e;
+  }
+}
+
+module.exports = { listar, crear, editar, asignar, eliminar, eliminarFisico };

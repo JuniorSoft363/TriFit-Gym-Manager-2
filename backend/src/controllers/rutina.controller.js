@@ -20,6 +20,11 @@ module.exports = {
     res.json(r);
   }),
   eliminar: asyncHandler(async (req, res) => {
+    if (req.query.definitivo === 'true') {
+      const r = await rutinaService.eliminarFisico(req.params.id);
+      auditar(req, 'ELIMINAR', 'Rutina', r.id);
+      return res.json(r);
+    }
     const r = await rutinaService.eliminar(req.params.id);
     auditar(req, 'DESACTIVAR', 'Rutina', r.id);
     res.json(r);

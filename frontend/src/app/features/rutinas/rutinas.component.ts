@@ -108,10 +108,39 @@ export class RutinasComponent implements OnInit {
       .afterClosed()
       .subscribe((ok) => {
         if (!ok) return;
-        this.api.eliminar('rutinas', rutina.id).subscribe(() => {
-          this.snack.open('Rutina desactivada', 'Cerrar', { duration: 3000 });
-          this.cargarRutinas();
+        this.api.eliminar('rutinas', rutina.id).subscribe({
+          next: () => {
+            this.snack.open('Rutina desactivada', 'Cerrar', { duration: 3000 });
+            this.cargarRutinas();
+          },
+          error: (err) => this.mostrarError(err)
         });
       });
+  }
+
+  confirmarEliminarFisico(rutina: any) {
+    this.dialog
+      .open(ConfirmDialogComponent, {
+        data: {
+          titulo: 'Eliminar definitivamente',
+          mensaje: '¿Eliminar DEFINITIVAMENTE esta rutina con sus ejercicios? Esta acción no se puede deshacer.',
+          textoConfirmar: 'Eliminar'
+        }
+      })
+      .afterClosed()
+      .subscribe((ok) => {
+        if (!ok) return;
+        this.api.eliminar('rutinas', rutina.id, true).subscribe({
+          next: () => {
+            this.snack.open('Rutina eliminada', 'Cerrar', { duration: 3000 });
+            this.cargarRutinas();
+          },
+          error: (err) => this.mostrarError(err)
+        });
+      });
+  }
+
+  private mostrarError(err: any) {
+    this.snack.open(err?.error?.mensaje || 'No se pudo completar la operación', 'Cerrar', { duration: 4000 });
   }
 }

@@ -3,6 +3,7 @@ const prisma = require('../config/prisma');
 const { getPaginacion } = require('./paginacion');
 const { auditar } = require('./auditoria');
 const asyncHandler = require('./asyncHandler');
+const { HttpError } = require('./httpError');
 
 // Convierte cadenas vacías en null para campos opcionales
 const limpiarDatos = (obj) =>
@@ -21,7 +22,10 @@ function crudService(modelo, opciones = {}) {
           [c]: { contains: query.busqueda, mode: 'insensitive' }
         }));
       }
-      if (query.activo !== undefined && softDelete) where.activo = query.activo === 'true';
+      if (softDelete) {
+        // Por defecto se ocultan los desactivados; ?activo=true/false filtra explícito
+        where.activo = query.activo !== undefined ? query.activo === 'true' : true;
+      }
       const [total, datos] = await Promise.all([
         db().count({ where }),
         db().findMany({ where, skip, take, include: incluir, orderBy: { id: 'desc' } })
@@ -41,6 +45,15 @@ function crudService(modelo, opciones = {}) {
       return softDelete
         ? db().update({ where: { id: Number(id) }, data: { activo: false } })
         : db().delete({ where: { id: Number(id) } });
+    },
+    async eliminarFisico(id) {
+      try {
+        return await db().delete({ where: { id: Number(id) } });
+      } catch (e) {
+        if (e.code === 'P2003')
+          throw new HttpError(409, 'No se puede eliminar: el registro tiene datos relacionados');
+        throw e;
+      }
     }
   };
 }
@@ -60,6 +73,11 @@ function crudController(servicio, entidad) {
       res.json(r);
     }),
     eliminar: asyncHandler(async (req, res) => {
+      if (req.query.definitivo === 'true') {
+        const r = await servicio.eliminarFisico(req.params.id);
+        auditar(req, 'ELIMINAR', entidad, r.id || Number(req.params.id));
+        return res.json(r);
+      }
       const r = await servicio.eliminar(req.params.id);
       auditar(req, 'DESACTIVAR', entidad, r.id || Number(req.params.id));
       res.json(r);

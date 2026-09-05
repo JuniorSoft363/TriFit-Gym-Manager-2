@@ -88,11 +88,40 @@ export class CatalogoProductosComponent implements OnInit {
       .afterClosed()
       .subscribe((ok) => {
         if (!ok) return;
-        this.api.eliminar('inventario/productos', p.id).subscribe(() => {
-          this.snack.open('Producto desactivado', 'Cerrar', { duration: 2500 });
-          this.cargar();
+        this.api.eliminar('inventario/productos', p.id).subscribe({
+          next: () => {
+            this.snack.open('Producto desactivado', 'Cerrar', { duration: 2500 });
+            this.cargar();
+          },
+          error: (err) => this.mostrarError(err)
         });
       });
+  }
+
+  confirmarEliminarFisico(p: any) {
+    this.dialog
+      .open(ConfirmDialogComponent, {
+        data: {
+          titulo: 'Eliminar definitivamente',
+          mensaje: `¿Eliminar DEFINITIVAMENTE el producto "${p.nombre}"? Esta acción no se puede deshacer.`,
+          textoConfirmar: 'Eliminar'
+        }
+      })
+      .afterClosed()
+      .subscribe((ok) => {
+        if (!ok) return;
+        this.api.eliminar('inventario/productos', p.id, true).subscribe({
+          next: () => {
+            this.snack.open('Producto eliminado', 'Cerrar', { duration: 2500 });
+            this.cargar();
+          },
+          error: (err) => this.mostrarError(err)
+        });
+      });
+  }
+
+  private mostrarError(err: any) {
+    this.snack.open(err?.error?.mensaje || 'No se pudo completar la operación', 'Cerrar', { duration: 4000 });
   }
 
   get productosFiltrados(): any[] {

@@ -38,8 +38,9 @@ export class ApiService {
     return this.http.put<T>(this.url(`${recurso}/${id}`), data);
   }
 
-  eliminar<T = any>(recurso: string, id: number | string) {
-    return this.http.delete<T>(this.url(`${recurso}/${id}`));
+  eliminar<T = any>(recurso: string, id: number | string, definitivo = false) {
+    const params = definitivo ? construirParams({ definitivo: true }) : undefined;
+    return this.http.delete<T>(this.url(`${recurso}/${id}`), { params });
   }
 
   patch<T = any>(recurso: string, body: any = {}) {

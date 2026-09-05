@@ -32,6 +32,7 @@ export class CrudPageComponent implements OnInit, OnChanges {
   @Input() permiteCrear = true;
   @Input() permiteEditar = true;
   @Input() permiteEliminar = true;
+  @Input() permiteEliminarFisico = true;
   @Input() textoEliminar = '¿Desea desactivar este registro?';
   @Input() busquedaPlaceholder = 'Buscar...';
   @Input() accionesExtra: AccionExtra[] = [];
@@ -76,7 +77,10 @@ export class CrudPageComponent implements OnInit, OnChanges {
   }
 
   get mostrarColumnaAcciones(): boolean {
-    return this.accionesExtra.length > 0 || (!this.soloLectura && (this.permiteEditar || this.permiteEliminar));
+    return (
+      this.accionesExtra.length > 0 ||
+      (!this.soloLectura && (this.permiteEditar || this.permiteEliminar || this.permiteEliminarFisico))
+    );
   }
 
   valor(fila: any, columna: Columna) {
@@ -156,10 +160,39 @@ export class CrudPageComponent implements OnInit, OnChanges {
       .afterClosed()
       .subscribe((ok) => {
         if (!ok) return;
-        this.api.eliminar(this.recurso, fila.id).subscribe(() => {
-          this.snack.open('Registro desactivado', 'Cerrar', { duration: 3000 });
-          this.cargar();
+        this.api.eliminar(this.recurso, fila.id).subscribe({
+          next: () => {
+            this.snack.open('Registro desactivado', 'Cerrar', { duration: 3000 });
+            this.cargar();
+          },
+          error: (err) => this.mostrarError(err)
         });
       });
+  }
+
+  confirmarEliminarFisico(fila: any) {
+    this.dialog
+      .open(ConfirmDialogComponent, {
+        data: {
+          titulo: 'Eliminar definitivamente',
+          mensaje: '¿Eliminar DEFINITIVAMENTE este registro? Esta acción no se puede deshacer.',
+          textoConfirmar: 'Eliminar'
+        }
+      })
+      .afterClosed()
+      .subscribe((ok) => {
+        if (!ok) return;
+        this.api.eliminar(this.recurso, fila.id, true).subscribe({
+          next: () => {
+            this.snack.open('Registro eliminado', 'Cerrar', { duration: 3000 });
+            this.cargar();
+          },
+          error: (err) => this.mostrarError(err)
+        });
+      });
+  }
+
+  private mostrarError(err: any) {
+    this.snack.open(err?.error?.mensaje || 'No se pudo completar la operación', 'Cerrar', { duration: 4000 });
   }
 }

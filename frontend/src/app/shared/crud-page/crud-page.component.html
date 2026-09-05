@@ -66,6 +66,15 @@
           matTooltip="Desactivar"
           (click)="confirmarEliminar(fila)"
         >
+          <mat-icon>block</mat-icon>
+        </button>
+        <button
+          *ngIf="permiteEliminarFisico && !soloLectura"
+          mat-icon-button
+          color="warn"
+          matTooltip="Eliminar definitivamente"
+          (click)="confirmarEliminarFisico(fila)"
+        >
           <mat-icon>delete</mat-icon>
         </button>
       </td>
