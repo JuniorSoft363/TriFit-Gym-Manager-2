@@ -27,21 +27,22 @@
 
     <div class="tf-full-width" style="display: flex; gap: 8px; align-items: flex-start">
       <mat-form-field appearance="outline" style="flex: 1">
-        <mat-label>Cédula del cliente (opcional)</mat-label>
+        <mat-label>Cédula del cliente</mat-label>
         <input matInput [(ngModel)]="cedulaCliente" [ngModelOptions]="{ standalone: true }" />
+        <mat-hint>Opcional</mat-hint>
       </mat-form-field>
       <button mat-stroked-button type="button" style="margin-top: 8px" (click)="buscarCliente()">Buscar</button>
     </div>
     <div class="tf-full-width" *ngIf="clienteAsignado" style="margin: -8px 0 8px">
       Cliente asignado: <strong>{{ clienteAsignado.nombres }} {{ clienteAsignado.apellidos }}</strong>
-      <button mat-icon-button (click)="quitarCliente()" matTooltip="Quitar cliente">
+      <button mat-icon-button type="button" (click)="quitarCliente()" matTooltip="Quitar cliente">
         <mat-icon>close</mat-icon>
       </button>
     </div>
-  </form>
 
   <h3>Ejercicios</h3>
-  <div formArrayName="ejercicios" *ngFor="let grupo of ejerciciosArray.controls; let i = index" [formGroup]="$any(grupo)">
+  <div formArrayName="ejercicios">
+  <div *ngFor="let grupo of ejerciciosArray.controls; let i = index" [formGroupName]="i">
     <div style="display: flex; gap: 8px; align-items: flex-start; flex-wrap: wrap; margin-bottom: 4px">
       <mat-form-field appearance="outline" style="flex: 2; min-width: 180px">
         <mat-label>Ejercicio</mat-label>
@@ -61,16 +62,18 @@
         <mat-label>Observación</mat-label>
         <input matInput formControlName="observacion" />
       </mat-form-field>
-      <button mat-icon-button matTooltip="Quitar" style="margin-top: 8px" (click)="quitarEjercicio(i)">
+      <button mat-icon-button type="button" matTooltip="Quitar" style="margin-top: 8px" (click)="quitarEjercicio(i)">
         <mat-icon>delete</mat-icon>
       </button>
     </div>
+  </div>
   </div>
 
   <button mat-stroked-button type="button" (click)="agregarEjercicio()">
     <mat-icon>add</mat-icon>
     Agregar ejercicio
   </button>
+  </form>
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
