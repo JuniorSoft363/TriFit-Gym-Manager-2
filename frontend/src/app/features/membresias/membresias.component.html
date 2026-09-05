@@ -81,7 +81,13 @@
             <ng-container matColumnDef="acciones">
               <th mat-header-cell *matHeaderCellDef>Acciones</th>
               <td mat-cell *matCellDef="let m">
-                <button mat-icon-button matTooltip="Renovar" (click)="renovar(m)">
+                <button
+                  mat-icon-button
+                  matTooltip="Renovar"
+                  [matTooltipDisabled]="m.estado === 'CANCELADA'"
+                  [disabled]="m.estado === 'CANCELADA'"
+                  (click)="renovar(m)"
+                >
                   <mat-icon>autorenew</mat-icon>
                 </button>
                 <button mat-icon-button matTooltip="Cambiar estado" [matMenuTriggerFor]="menuEstado">

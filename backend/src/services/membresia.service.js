@@ -41,6 +41,7 @@ async function listar(query) {
 async function asignar({ clienteId, planId, fechaInicio }) {
   await actualizarVencidas();
   const plan = await prisma.plan.findUniqueOrThrow({ where: { id: Number(planId) } });
+  if (!plan.activo) throw new HttpError(400, 'El plan seleccionado no está activo');
   const existente = await prisma.membresia.findFirst({
     where: { clienteId: Number(clienteId), estado: 'ACTIVA' }
   });
@@ -59,6 +60,8 @@ async function renovar(id) {
     where: { id: Number(id) },
     include: { plan: true }
   });
+  if (m.estado === 'CANCELADA')
+    throw new HttpError(409, 'No se puede renovar una membresía cancelada');
   const base = m.fechaFin > new Date() ? new Date(m.fechaFin) : new Date();
   const fin = new Date(base);
   fin.setDate(fin.getDate() + m.plan.duracionDias);

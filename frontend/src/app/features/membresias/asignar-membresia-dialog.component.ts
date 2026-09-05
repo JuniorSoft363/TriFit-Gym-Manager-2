@@ -33,7 +33,7 @@ export class AsignarMembresiaDialogComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.api.listar('planes', { limit: 100 }).subscribe((res) => (this.planes = res.datos));
+    this.api.listar('planes', { activo: true, limit: 100 }).subscribe((res) => (this.planes = res.datos));
   }
 
   buscarCliente() {

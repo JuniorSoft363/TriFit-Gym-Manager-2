@@ -51,10 +51,10 @@
 
 | Campo | Detalle |
 |---|---|
-| **Resultados obtenidos** | Pendiente de ejecución. |
-| **Estado** | No ejecutado |
+| **Resultados obtenidos** | Aprobado solo con BD recién sembrada (`npm run seed:dataset`, cédula `1956789012`). En 2ª corrida sin re-seed falla: el cliente ya tiene membresía ACTIVA y el backend responde 409 (correcto por diseño; el caso no es idempotente). |
+| **Estado** | Aprobado con precondición (no idempotente) |
 | **Tiempo de ejecución** | - |
-| **Observaciones** | Ninguna. |
+| **Observaciones** | Evidencias en `docs/evidencias/TC-INT-01/` y `frontend/playwright-report/`. |
 
 ---
 
@@ -85,10 +85,10 @@
 
 | Campo | Detalle |
 |---|---|
-| **Resultados obtenidos** | Pendiente de ejecución. |
-| **Estado** | No ejecutado |
+| **Resultados obtenidos** | Aprobado en corrida Playwright del 30/08/2026: el backend responde 409 controlado y no se crea el duplicado. |
+| **Estado** | Aprobado |
 | **Tiempo de ejecución** | - |
-| **Observaciones** | Verificar que la respuesta del backend es controlada (no 500). |
+| **Observaciones** | Evidencias en `docs/evidencias/TC-INT-02/` y `frontend/playwright-report/`. |
 
 ---
 
@@ -119,10 +119,10 @@
 
 | Campo | Detalle |
 |---|---|
-| **Resultados obtenidos** | Pendiente de ejecución. |
-| **Estado** | No ejecutado |
+| **Resultados obtenidos** | Aprobado en corrida Playwright del 30/08/2026. |
+| **Estado** | Aprobado |
 | **Tiempo de ejecución** | - |
-| **Observaciones** | Ninguna. |
+| **Observaciones** | Evidencias en `docs/evidencias/TC-INT-03/` y `frontend/playwright-report/`. |
 
 ---
 
@@ -153,10 +153,10 @@
 
 | Campo | Detalle |
 |---|---|
-| **Resultados obtenidos** | Pendiente de ejecución. |
-| **Estado** | No ejecutado |
+| **Resultados obtenidos** | Aprobado en corrida Playwright del 30/08/2026. |
+| **Estado** | Aprobado |
 | **Tiempo de ejecución** | - |
-| **Observaciones** | Repetir ingresando texto no numérico en cédula para confirmar validación. |
+| **Observaciones** | Evidencias en `docs/evidencias/TC-INT-04/` y `frontend/playwright-report/`. Repetir ingresando texto no numérico en cédula para confirmar validación. |
 
 ---
 
@@ -187,10 +187,10 @@
 
 | Campo | Detalle |
 |---|---|
-| **Resultados obtenidos** | Pendiente de ejecución. |
-| **Estado** | No ejecutado |
+| **Resultados obtenidos** | Aprobado en corrida Playwright del 30/08/2026. |
+| **Estado** | Aprobado |
 | **Tiempo de ejecución** | - |
-| **Observaciones** | Verificar en la base de datos que la membresía queda con `fechaFin` extendida. |
+| **Observaciones** | Evidencias en `docs/evidencias/TC-INT-05/` y `frontend/playwright-report/`. Verificado en BD que la membresía queda con `fechaFin` extendida. |
 
 ---
 
@@ -221,10 +221,10 @@
 
 | Campo | Detalle |
 |---|---|
-| **Resultados obtenidos** | Pendiente de ejecución. |
-| **Estado** | No ejecutado |
+| **Resultados obtenidos** | Aprobado en corrida Playwright del 30/08/2026. |
+| **Estado** | Aprobado |
 | **Tiempo de ejecución** | - |
-| **Observaciones** | Ninguna. |
+| **Observaciones** | Evidencias en `docs/evidencias/TC-INT-06/` y `frontend/playwright-report/`. |
 
 ---
 
@@ -256,10 +256,10 @@
 
 | Campo | Detalle |
 |---|---|
-| **Resultados obtenidos** | Pendiente de ejecución. |
-| **Estado** | No ejecutado |
+| **Resultados obtenidos** | Aprobado en corrida Playwright del 30/08/2026. |
+| **Estado** | Aprobado |
 | **Tiempo de ejecución** | - |
-| **Observaciones** | Ninguna. |
+| **Observaciones** | Evidencias en `docs/evidencias/TC-INT-07/` y `frontend/playwright-report/`. |
 
 ---
 
@@ -276,7 +276,7 @@
 | **Objetivo** | Comprobar que el select de planes carga las opciones desde el backend. |
 | **Subsistema/s** | AsignarMembresiaDialog → GET /api/planes?limit=100 |
 | **Datos de entrada** | Carga inicial del diálogo (sin interacción del usuario) |
-| **Resultado esperado** | El `<mat-select>` muestra al menos una opción. La implementación actual **no valida el formato del texto** (puede incluir planes inactivos), por lo que esta prueba se centra en verificar la disponibilidad del catálogo, no su contenido filtrado. |
+| **Resultado esperado** | El `<mat-select>` muestra al menos una opción y solo incluye planes con `activo = true` (el diálogo solicita `GET /api/planes?activo=true`). |
 
 **Pasos de ejecución:**
 - Abrir **Asignar membresía**
@@ -289,10 +289,10 @@
 
 | Campo | Detalle |
 |---|---|
-| **Resultados obtenidos** | Pendiente de ejecución. |
-| **Estado** | No ejecutado |
+| **Resultados obtenidos** | Aprobado en corrida Playwright del 30/08/2026. |
+| **Estado** | Aprobado |
 | **Tiempo de ejecución** | - |
-| **Observaciones** | **Acción derivada:** si se requiere filtrar los planes inactivos, el backend debe soportar `GET /api/planes?activo=true` o el frontend debe filtrar en cliente. |
+| **Observaciones** | Acción derivada implementada: el diálogo solicita `GET /api/planes?activo=true` y `asignar` rechaza planes inactivos con 400. |
 
 ---
 
@@ -322,10 +322,10 @@
 
 | Campo | Detalle |
 |---|---|
-| **Resultados obtenidos** | Pendiente de ejecución. |
-| **Estado** | No ejecutado |
+| **Resultados obtenidos** | Aprobado en corrida Playwright del 30/08/2026. |
+| **Estado** | Aprobado |
 | **Tiempo de ejecución** | - |
-| **Observaciones** | El dataset de prueba (20 membresías) es suficiente para validar la paginación. |
+| **Observaciones** | Evidencias en `docs/evidencias/TC-INT-09/` y `frontend/playwright-report/`. El dataset de prueba (20 membresías) es suficiente para validar la paginación. |
 
 ---
 
@@ -342,19 +342,19 @@
 | **Objetivo** | Comprobar el comportamiento de la API y la UI al intentar renovar una membresía cancelada. |
 | **Subsistema/s** | Botón Renovar sobre fila CANCELADA → PATCH /api/membresias/:id/renovar |
 | **Datos de entrada** | ID de una membresía en estado `CANCELADA` |
-| **Resultado esperado** | PATCH responde 200 (Prisma `update` no valida estado) y la membresía pasa a `ACTIVA` con nueva `fechaFin`. Decisión de diseño: la UI debería deshabilitar el botón "Renovar" si la membresía está cancelada. |
+| **Resultado esperado** | PATCH responde 409 con el mensaje "No se puede renovar una membresía cancelada". En la UI, el botón "Renovar" aparece deshabilitado con el tooltip correspondiente y no dispara la petición. |
 
 **Pasos de ejecución:**
 - Ubicar una fila con estado `CANCELADA`
 - Clic en el botón con icono `autorenew`
 
 **Criterio de verificación:**
-- No se produce un error 500
-- Si el botón está habilitado, la respuesta es 200; si está deshabilitado, no se dispara la petición
+- No se produce un error 500 (la API responde 409 controlado)
+- En la UI, el botón "Renovar" está deshabilitado para filas CANCELADA (no se dispara la petición)
 
 | Campo | Detalle |
 |---|---|
-| **Resultados obtenidos** | Pendiente de ejecución. |
-| **Estado** | No ejecutado |
+| **Resultados obtenidos** | Aprobado en corrida Playwright del 30/08/2026 (la API responde 409 controlado, sin error 500). |
+| **Estado** | Aprobado |
 | **Tiempo de ejecución** | - |
-| **Observaciones** | Acción derivada recomendada: ocultar/deshabilitar el botón "Renovar" cuando `estado === 'CANCELADA'`. |
+| **Observaciones** | Acción derivada implementada: validación en `membresiaService.renovar` (409) + botón deshabilitado en la tabla. |
