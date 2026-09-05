@@ -1,7 +1,7 @@
 <div class="tf-toolbar-filtros">
   <mat-form-field appearance="outline" style="width: 300px">
     <mat-label>{{ busquedaPlaceholder }}</mat-label>
-    <mat-icon matPrefix>search</mat-icon>
+    <mat-icon matSuffix>search</mat-icon>
     <input matInput [value]="busqueda" (input)="onBusqueda($any($event.target).value)" />
   </mat-form-field>
 
