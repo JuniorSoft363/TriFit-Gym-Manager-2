@@ -1,7 +1,8 @@
 <div class="tf-toolbar-filtros">
   <mat-form-field appearance="outline" style="width: 240px">
-    <mat-label>Filtrar por entidad (ej. Cliente)</mat-label>
+    <mat-label>Filtrar por entidad</mat-label>
     <input matInput [(ngModel)]="entidad" (ngModelChange)="onFiltroCambio()" />
+    <mat-hint>Ej. Cliente</mat-hint>
     <mat-icon matSuffix>search</mat-icon>
   </mat-form-field>
 </div>
