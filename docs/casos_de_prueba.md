@@ -358,3 +358,293 @@
 | **Estado** | Aprobado |
 | **Tiempo de ejecución** | - |
 | **Observaciones** | Acción derivada implementada: validación en `membresiaService.renovar` (409) + botón deshabilitado en la tabla. |
+
+---
+
+## TriFit Gym Manager — Módulo de Autenticación y sesiones
+
+> **Endpoints reales** (backend en `http://localhost:3000/api`):
+> - `POST /api/auth/login` (rate-limit 10 intentos/15 min por IP) → `{ token, refreshToken, usuario }`
+> - `POST /api/auth/refresh` (rota el refresh; el reuso revoca todas las sesiones) → par nuevo
+> - `POST /api/auth/logout` (revoca el refresh)
+> - `GET /api/auth/perfil`, `PUT /api/auth/perfil/password`
+>
+> **UI real**: `/login` (formulario con *Correo electrónico* / *Contraseña* / *Ingresar*), `/app/perfil` (banner `.tf-perfil-aviso` + tarjeta *Cambiar contraseña*), guard `authGuard` + interceptor de refresh automático.
+>
+> **Reglas de negocio reales**:
+> - `debeCambiarPassword = true` → la API bloquea todo con 403 `PASSWORD_CAMBIAR_REQUERIDO` excepto login, ver perfil y cambiar contraseña; el frontend redirige a `/app/perfil`.
+> - Cambiar la contraseña limpia el flag y revoca todas las sesiones del usuario.
+> - Cerrar sesión revoca el refresh en el servidor.
+
+## TC-AUTH-01
+
+| Campo | Detalle |
+|---|---|
+| **ID** | TC-AUTH-01 |
+| **Nombre del caso de prueba** | Login válido por UI llega al dashboard |
+| **Prioridad** | Alta |
+| **Precondiciones** | Usuario admin con credenciales vigentes. |
+| **Tipo de prueba** | Integración |
+| **Estado de implementación** | Ejecutable con la UI `/login` |
+| **Objetivo** | Comprobar el flujo de ingreso con credenciales correctas. |
+| **Subsistema/s** | LoginComponent → POST /api/auth/login → guardado de sesión → navegación por rol |
+| **Datos de entrada** | `admin@trifit.com` / `Admin123*` |
+| **Resultado esperado** | Redirección a `/app/dashboard` y encabezado *Dashboard* visible. |
+
+**Pasos de ejecución:**
+- Navegar a `/login`
+- Completar correo y contraseña, clic en **Ingresar**
+
+**Criterio de verificación:**
+- URL `/app/dashboard` y heading *Dashboard* visible
+
+| Campo | Detalle |
+|---|---|
+| **Resultados obtenidos** | Aprobado en corrida Playwright (suite completa 22/22, 05/09/2026). |
+| **Estado** | Aprobado |
+
+## TC-AUTH-02
+
+| Campo | Detalle |
+|---|---|
+| **ID** | TC-AUTH-02 |
+| **Nombre del caso de prueba** | Login inválido muestra error y no navega |
+| **Prioridad** | Alta |
+| **Precondiciones** | Ninguna. |
+| **Tipo de prueba** | Integración |
+| **Estado de implementación** | Ejecutable con la UI `/login` |
+| **Objetivo** | Comprobar el manejo de credenciales incorrectas sin romper la sesión. |
+| **Subsistema/s** | LoginComponent (errorMsg) |
+| **Datos de entrada** | `admin@trifit.com` / contraseña incorrecta |
+| **Resultado esperado** | Mensaje *Credenciales incorrectas* y permanencia en `/login`. |
+
+**Criterio de verificación:**
+- `.tf-login-error` visible con el mensaje; URL sigue en `/login`
+
+| Campo | Detalle |
+|---|---|
+| **Resultados obtenidos** | Aprobado en corrida Playwright (05/09/2026). |
+| **Estado** | Aprobado |
+
+## TC-AUTH-03
+
+| Campo | Detalle |
+|---|---|
+| **ID** | TC-AUTH-03 |
+| **Nombre del caso de prueba** | Ruta protegida sin sesión redirige a login |
+| **Prioridad** | Alta |
+| **Precondiciones** | Sin token en `localStorage`. |
+| **Tipo de prueba** | Integración |
+| **Estado de implementación** | Ejecutable con la UI |
+| **Objetivo** | Comprobar el guard de autenticación. |
+| **Subsistema/s** | `authGuard` |
+| **Datos de entrada** | Navegación directa a `/app/dashboard` |
+| **Resultado esperado** | Redirección a `/login`. |
+
+| Campo | Detalle |
+|---|---|
+| **Resultados obtenidos** | Aprobado en corrida Playwright (05/09/2026). |
+| **Estado** | Aprobado |
+
+## TC-AUTH-04
+
+| Campo | Detalle |
+|---|---|
+| **ID** | TC-AUTH-04 |
+| **Nombre del caso de prueba** | Cambio forzado: login lleva a perfil y bloquea lo demás |
+| **Prioridad** | Alta |
+| **Precondiciones** | Usuario temporal con `debeCambiarPassword = true` (creado por API en el `beforeAll`). |
+| **Tipo de prueba** | Integración |
+| **Estado de implementación** | Ejecutable con UI + API |
+| **Objetivo** | Comprobar el flujo de contraseña inicial obligatoria en ambos frentes. |
+| **Subsistema/s** | LoginComponent → `/app/perfil` + banner; `authGuard`; middleware `autenticar` (403 + código) |
+| **Datos de entrada** | Credenciales del temporal |
+| **Resultado esperado** | Tras login, URL `/app/perfil` con banner de aviso; ir a `/app/dashboard` rebota a `/app/perfil`; `GET /api/clientes` responde 403 `PASSWORD_CAMBIAR_REQUERIDO` y `GET /api/auth/perfil` responde 200. |
+
+| Campo | Detalle |
+|---|---|
+| **Resultados obtenidos** | Aprobado en corrida Playwright (05/09/2026). |
+| **Estado** | Aprobado |
+
+## TC-AUTH-05
+
+| Campo | Detalle |
+|---|---|
+| **ID** | TC-AUTH-05 |
+| **Nombre del caso de prueba** | Tras cambiar la contraseña se libera el acceso |
+| **Prioridad** | Alta |
+| **Precondiciones** | TC-AUTH-04 (sesión del temporal con cambio pendiente). |
+| **Tipo de prueba** | Integración |
+| **Estado de implementación** | Ejecutable con UI + API |
+| **Objetivo** | Comprobar que el cambio de contraseña limpia el flag y habilita la app. |
+| **Subsistema/s** | PerfilComponent → PUT /api/auth/perfil/password |
+| **Datos de entrada** | Actual = inicial del temporal; nueva distinta (≥ 6 caracteres) + confirmación |
+| **Resultado esperado** | Mensaje *Contraseña actualizada correctamente*, banner desaparece, `/app/dashboard` accesible y `debeCambiarPassword = false` en el perfil. |
+
+| Campo | Detalle |
+|---|---|
+| **Resultados obtenidos** | Aprobado en corrida Playwright (05/09/2026; 1 reintento por timeout de red). |
+| **Estado** | Aprobado |
+
+## TC-AUTH-06
+
+| Campo | Detalle |
+|---|---|
+| **ID** | TC-AUTH-06 |
+| **Nombre del caso de prueba** | Logout cierra sesión y revoca el refresh |
+| **Prioridad** | Alta |
+| **Precondiciones** | Sesión válida del temporal. |
+| **Tipo de prueba** | Integración |
+| **Estado de implementación** | Ejecutable con UI + API |
+| **Objetivo** | Comprobar el cierre de sesión con revocación en servidor. |
+| **Subsistema/s** | Menú de usuario → `AuthService.cerrarSesion` → POST /api/auth/logout |
+| **Datos de entrada** | Clic en *Menú de usuario* → *Cerrar sesión* |
+| **Resultado esperado** | Redirección a `/login`, `localStorage` sin token y `POST /api/auth/refresh` con el refresh anterior responde 401. |
+
+| Campo | Detalle |
+|---|---|
+| **Resultados obtenidos** | Aprobado en corrida Playwright (05/09/2026). |
+| **Estado** | Aprobado |
+
+---
+
+## TriFit Gym Manager — Módulo de Pagos
+
+> **Endpoints reales** (backend en `http://localhost:3000/api`, roles `ADMINISTRADOR`/`RECEPCIONISTA`):
+> - `GET /api/pagos` (filtros `estado`, `metodo`, `busqueda`, `desde`/`hasta`; responde `sumaTotal`)
+> - `POST /api/pagos` (body: `{ membresiaId, monto > 0, metodo: EFECTIVO|TARJETA|TRANSFERENCIA }`) → 201
+> - `PATCH /api/pagos/:id/anular` (idempotente)
+>
+> **UI real**: `/app/pagos` (filtros + botón **Registrar pago** + columna *Acciones* con **Anular**, deshabilitado si `ANULADO`).
+>
+> **Reglas de negocio reales**:
+> - `monto` debe ser mayor a 0 y `metodo` uno de los tres válidos (400 si no).
+> - Anular un pago ya anulado no falla (idempotente, sigue `ANULADO`).
+
+## TC-PAG-01
+
+| Campo | Detalle |
+|---|---|
+| **ID** | TC-PAG-01 |
+| **Nombre del caso de prueba** | Registrar pago válido por UI |
+| **Prioridad** | Alta |
+| **Precondiciones** | Existe una membresía `ACTIVA` (si no, ejecutar `npm run seed:dataset`). |
+| **Tipo de prueba** | Integración |
+| **Estado de implementación** | Ejecutable con la UI `/app/pagos` |
+| **Objetivo** | Comprobar el registro de un pago desde el diálogo. |
+| **Subsistema/s** | RegistrarPagoDialog → POST /api/pagos → recarga de tabla |
+| **Datos de entrada** | Cédula del cliente de la membresía activa; monto 30; método EFECTIVO |
+| **Resultado esperado** | Snack-bar *Pago registrado correctamente*. |
+
+**Pasos de ejecución:**
+- En `/app/pagos`, clic en **Registrar pago**
+- Escribir la cédula, clic en **Buscar**, verificar *Cliente:*
+- Completar monto, elegir método, clic en **Registrar**
+
+**Criterio de verificación:**
+- Snack-bar visible con el mensaje de éxito
+
+| Campo | Detalle |
+|---|---|
+| **Resultados obtenidos** | Aprobado en corrida Playwright (05/09/2026). |
+| **Estado** | Aprobado |
+
+## TC-PAG-02
+
+| Campo | Detalle |
+|---|---|
+| **ID** | TC-PAG-02 |
+| **Nombre del caso de prueba** | Validaciones de registro devuelven 400 sin error 500 |
+| **Prioridad** | Alta |
+| **Precondiciones** | Existe una membresía `ACTIVA`. |
+| **Tipo de prueba** | Integración |
+| **Estado de implementación** | Ejecutable con la API REST |
+| **Objetivo** | Comprobar las validaciones de monto, método y membresía. |
+| **Subsistema/s** | `v.pago` (express-validator) + manejador global (P2003 → 409) |
+| **Datos de entrada** | `monto: 0`; `metodo: TRUEQUE`; `membresiaId: 999999` |
+| **Resultado esperado** | 400 para monto y método inválidos; < 500 para membresía inexistente. |
+
+| Campo | Detalle |
+|---|---|
+| **Resultados obtenidos** | Aprobado en corrida Playwright (05/09/2026). |
+| **Estado** | Aprobado |
+
+## TC-PAG-03
+
+| Campo | Detalle |
+|---|---|
+| **ID** | TC-PAG-03 |
+| **Nombre del caso de prueba** | Anular pago por UI queda ANULADO en la API |
+| **Prioridad** | Alta |
+| **Precondiciones** | Existe un pago `PAGADO` (si no, registrar uno con TC-PAG-01). |
+| **Tipo de prueba** | Integración |
+| **Estado de implementación** | Ejecutable con UI + API |
+| **Objetivo** | Comprobar la anulación y su reflejo en el backend. |
+| **Subsistema/s** | Botón Anular → confirmación → PATCH /api/pagos/:id/anular |
+| **Datos de entrada** | Búsqueda por cédula del cliente del pago; confirmación **Anular** |
+| **Resultado esperado** | Snack-bar *Pago anulado* y el pago con estado `ANULADO` en la API. |
+
+| Campo | Detalle |
+|---|---|
+| **Resultados obtenidos** | Aprobado en corrida Playwright (05/09/2026). |
+| **Estado** | Aprobado |
+
+## TC-PAG-04
+
+| Campo | Detalle |
+|---|---|
+| **ID** | TC-PAG-04 |
+| **Nombre del caso de prueba** | Anular un pago ya anulado no produce error 500 |
+| **Prioridad** | Media |
+| **Precondiciones** | Existe un pago `ANULADO`. |
+| **Tipo de prueba** | Integración |
+| **Estado de implementación** | Ejecutable con la API REST |
+| **Objetivo** | Documentar la idempotencia de la anulación. |
+| **Subsistema/s** | PATCH /api/pagos/:id/anular |
+| **Datos de entrada** | ID de un pago `ANULADO` |
+| **Resultado esperado** | Respuesta < 500 con estado `ANULADO`. |
+
+| Campo | Detalle |
+|---|---|
+| **Resultados obtenidos** | Aprobado en corrida Playwright (05/09/2026). |
+| **Estado** | Aprobado |
+
+## TC-PAG-05
+
+| Campo | Detalle |
+|---|---|
+| **ID** | TC-PAG-05 |
+| **Nombre del caso de prueba** | Filtro por estado solo trae ese estado |
+| **Prioridad** | Media |
+| **Precondiciones** | Existe al menos un pago `ANULADO`. |
+| **Tipo de prueba** | Integración |
+| **Estado de implementación** | Ejecutable con la API REST |
+| **Objetivo** | Comprobar el filtro `estado` del listado. |
+| **Subsistema/s** | GET /api/pagos?estado= |
+| **Datos de entrada** | `estado=ANULADO` |
+| **Resultado esperado** | Todos los registros con estado `ANULADO` (al menos uno). |
+
+| Campo | Detalle |
+|---|---|
+| **Resultados obtenidos** | Aprobado en corrida Playwright (05/09/2026). |
+| **Estado** | Aprobado |
+
+## TC-PAG-06
+
+| Campo | Detalle |
+|---|---|
+| **ID** | TC-PAG-06 |
+| **Nombre del caso de prueba** | Vista de pagos muestra total y paginador |
+| **Prioridad** | Baja |
+| **Precondiciones** | Sesión de administrador. |
+| **Tipo de prueba** | Integración (smoke UI) |
+| **Estado de implementación** | Ejecutable con la UI `/app/pagos` |
+| **Objetivo** | Comprobar que la vista carga sus elementos clave. |
+| **Subsistema/s** | PagosComponent |
+| **Datos de entrada** | Navegación a `/app/pagos` |
+| **Resultado esperado** | Texto *Total en resultados:* y `mat-paginator` visibles. |
+
+| Campo | Detalle |
+|---|---|
+| **Resultados obtenidos** | Aprobado en corrida Playwright (05/09/2026). |
+| **Estado** | Aprobado |
