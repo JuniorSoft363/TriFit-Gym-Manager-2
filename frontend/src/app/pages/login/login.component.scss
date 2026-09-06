@@ -1,96 +1,200 @@
 .tf-login-wrap {
   min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  background: var(--tf-bg);
+}
+
+/* ---------------------------- PANEL DE MARCA ---------------------------- */
+.tf-login-brand-panel {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  padding: 64px;
+  background: linear-gradient(150deg, #0b0f1a 0%, #171a3a 45%, #0d1b2e 100%);
+  color: #fff;
+}
+
+.tf-login-mesh {
+  position: absolute;
+  inset: -25%;
+  background:
+    radial-gradient(40% 44% at 18% 22%, rgba(129, 140, 248, 0.7) 0%, transparent 62%),
+    radial-gradient(36% 40% at 85% 32%, rgba(167, 139, 250, 0.55) 0%, transparent 62%),
+    radial-gradient(44% 48% at 60% 88%, rgba(52, 211, 153, 0.42) 0%, transparent 62%);
+  filter: blur(30px);
+  background-size: 180% 180%;
+  animation: tf-gradient-pan 20s ease-in-out infinite;
+  opacity: 0.9;
+}
+
+.tf-login-brand-content {
+  position: relative;
+  z-index: 1;
+  max-width: 460px;
+  animation: tf-fade-up 0.7s var(--tf-ease) both;
+}
+
+.tf-login-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 56px;
+  color: #fff;
+}
+
+.tf-login-logo-icon {
+  width: 46px;
+  height: 46px;
+  background: var(--tf-grad-primary);
+  border-radius: 13px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--tf-bg);
-  padding: 16px;
+  box-shadow: 0 10px 26px -8px rgba(99, 102, 241, 0.7);
+  flex-shrink: 0;
+}
+.tf-login-logo-icon mat-icon {
+  color: #fff;
+  font-size: 25px;
+  width: 25px;
+  height: 25px;
+}
+.tf-login-logo-icon-sm {
+  width: 52px;
+  height: 52px;
+  margin-bottom: 16px;
+}
+
+.tf-login-logo .tf-login-logo-text {
+  font-family: var(--tf-font-title);
+  font-size: 19px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.tf-login-pitch h1 {
+  font-family: var(--tf-font-title);
+  font-size: 40px;
+  font-weight: 700;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  margin-bottom: 18px;
+  color: #fff;
+}
+.tf-login-pitch p {
+  font-size: 15.5px;
+  line-height: 1.65;
+  color: rgba(255, 255, 255, 0.72);
+  margin: 0 0 44px;
+}
+
+.tf-login-features {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.tf-login-features li {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.85);
+}
+.tf-login-features mat-icon {
+  color: #a5b4fc;
+  background: rgba(99, 102, 241, 0.18);
+  border-radius: 9px;
+  padding: 7px;
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  box-sizing: content-box;
+}
+
+/* ---------------------------- FORMULARIO ---------------------------- */
+.tf-login-form-panel {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+  background:
+    radial-gradient(70% 60% at 70% 15%, var(--tf-primary-soft) 0%, transparent 60%),
+    var(--tf-bg);
 }
 
 .tf-login-card {
   width: 100%;
-  max-width: 400px;
-  padding: 40px 32px !important;
+  max-width: 410px;
+  padding: 42px 38px !important;
+  animation: tf-fade-up 0.6s var(--tf-ease) 0.05s both;
 }
 
-.tf-login-logo {
+.tf-login-card-head {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 32px;
+  text-align: center;
+  margin-bottom: 30px;
 }
-
-.tf-login-logo-icon {
-  width: 56px;
-  height: 56px;
-  background: var(--tf-primary);
-  border-radius: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.tf-login-logo-icon mat-icon {
-  color: #fff;
-  font-size: 30px;
-  width: 30px;
-  height: 30px;
-}
-
-.tf-login-logo-text {
+.tf-login-card-head .tf-login-logo-text {
   font-family: var(--tf-font-title);
-  font-size: 22px;
+  font-size: 21px;
   font-weight: 700;
   color: var(--tf-text);
-  text-align: center;
 }
-
 .tf-login-logo-sub {
   font-size: 13px;
   color: var(--tf-text-secondary);
-  margin-top: -4px;
+  margin-top: 4px;
 }
 
-.tf-full-width {
-  width: 100%;
-}
+.tf-full-width { width: 100%; }
 
 .tf-login-error {
-  color: var(--tf-primary);
+  color: var(--tf-danger);
+  background: var(--tf-danger-soft);
+  border: 1px solid color-mix(in srgb, var(--tf-danger) 30%, transparent);
+  border-radius: 10px;
+  padding: 10px 12px;
   font-size: 13px;
-  margin: -8px 0 16px;
+  margin: 2px 0 16px;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
 }
-
 .tf-login-error mat-icon {
-  font-size: 16px;
-  width: 16px;
-  height: 16px;
+  font-size: 17px;
+  width: 17px;
+  height: 17px;
 }
 
 .tf-login-submit {
-  margin-top: 8px;
-  padding: 6px 0 !important;
-  border-radius: 8px !important;
+  margin-top: 6px;
+  height: 46px;
+  border-radius: 12px !important;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
+  font-size: 15px !important;
 }
 
 .tf-volver {
   display: block;
   text-align: center;
-  margin-top: 20px;
+  margin-top: 22px;
   font-size: 13px;
   color: var(--tf-text-secondary);
-  text-decoration: none;
-  transition: color 0.2s;
 }
+.tf-volver:hover { color: var(--tf-primary); }
 
-.tf-volver:hover {
-  color: var(--tf-primary);
+@media (max-width: 900px) {
+  .tf-login-wrap { grid-template-columns: 1fr; }
+  .tf-login-brand-panel { display: none; }
 }

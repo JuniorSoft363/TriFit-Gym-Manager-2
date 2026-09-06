@@ -69,7 +69,7 @@
             <tr mat-header-row *matHeaderRowDef="columnasMovimientos"></tr>
             <tr mat-row *matRowDef="let row; columns: columnasMovimientos"></tr>
           </table>
-          <p *ngIf="!movimientos.length" class="tf-center" style="padding: 24px; color: rgba(0,0,0,.5)">
+          <p *ngIf="!movimientos.length" class="tf-center" style="padding: 24px; color: var(--tf-text-tertiary)">
             No se encontraron movimientos.
           </p>
         </div>

@@ -9,8 +9,9 @@
         <span class="tf-logo-sub">Gym Manager</span>
       </div>
     </div>
-    <mat-divider class="tf-divider"></mat-divider>
+
     <mat-nav-list class="tf-nav-list">
+      <span class="tf-nav-label">Menú</span>
       <a
         mat-list-item
         *ngFor="let item of menu"
@@ -23,12 +24,38 @@
         <span matListItemTitle>{{ item.etiqueta }}</span>
       </a>
     </mat-nav-list>
+
+    <div class="tf-sidenav-footer">
+      <div class="tf-sidenav-user">
+        <ng-container *ngIf="urlFoto(); else sfIniciales">
+          <img [src]="urlFoto()!" alt="Foto de perfil" class="tf-sidenav-avatar" />
+        </ng-container>
+        <ng-template #sfIniciales>
+          <div class="tf-sidenav-avatar tf-sidenav-avatar-iniciales">{{ iniciales() }}</div>
+        </ng-template>
+        <div class="tf-sidenav-user-info">
+          <span class="tf-sidenav-user-name">{{ auth.usuario()?.nombre }}</span>
+          <span class="tf-sidenav-user-rol">{{ auth.usuario()?.rol }}</span>
+        </div>
+      </div>
+    </div>
   </mat-sidenav>
 
   <mat-sidenav-content>
     <mat-toolbar class="tf-topbar">
       <span class="tf-topbar-title">TriFit Gym Manager</span>
       <span class="tf-spacer"></span>
+
+      <button
+        type="button"
+        mat-icon-button
+        class="tf-theme-toggle"
+        (click)="alternarTema()"
+        [attr.aria-label]="theme.tema() === 'dark' ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro'"
+        matTooltip="{{ theme.tema() === 'dark' ? 'Tema claro' : 'Tema oscuro' }}"
+      >
+        <mat-icon>{{ theme.tema() === 'dark' ? 'light_mode' : 'dark_mode' }}</mat-icon>
+      </button>
 
       <button type="button" class="tf-user-trigger" [matMenuTriggerFor]="menuUsuario" aria-label="Menú de usuario">
         <ng-container *ngIf="urlFoto(); else inicialesTpl">

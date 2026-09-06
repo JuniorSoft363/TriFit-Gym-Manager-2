@@ -1,78 +1,117 @@
 <div class="tf-page">
   <div class="tf-header">
-    <h1>Dashboard</h1>
+    <div>
+      <h1>Dashboard</h1>
+      <span class="tf-dash-greet">{{ saludo() }}<ng-container *ngIf="primerNombre()">, {{ primerNombre() }}</ng-container> · <span class="tf-dash-fecha">{{ hoy | date: "EEEE d 'de' MMMM 'de' y" }}</span></span>
+    </div>
+    <button mat-stroked-button routerLink="/app/reportes">
+      <mat-icon>insights</mat-icon>
+      Ver reportes
+    </button>
   </div>
 
-  <div *ngIf="cargando" class="tf-center tf-loading">
-    <mat-spinner diameter="40"></mat-spinner>
-  </div>
+  <!-- Cargando: skeletons -->
+  <ng-container *ngIf="cargando()">
+    <div class="tf-skeleton-grid">
+      <div class="tf-skeleton tf-skeleton-kpi" *ngFor="let i of [1,2,3,4,5,6]"></div>
+    </div>
+  </ng-container>
 
-  <ng-container *ngIf="!cargando && resumen">
-    <!-- KPI Cards -->
+  <ng-container *ngIf="!cargando() && resumen() as r">
+    <!-- KPIs -->
     <div class="tf-kpi-grid">
-      <mat-card class="tf-kpi-card">
+      <mat-card class="tf-kpi-card tf-metric" *ngFor="let k of kpis()" [attr.data-color]="k.color">
         <div class="tf-kpi-header">
-          <span class="tf-kpi-etiqueta">Clientes activos</span>
-          <mat-icon class="tf-kpi-icon">groups</mat-icon>
+          <span class="tf-kpi-etiqueta">{{ k.etiqueta }}</span>
+          <span class="tf-metric-chip">
+            <mat-icon>{{ k.icono }}</mat-icon>
+          </span>
         </div>
-        <span class="tf-kpi-valor">{{ resumen.clientesActivos }}</span>
+        <span
+          class="tf-kpi-valor"
+          [tfCountUp]="k.valor"
+          [tfCountUpDecimals]="k.moneda ? 2 : 0"
+          [tfCountUpPrefix]="k.moneda ? '$' : ''"
+        >{{ k.moneda ? ('$' + (k.valor | number: '1.2-2')) : k.valor }}</span>
+        <span class="tf-metric-ctx">{{ k.contexto }}</span>
       </mat-card>
-      <mat-card class="tf-kpi-card">
-        <div class="tf-kpi-header">
-          <span class="tf-kpi-etiqueta">Membresías activas</span>
-          <mat-icon class="tf-kpi-icon">card_membership</mat-icon>
+    </div>
+
+    <!-- Paneles analíticos -->
+    <div class="tf-dash-panels">
+      <mat-card class="tf-card tf-panel">
+        <div class="tf-panel-head">
+          <div>
+            <h2>Estado de membresías</h2>
+            <p>Vigentes vs. próximas a vencer</p>
+          </div>
+          <mat-icon>donut_large</mat-icon>
         </div>
-        <span class="tf-kpi-valor">{{ resumen.membresiasActivas }}</span>
+        <div class="tf-ring-wrap">
+          <div
+            class="tf-ring"
+            [style.--pct]="porcentajePorVencer()"
+          >
+            <div class="tf-ring-center">
+              <span class="tf-ring-num" [tfCountUp]="porcentajePorVencer()" tfCountUpSuffix="%">{{ porcentajePorVencer() }}%</span>
+              <span class="tf-ring-lbl">por vencer</span>
+            </div>
+          </div>
+          <div class="tf-ring-legend">
+            <div><span class="tf-dot tf-dot-emerald"></span> Activas <strong>{{ r.membresiasActivas }}</strong></div>
+            <div><span class="tf-dot tf-dot-amber"></span> Por vencer (7 días) <strong>{{ r.membresiasPorVencer }}</strong></div>
+          </div>
+        </div>
       </mat-card>
-      <mat-card class="tf-kpi-card">
-        <div class="tf-kpi-header">
-          <span class="tf-kpi-etiqueta">Por vencer (7 días)</span>
-          <mat-icon class="tf-kpi-icon">event_busy</mat-icon>
+
+      <mat-card class="tf-card tf-panel">
+        <div class="tf-panel-head">
+          <div>
+            <h2>Ingresos</h2>
+            <p>Comparativa día · mes</p>
+          </div>
+          <mat-icon>payments</mat-icon>
         </div>
-        <span class="tf-kpi-valor">{{ resumen.membresiasPorVencer }}</span>
-      </mat-card>
-      <mat-card class="tf-kpi-card">
-        <div class="tf-kpi-header">
-          <span class="tf-kpi-etiqueta">Asistencias hoy</span>
-          <mat-icon class="tf-kpi-icon">how_to_reg</mat-icon>
+        <div class="tf-bars">
+          <div class="tf-bar-row">
+            <span class="tf-bar-lbl">Hoy</span>
+            <div class="tf-bar-track">
+              <div class="tf-bar-fill tf-bar-fill-day" [style.width.%]="ratioDiaMes() || 2"></div>
+            </div>
+            <span class="tf-bar-val" [tfCountUp]="+r.ingresosDia" [tfCountUpDecimals]="2" tfCountUpPrefix="$">{{ +r.ingresosDia | currency: 'USD' }}</span>
+          </div>
+          <div class="tf-bar-row">
+            <span class="tf-bar-lbl">Mes</span>
+            <div class="tf-bar-track">
+              <div class="tf-bar-fill tf-bar-fill-month" [style.width.%]="100"></div>
+            </div>
+            <span class="tf-bar-val" [tfCountUp]="+r.ingresosMes" [tfCountUpDecimals]="2" tfCountUpPrefix="$">{{ +r.ingresosMes | currency: 'USD' }}</span>
+          </div>
         </div>
-        <span class="tf-kpi-valor">{{ resumen.asistenciasHoy }}</span>
-      </mat-card>
-      <mat-card class="tf-kpi-card">
-        <div class="tf-kpi-header">
-          <span class="tf-kpi-etiqueta">Ingresos del día</span>
-          <mat-icon class="tf-kpi-icon">payments</mat-icon>
+        <div class="tf-bars-foot">
+          El día representa el <strong>{{ ratioDiaMes() }}%</strong> del acumulado mensual.
         </div>
-        <span class="tf-kpi-valor">{{ resumen.ingresosDia | currency: 'USD' }}</span>
-      </mat-card>
-      <mat-card class="tf-kpi-card">
-        <div class="tf-kpi-header">
-          <span class="tf-kpi-etiqueta">Ingresos del mes</span>
-          <mat-icon class="tf-kpi-icon">trending_up</mat-icon>
-        </div>
-        <span class="tf-kpi-valor">{{ resumen.ingresosMes | currency: 'USD' }}</span>
       </mat-card>
     </div>
 
     <!-- Accesos rápidos -->
-    <h2 style="font-family: var(--tf-font-title); font-size: 18px; font-weight: 600; margin-bottom: 16px; color: var(--tf-text);">
-      Accesos rápidos
-    </h2>
-    <div class="tf-kpi-grid" style="margin-bottom: 32px;">
-      <button mat-stroked-button class="tf-quick-access" *ngFor="let acc of accesosRapidos" [routerLink]="acc.ruta">
-        <mat-icon>{{ acc.icono }}</mat-icon>
-        <span>{{ acc.etiqueta }}</span>
-      </button>
+    <h2 class="tf-dash-subtitle">Accesos rápidos</h2>
+    <div class="tf-quick-grid">
+      <a class="tf-quick-access" *ngFor="let acc of accesosRapidos" [routerLink]="acc.ruta">
+        <span class="tf-quick-icon"><mat-icon>{{ acc.icono }}</mat-icon></span>
+        <span class="tf-quick-label">{{ acc.etiqueta }}</span>
+        <mat-icon class="tf-quick-arrow">arrow_forward</mat-icon>
+      </a>
     </div>
 
     <!-- Últimos pagos -->
-    <mat-card class="tf-card">
+    <mat-card class="tf-card tf-dash-pagos">
       <mat-card-header>
         <mat-card-title>Últimos pagos</mat-card-title>
       </mat-card-header>
       <mat-card-content>
         <div class="tf-table-wrap">
-          <table mat-table [dataSource]="resumen.ultimosPagos">
+          <table mat-table [dataSource]="r.ultimosPagos">
             <ng-container matColumnDef="cliente">
               <th mat-header-cell *matHeaderCellDef>Cliente</th>
               <td mat-cell *matCellDef="let p">
@@ -85,7 +124,7 @@
             </ng-container>
             <ng-container matColumnDef="monto">
               <th mat-header-cell *matHeaderCellDef>Monto</th>
-              <td mat-cell *matCellDef="let p">{{ p.monto | currency: 'USD' }}</td>
+              <td mat-cell *matCellDef="let p"><strong>{{ p.monto | currency: 'USD' }}</strong></td>
             </ng-container>
             <ng-container matColumnDef="metodo">
               <th mat-header-cell *matHeaderCellDef>Método</th>
@@ -106,7 +145,8 @@
             <tr mat-header-row *matHeaderRowDef="columnasPagos"></tr>
             <tr mat-row *matRowDef="let row; columns: columnasPagos"></tr>
           </table>
-          <p *ngIf="!resumen.ultimosPagos.length" class="tf-vacio" style="padding: 24px; text-align: center;">
+          <p *ngIf="!r.ultimosPagos.length" class="tf-empty-inline">
+            <mat-icon>receipt_long</mat-icon>
             Aún no se han registrado pagos.
           </p>
         </div>

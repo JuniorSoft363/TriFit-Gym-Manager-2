@@ -1,56 +1,83 @@
 <div class="tf-login-wrap">
-  <mat-card class="tf-login-card">
-    <div class="tf-login-logo">
-      <div class="tf-login-logo-icon">
-        <mat-icon>fitness_center</mat-icon>
+  <!-- Panel de marca -->
+  <aside class="tf-login-brand-panel">
+    <div class="tf-login-mesh"></div>
+    <div class="tf-login-brand-content">
+      <a routerLink="/" class="tf-login-logo">
+        <div class="tf-login-logo-icon">
+          <mat-icon>fitness_center</mat-icon>
+        </div>
+        <span class="tf-login-logo-text">TriFit Gym Manager</span>
+      </a>
+
+      <div class="tf-login-pitch">
+        <h1>Gestiona tu gimnasio<br />sin fricción.</h1>
+        <p>Clientes, membresías, pagos, asistencias, rutinas e inventario en una sola plataforma.</p>
       </div>
-      <div class="tf-login-logo-text">TriFit Gym Manager</div>
-      <div class="tf-login-logo-sub">Inicia sesión para continuar</div>
+
+      <ul class="tf-login-features">
+        <li><mat-icon>groups</mat-icon> Control de clientes y membresías en tiempo real</li>
+        <li><mat-icon>payments</mat-icon> Pagos, reportes y exportación a PDF</li>
+        <li><mat-icon>verified_user</mat-icon> Accesos por rol y auditoría de cambios</li>
+      </ul>
     </div>
+  </aside>
 
-    <form [formGroup]="form" (ngSubmit)="enviar()">
-      <mat-form-field appearance="outline" class="tf-full-width">
-        <mat-label>Correo electrónico</mat-label>
-        <mat-icon matPrefix>email</mat-icon>
-        <input matInput type="email" formControlName="email" autocomplete="username" />
-        <mat-error *ngIf="form.get('email')?.hasError('required')">El correo es obligatorio</mat-error>
-        <mat-error *ngIf="form.get('email')?.hasError('email')">Ingresa un correo válido</mat-error>
-      </mat-form-field>
+  <!-- Formulario -->
+  <main class="tf-login-form-panel">
+    <mat-card class="tf-login-card">
+      <div class="tf-login-card-head">
+        <div class="tf-login-logo-icon tf-login-logo-icon-sm">
+          <mat-icon>fitness_center</mat-icon>
+        </div>
+        <div class="tf-login-logo-text">Bienvenido de nuevo</div>
+        <div class="tf-login-logo-sub">Inicia sesión para continuar</div>
+      </div>
 
-      <mat-form-field appearance="outline" class="tf-full-width">
-        <mat-label>Contraseña</mat-label>
-        <mat-icon matPrefix>lock</mat-icon>
-        <input matInput [type]="hidePassword ? 'password' : 'text'" formControlName="password" autocomplete="current-password" />
+      <form [formGroup]="form" (ngSubmit)="enviar()">
+        <mat-form-field appearance="outline" class="tf-full-width">
+          <mat-label>Correo electrónico</mat-label>
+          <mat-icon matPrefix>email</mat-icon>
+          <input matInput type="email" formControlName="email" autocomplete="username" />
+          <mat-error *ngIf="form.get('email')?.hasError('required')">El correo es obligatorio</mat-error>
+          <mat-error *ngIf="form.get('email')?.hasError('email')">Ingresa un correo válido</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="tf-full-width">
+          <mat-label>Contraseña</mat-label>
+          <mat-icon matPrefix>lock</mat-icon>
+          <input matInput [type]="hidePassword ? 'password' : 'text'" formControlName="password" autocomplete="current-password" />
+          <button
+            type="button"
+            mat-icon-button
+            matSuffix
+            (click)="togglePasswordVisibility()"
+            [attr.aria-label]="hidePassword ? 'Mostrar contraseña' : 'Ocultar contraseña'"
+            [attr.aria-pressed]="!hidePassword"
+          >
+            <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+          <mat-error *ngIf="form.get('password')?.hasError('required')">La contraseña es obligatoria</mat-error>
+        </mat-form-field>
+
+        <p *ngIf="errorMsg" class="tf-login-error">
+          <mat-icon>error_outline</mat-icon>
+          {{ errorMsg }}
+        </p>
+
         <button
-          type="button"
-          mat-icon-button
-          matSuffix
-          (click)="togglePasswordVisibility()"
-          [attr.aria-label]="hidePassword ? 'Mostrar contraseña' : 'Ocultar contraseña'"
-          [attr.aria-pressed]="!hidePassword"
+          mat-flat-button
+          color="primary"
+          class="tf-full-width tf-login-submit"
+          type="submit"
+          [disabled]="form.invalid || cargando"
         >
-          <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+          <mat-spinner *ngIf="cargando" diameter="20"></mat-spinner>
+          <span *ngIf="!cargando">Ingresar</span>
         </button>
-        <mat-error *ngIf="form.get('password')?.hasError('required')">La contraseña es obligatoria</mat-error>
-      </mat-form-field>
+      </form>
 
-      <p *ngIf="errorMsg" class="tf-login-error">
-        <mat-icon>error_outline</mat-icon>
-        {{ errorMsg }}
-      </p>
-
-      <button
-        mat-flat-button
-        color="primary"
-        class="tf-full-width tf-login-submit"
-        type="submit"
-        [disabled]="form.invalid || cargando"
-      >
-        <mat-spinner *ngIf="cargando" diameter="20"></mat-spinner>
-        <span *ngIf="!cargando">Ingresar</span>
-      </button>
-    </form>
-
-    <a routerLink="/" class="tf-volver">← Volver al inicio</a>
-  </mat-card>
+      <a routerLink="/" class="tf-volver">← Volver al inicio</a>
+    </mat-card>
+  </main>
 </div>

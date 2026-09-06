@@ -66,27 +66,32 @@ async function main() {
   const rolAdmin = await prisma.rol.findUnique({ where: { nombre: 'ADMINISTRADOR' } });
   const rolRecep = await prisma.rol.findUnique({ where: { nombre: 'RECEPCIONISTA' } });
 
-  // Admin (por si el seed base no se ejecutó)
+  // Admin (por si el seed base no se ejecutó). Este dataset es el entorno de
+  // demo/QA: las cuentas base quedan listas para usar (sin cambio forzado de
+  // contraseña) para que la suite e2e y las demostraciones funcionen tras un
+  // arranque limpio. El seed base (seed.js) sí fuerza el cambio en producción.
   await prisma.usuario.upsert({
     where: { email: 'admin@trifit.com' },
-    update: {},
+    update: { debeCambiarPassword: false },
     create: {
       nombre: 'Administrador',
       email: 'admin@trifit.com',
       passwordHash: await bcrypt.hash('Admin123*', 10),
-      rolId: rolAdmin.id
+      rolId: rolAdmin.id,
+      debeCambiarPassword: false
     }
   });
 
   // Usuario recepción
   await prisma.usuario.upsert({
     where: { email: 'recepcion@trifit.com' },
-    update: {},
+    update: { debeCambiarPassword: false },
     create: {
       nombre: 'Recepción',
       email: 'recepcion@trifit.com',
       passwordHash: await bcrypt.hash('Admin123*', 10),
-      rolId: rolRecep.id
+      rolId: rolRecep.id,
+      debeCambiarPassword: false
     }
   });
 

@@ -103,7 +103,7 @@
             <tr mat-header-row *matHeaderRowDef="columnasMembresias"></tr>
             <tr mat-row *matRowDef="let row; columns: columnasMembresias"></tr>
           </table>
-          <p *ngIf="!membresias.length" class="tf-center" style="padding: 24px; color: rgba(0,0,0,.5)">
+          <p *ngIf="!membresias.length" class="tf-center" style="padding: 24px; color: var(--tf-text-tertiary)">
             No se encontraron membresías.
           </p>
         </div>

@@ -86,7 +86,7 @@
         <tr mat-header-row *matHeaderRowDef="columnas"></tr>
         <tr mat-row *matRowDef="let row; columns: columnas"></tr>
       </table>
-      <p *ngIf="!registros.length" class="tf-center" style="padding: 24px; color: rgba(0,0,0,.5)">
+      <p *ngIf="!registros.length" class="tf-center" style="padding: 24px; color: var(--tf-text-tertiary)">
         Aún no hay asistencias registradas hoy.
       </p>
     </div>

@@ -6,16 +6,16 @@ import { Columna } from '../../shared/campos';
 import { FiltroReporte } from './filtro-reporte';
 
 const COLORES_ESTADO_MEMBRESIA: Record<string, string> = {
-  ACTIVA: '#2e7d32',
-  VENCIDA: '#c62828',
-  SUSPENDIDA: '#ef6c00',
-  CANCELADA: '#757575'
+  ACTIVA: '#10b981',
+  VENCIDA: '#f43f5e',
+  SUSPENDIDA: '#f59e0b',
+  CANCELADA: '#64748b'
 };
 
 const COLORES_ESTADO_PAGO: Record<string, string> = {
-  PAGADO: '#2e7d32',
-  PENDIENTE: '#ef6c00',
-  ANULADO: '#c62828'
+  PAGADO: '#10b981',
+  PENDIENTE: '#f59e0b',
+  ANULADO: '#f43f5e'
 };
 
 @Component({

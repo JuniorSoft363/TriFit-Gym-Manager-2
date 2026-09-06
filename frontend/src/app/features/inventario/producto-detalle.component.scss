@@ -62,7 +62,7 @@
 }
 
 .tf-detalle-tipo {
-  background: rgba(229, 57, 53, 0.15);
+  background: var(--tf-primary-soft);
   color: var(--tf-primary);
   padding: 3px 12px;
   border-radius: 100px;

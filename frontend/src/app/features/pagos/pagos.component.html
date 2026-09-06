@@ -68,7 +68,7 @@
         <td mat-cell *matCellDef="let p">
           <span
             class="tf-estado-chip"
-            [style.background]="p.estado === 'PAGADO' ? '#2e7d32' : p.estado === 'ANULADO' ? '#c62828' : '#ef6c00'"
+            [style.background]="p.estado === 'PAGADO' ? '#10b981' : p.estado === 'ANULADO' ? '#f43f5e' : '#f59e0b'"
           >
             {{ p.estado }}
           </span>
@@ -87,14 +87,14 @@
             [disabled]="p.estado === 'ANULADO'"
             (click)="anular(p)"
           >
-            <mat-icon>cancel</mat-icon>
+            <mat-icon>highlight_off</mat-icon>
           </button>
         </td>
       </ng-container>
       <tr mat-header-row *matHeaderRowDef="columnas"></tr>
       <tr mat-row *matRowDef="let row; columns: columnas"></tr>
     </table>
-    <p *ngIf="!pagos.length" class="tf-center" style="padding: 24px; color: rgba(0,0,0,.5)">
+    <p *ngIf="!pagos.length" class="tf-center" style="padding: 24px; color: var(--tf-text-tertiary)">
       No se encontraron pagos.
     </p>
   </div>

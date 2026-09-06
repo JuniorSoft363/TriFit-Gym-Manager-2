@@ -7,21 +7,30 @@
     <span class="tf-landing-brand">{{ gimnasio?.nombre || 'TriFit Gym' }}</span>
   </div>
   <span class="tf-spacer"></span>
-  <button mat-stroked-button class="tf-landing-btn" routerLink="/login">Iniciar Sesión</button>
+  <button mat-flat-button color="primary" class="tf-landing-btn" routerLink="/login">Iniciar Sesión</button>
 </mat-toolbar>
 
 <!-- Hero -->
 <section class="tf-hero">
   <div class="tf-hero-overlay"></div>
+  <div class="tf-hero-orb tf-hero-orb-1"></div>
+  <div class="tf-hero-orb tf-hero-orb-2"></div>
   <div class="tf-hero-content">
-    <div class="tf-hero-badge">FITNESS MANAGEMENT</div>
-    <h1 class="tf-hero-title">Entrena con Propósito en {{ gimnasio?.nombre || 'TriFit Gym' }}</h1>
-    <p class="tf-hero-subtitle">{{ gimnasio?.descripcion || 'Tu centro de entrenamiento integral: fuerza, cardio y acondicionamiento funcional.' }}</p>
+    <div class="tf-hero-badge">● Plataforma de gestión fitness</div>
+    <h1 class="tf-hero-title">Entrena con propósito en <span class="tf-hero-accent">{{ gimnasio?.nombre || 'TriFit Gym' }}</span></h1>
+    <p class="tf-hero-subtitle">{{ gimnasio?.descripcion || 'Tu centro de entrenamiento integral: fuerza, cardio y acondicionamiento funcional, con seguimiento profesional de cada avance.' }}</p>
     <div class="tf-hero-actions">
       <button mat-flat-button class="tf-btn-primary" routerLink="/login">
-        Ingresar
+        Ingresar a la plataforma
         <mat-icon>arrow_forward</mat-icon>
       </button>
+    </div>
+
+    <div class="tf-hero-stats">
+      <div class="tf-hero-stat" *ngFor="let s of stats">
+        <span class="tf-hero-stat-num" [tfCountUp]="s.valor" [tfCountUpSuffix]="s.sufijo">{{ s.valor }}{{ s.sufijo }}</span>
+        <span class="tf-hero-stat-lbl">{{ s.etiqueta }}</span>
+      </div>
     </div>
   </div>
 </section>
@@ -29,13 +38,13 @@
 <!-- Beneficios -->
 <section class="tf-section tf-benefits">
   <div class="tf-section-inner">
-    <div class="tf-section-header">
+    <div class="tf-section-header" tfReveal>
       <span class="tf-section-tag">¿Por qué elegirnos?</span>
       <h2 class="tf-section-title">Beneficios de entrenar con nosotros</h2>
       <p class="tf-section-desc">Transformamos tu experiencia fitness con tecnología y profesionalismo.</p>
     </div>
     <div class="tf-benefits-grid">
-      <div class="tf-benefit-card" *ngFor="let b of beneficios">
+      <div class="tf-benefit-card" *ngFor="let b of beneficios; let i = index" tfReveal [tfRevealDelay]="i * 90">
         <div class="tf-benefit-icon">
           <mat-icon>{{ b.icono }}</mat-icon>
         </div>
@@ -49,12 +58,12 @@
 <!-- Servicios -->
 <section class="tf-section tf-services">
   <div class="tf-section-inner">
-    <div class="tf-section-header">
+    <div class="tf-section-header" tfReveal>
       <span class="tf-section-tag">Nuestros servicios</span>
       <h2 class="tf-section-title">Todo lo que necesitas en un solo lugar</h2>
     </div>
     <div class="tf-services-grid">
-      <mat-card class="tf-service-card" *ngFor="let s of servicios">
+      <mat-card class="tf-service-card" *ngFor="let s of servicios; let i = index" tfReveal [tfRevealDelay]="i * 90">
         <div class="tf-service-icon">
           <mat-icon>{{ s.icono }}</mat-icon>
         </div>
@@ -68,12 +77,12 @@
 <!-- Contacto -->
 <section class="tf-section tf-contact">
   <div class="tf-section-inner">
-    <div class="tf-section-header">
+    <div class="tf-section-header" tfReveal>
       <span class="tf-section-tag">Contacto</span>
       <h2 class="tf-section-title">Estamos para servirte</h2>
     </div>
     <div class="tf-contact-grid">
-      <div class="tf-contact-item" *ngFor="let c of contactos">
+      <div class="tf-contact-item" *ngFor="let c of contactos; let i = index" tfReveal [tfRevealDelay]="i * 80">
         <div class="tf-contact-icon">
           <mat-icon>{{ c.icono }}</mat-icon>
         </div>

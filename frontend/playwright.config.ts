@@ -24,6 +24,8 @@ export default defineConfig({
     trace: 'on-first-retry',
     screenshot: 'on',
     video: 'retain-on-failure',
+    // Desactiva animaciones de entrada/transición para pruebas deterministas.
+    reducedMotion: 'reduce',
     actionTimeout: 30_000,
     navigationTimeout: 90_000
   },

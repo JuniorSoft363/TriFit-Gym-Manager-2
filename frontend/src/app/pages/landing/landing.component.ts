@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { MATERIAL } from '../../shared/material';
+import { RevealDirective } from '../../shared/reveal.directive';
+import { CountUpDirective } from '../../shared/count-up.directive';
 import { ApiService } from '../../core/services/api.service';
 
 interface DatosGimnasio {
@@ -16,13 +18,20 @@ interface DatosGimnasio {
 @Component({
   selector: 'app-landing',
   standalone: true,
-  imports: [CommonModule, RouterLink, MATERIAL],
+  imports: [CommonModule, RouterLink, MATERIAL, RevealDirective, CountUpDirective],
   templateUrl: './landing.component.html',
   styleUrl: './landing.component.scss'
 })
 export class LandingComponent implements OnInit {
   currentYear = new Date().getFullYear();
   gimnasio: DatosGimnasio | null = null;
+
+  stats = [
+    { valor: 500, sufijo: '+', etiqueta: 'Miembros activos' },
+    { valor: 15, sufijo: '', etiqueta: 'Entrenadores certificados' },
+    { valor: 40, sufijo: '+', etiqueta: 'Clases a la semana' },
+    { valor: 6, sufijo: ' días', etiqueta: 'Abierto por semana' }
+  ];
 
   beneficios = [
     { icono: 'monitoring', titulo: 'Control Total', desc: 'Gestiona tu membresía, asistencias y pagos desde un solo lugar.' },

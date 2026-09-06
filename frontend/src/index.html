@@ -5,17 +5,28 @@
   <title>TriFit Gym Manager</title>
   <base href="/" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="icon" type="image/x-icon" href="data:," />
+  <meta name="theme-color" content="#0b0f1a" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%236366f1'/%3E%3Cpath d='M9 12h3v8H9zm11 0h3v8h-3zM12 15h8v2h-8z' fill='%23fff'/%3E%3C/svg%3E" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
-    href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Roboto:wght@300;400;500;700&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap"
     rel="stylesheet"
   />
   <link
     href="https://fonts.googleapis.com/icon?family=Material+Icons"
     rel="stylesheet"
   />
+  <script>
+    // Aplica el tema guardado antes de pintar para evitar parpadeo.
+    (function () {
+      try {
+        var t = localStorage.getItem('tf_theme') || 'dark';
+        document.documentElement.classList.toggle('tf-light', t === 'light');
+        document.documentElement.setAttribute('data-tf-theme', t);
+      } catch (e) {}
+    })();
+  </script>
 </head>
 <body class="mat-typography">
   <app-root></app-root>

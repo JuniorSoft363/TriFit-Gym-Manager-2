@@ -1,7 +1,7 @@
 <div class="tf-toolbar-filtros">
-  <mat-form-field appearance="outline" style="width: 300px">
+  <mat-form-field appearance="outline" class="tf-crud-buscar">
     <mat-label>{{ busquedaPlaceholder }}</mat-label>
-    <mat-icon matSuffix>search</mat-icon>
+    <mat-icon matPrefix>search</mat-icon>
     <input matInput [value]="busqueda" (input)="onBusqueda($any($event.target).value)" />
   </mat-form-field>
 
@@ -14,8 +14,8 @@
 </div>
 
 <div class="tf-table-wrap">
-  <div *ngIf="cargando" class="tf-center tf-loading">
-    <mat-spinner diameter="36"></mat-spinner>
+  <div *ngIf="cargando" class="tf-crud-skeleton">
+    <div class="tf-skeleton tf-skeleton-row" *ngFor="let i of [1,2,3,4,5,6]"></div>
   </div>
 
   <table mat-table [dataSource]="datos" *ngIf="!cargando">
@@ -26,7 +26,7 @@
           <span *ngSwitchCase="'estado'">
             <span
               class="tf-estado-chip"
-              [style.background]="(columna.colores && columna.colores[valor(fila, columna)]) || '#607d8b'"
+              [style.background]="(columna.colores && columna.colores[valor(fila, columna)]) || 'var(--tf-text-tertiary)'"
             >
               {{ valor(fila, columna) }}
             </span>
@@ -84,9 +84,10 @@
     <tr mat-row *matRowDef="let row; columns: columnasVisibles"></tr>
   </table>
 
-  <p *ngIf="!cargando && !datos.length" class="tf-center" style="padding: 24px; color: var(--tf-text-secondary)">
-    No se encontraron registros.
-  </p>
+  <div *ngIf="!cargando && !datos.length" class="tf-crud-empty">
+    <mat-icon>inbox</mat-icon>
+    <span>No se encontraron registros.</span>
+  </div>
 </div>
 
 <mat-paginator

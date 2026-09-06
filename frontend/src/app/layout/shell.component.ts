@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { MATERIAL } from '../shared/material';
 import { AuthService } from '../core/services/auth.service';
+import { ThemeService } from '../core/services/theme.service';
 import { RolNombre } from '../core/models';
 
 interface ItemMenu {
@@ -43,11 +44,18 @@ const MENU: ItemMenu[] = [
   styleUrl: './shell.component.scss'
 })
 export class ShellComponent {
-  constructor(public auth: AuthService) {}
+  constructor(
+    public auth: AuthService,
+    public theme: ThemeService
+  ) {}
 
   get menu(): ItemMenu[] {
     const rol = this.auth.usuario()?.rol;
     return MENU.filter((item) => !rol || item.roles.includes(rol));
+  }
+
+  alternarTema() {
+    this.theme.alternar();
   }
 
   cerrarSesion() {

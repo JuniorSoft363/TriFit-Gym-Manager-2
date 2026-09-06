@@ -12,10 +12,10 @@ import { AuthService } from '../../core/services/auth.service';
 import { AsignarMembresiaDialogComponent } from './asignar-membresia-dialog.component';
 
 const COLORES_ESTADO: Record<string, string> = {
-  ACTIVA: '#2e7d32',
-  VENCIDA: '#c62828',
-  SUSPENDIDA: '#ef6c00',
-  CANCELADA: '#757575'
+  ACTIVA: '#10b981',
+  VENCIDA: '#f43f5e',
+  SUSPENDIDA: '#f59e0b',
+  CANCELADA: '#64748b'
 };
 
 @Component({
