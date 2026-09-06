@@ -245,12 +245,12 @@ Si el backend corre en una URL distinta a `http://localhost:3000/api`, edítala 
 | Módulo | Roles con acceso |
 |---|---|
 | Dashboard | Administrador, Recepcionista |
-| Clientes | Administrador, Recepcionista, Entrenador (solo lectura) |
+| Clientes | Administrador, Recepcionista, Entrenador (solo lectura y solo sus asignados) |
 | Planes y Membresías | Administrador (planes), Administrador + Recepcionista (membresías) |
 | Pagos | Administrador, Recepcionista |
 | Asistencias (por cédula) | Administrador, Recepcionista |
 | Entrenadores | Administrador |
-| Rutinas y Ejercicios | Administrador, Entrenador |
+| Rutinas y Ejercicios | Administrador, Entrenador (solo propias, de sus clientes y generales) |
 | Inventario | Administrador |
 | Reportes (con exportación PDF) | Administrador, Recepcionista |
 | Configuración (usuarios, datos del gimnasio, auditoría) | Administrador |
@@ -262,3 +262,4 @@ Si el backend corre en una URL distinta a `http://localhost:3000/api`, edítala 
 - El registro de asistencia es únicamente por número de cédula (sin QR, según alcance del proyecto).
 - La exportación a PDF se genera en el navegador con `jsPDF` + `jspdf-autotable`, tomando hasta 1000 registros filtrados.
 - Toda acción de creación/edición/desactivación queda registrada en la tabla de Auditoría.
+- Los entrenadores solo ven sus clientes asignados (API filtra por `ClienteEntrenador` activo; el detalle de ajenos responde 404) y solo editan/eliminan sus propias rutinas. La asignación se gestiona en **Entrenadores → clientes** (solo Administrador); el seed reparte los primeros 15 clientes entre entrenadores.

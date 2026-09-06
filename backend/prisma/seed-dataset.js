@@ -174,6 +174,25 @@ async function main() {
     clientesCreados.push(cli);
   }
 
+  // 5b) Asignar clientes a entrenadores (round-robin, idempotente).
+  // Sin esto, el scoping dejaría a los entrenadores sin clientes visibles.
+  const entrenadoresCreados = await prisma.entrenador.findMany({
+    where: { activo: true },
+    select: { id: true },
+    orderBy: { id: 'asc' }
+  });
+  for (let i = 0; i < Math.min(clientesCreados.length, 15); i++) {
+    const ent = entrenadoresCreados[i % entrenadoresCreados.length];
+    if (!ent) break;
+    await prisma.clienteEntrenador.upsert({
+      where: {
+        clienteId_entrenadorId: { clienteId: clientesCreados[i].id, entrenadorId: ent.id }
+      },
+      update: { activo: true },
+      create: { clienteId: clientesCreados[i].id, entrenadorId: ent.id }
+    });
+  }
+
   // 6) Membresías: estados variados para que la tabla tenga contenido
   // Regla: la BD solo permite 1 ACTIVA por cliente (por servicio). Aquí forzamos limpieza previa.
   console.log('Limpiando membresías previas para reinsertar dataset...');

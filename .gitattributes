@@ -1,0 +1,5 @@
+# Forzar LF en scripts y plantillas: CRLF rompe `sh` en Alpine (entrypoint,
+# backup) y puede romper directivas de nginx. Con autocrlf=true en Windows,
+# cada cambio de rama los convertiría sin esto.
+*.sh text eol=lf
+*.template text eol=lf
