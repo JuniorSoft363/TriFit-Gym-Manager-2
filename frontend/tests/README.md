@@ -4,7 +4,8 @@ Tests end-to-end de TriFit Gym Manager usando Playwright.
 
 ## Requisitos
 - Backend (`http://localhost:3000`) con la base de datos sembrada (`npm run seed` en `backend/`).
-- Si el frontend no está corriendo, `playwright.config.ts` lo levanta automáticamente con `npm start`.
+- Frontend de Docker en `https://localhost:8443` (cert autofirmado; Playwright lo acepta con `ignoreHTTPSErrors`).
+  Si no está corriendo, `playwright.config.ts` intenta levantarlo con `npm start`.
 
 ## Comandos
 
@@ -14,7 +15,7 @@ Tests end-to-end de TriFit Gym Manager usando Playwright.
 | `npx playwright test --ui` | Modo UI (depuración interactiva) |
 | `npx playwright test --headed` | Ver el navegador mientras corre |
 | `npx playwright test --debug` | Paso a paso |
-| `npx playwright codegen http://localhost:4200` | Graba interacciones y genera código |
+| `npx playwright codegen http://localhost:4200` | Graba interacciones y genera código (o `https://localhost:8443`) |
 | `npx playwright show-report` | Abre el reporte HTML |
 
 ## Estructura

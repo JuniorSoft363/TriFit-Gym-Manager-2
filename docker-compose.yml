@@ -46,11 +46,16 @@ services:
       PORT: 3000
       DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-trifit}
       JWT_SECRET: ${JWT_SECRET:-cambia_este_secreto_en_produccion}
-      JWT_EXPIRES: ${JWT_EXPIRES:-8h}
+      JWT_EXPIRES: ${JWT_EXPIRES:-30m}
+      REFRESH_EXPIRES_DIAS: ${REFRESH_EXPIRES_DIAS:-7}
+      CORS_ORIGIN: ${CORS_ORIGIN:-https://localhost:8443,http://localhost:4200}
     ports:
       - "3000:3000"
     volumes:
       - backend_uploads:/app/uploads
+      # Persiste el JWT_SECRET autogenerado (ver backend/entrypoint.sh).
+      # Si defines tu propio JWT_SECRET, este volumen solo guarda ese caso.
+      - backend_data:/app/data
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/"]
       interval: 10s
@@ -69,8 +74,18 @@ services:
     depends_on:
       backend:
         condition: service_healthy
+    environment:
+      # Puerto HTTPS visto desde el host. Desarrollo: 8443 (el 443 del host
+      # suele estar ocupado). Producción: "443" + mapear "443:443".
+      HTTPS_PORT: "8443"
     ports:
       - "4200:80"
+      - "8443:443"
+    # Producción: descomentar para usar certificados reales (Let's Encrypt)
+    # en lugar del autofirmado generado en el build.
+    #volumes:
+    #  - ./certs/trifit.crt:/etc/nginx/certs/trifit.crt:ro
+    #  - ./certs/trifit.key:/etc/nginx/certs/trifit.key:ro
     networks:
       - trifit-net
 
@@ -101,6 +116,7 @@ services:
 volumes:
   postgres_data:
   backend_uploads:
+  backend_data:
 
 networks:
   trifit-net:

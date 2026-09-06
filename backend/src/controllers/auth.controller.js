@@ -11,4 +11,14 @@ const login = asyncHandler(async (req, res) => {
 
 const perfil = asyncHandler(async (req, res) => res.json(await authService.perfil(req.usuario.id)));
 
-module.exports = { login, perfil };
+const refrescar = asyncHandler(async (req, res) => {
+  const r = await authService.refrescar(req.body.refreshToken);
+  res.json(r);
+});
+
+const cerrarSesion = asyncHandler(async (req, res) => {
+  await authService.cerrarSesion(req.body.refreshToken);
+  res.json({ ok: true });
+});
+
+module.exports = { login, perfil, refrescar, cerrarSesion };

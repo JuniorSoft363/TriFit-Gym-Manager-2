@@ -5,16 +5,22 @@ import { environment } from '../../../environments/environment';
 import { PerfilCompleto, RespuestaLogin, RolNombre, UsuarioSesion } from '../models';
 
 const CLAVE_TOKEN = 'tf_token';
+const CLAVE_REFRESH = 'tf_refresh';
 const CLAVE_USUARIO = 'tf_usuario';
+// Cierre automático tras 30 min sin interacción del usuario.
+const LIMITE_INACTIVIDAD_MS = 30 * 60 * 1000;
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   usuario = signal<UsuarioSesion | null>(this.leerUsuario());
+  private ultimaActividad = Date.now();
 
   constructor(
     private http: HttpClient,
     private router: Router
-  ) {}
+  ) {
+    this.iniciarVigilanciaInactividad();
+  }
 
   private leerUsuario(): UsuarioSesion | null {
     const crudo = localStorage.getItem(CLAVE_USUARIO);
@@ -26,9 +32,30 @@ export class AuthService {
   }
 
   guardarSesion(respuesta: RespuestaLogin) {
-    localStorage.setItem(CLAVE_TOKEN, respuesta.token);
-    localStorage.setItem(CLAVE_USUARIO, JSON.stringify(respuesta.usuario));
+    this.guardarTokens(respuesta);
     this.usuario.set(respuesta.usuario);
+    this.registrarActividad();
+  }
+
+  // Almacena los tokens nuevos tras un refresh (usado por el interceptor).
+  aplicarTokens(respuesta: RespuestaLogin) {
+    this.guardarTokens(respuesta);
+    this.registrarActividad();
+  }
+
+  private guardarTokens(respuesta: RespuestaLogin) {
+    localStorage.setItem(CLAVE_TOKEN, respuesta.token);
+    localStorage.setItem(CLAVE_REFRESH, respuesta.refreshToken);
+    if (respuesta.usuario) {
+      localStorage.setItem(CLAVE_USUARIO, JSON.stringify(respuesta.usuario));
+      this.usuario.set(respuesta.usuario);
+    }
+  }
+
+  refrescarToken() {
+    const refreshToken = this.obtenerRefreshToken();
+    if (!refreshToken) throw new Error('Sin refresh token');
+    return this.http.post<RespuestaLogin>(`${environment.apiUrl}/auth/refresh`, { refreshToken });
   }
 
   actualizarSesion(datos: Partial<UsuarioSesion>) {
@@ -45,14 +72,33 @@ export class AuthService {
   }
 
   cerrarSesion() {
+    const refreshToken = this.obtenerRefreshToken();
+    // Revocación del refresh en el servidor (mejor esfuerzo; no bloquea el logout).
+    if (refreshToken) {
+      this.http.post<{ ok: boolean }>(`${environment.apiUrl}/auth/logout`, { refreshToken }).subscribe({
+        next: () => {},
+        error: () => {}
+      });
+    }
+    this.limpiarLocal();
+    this.router.navigate(['/login']);
+  }
+
+  // Solo limpia la sesión local (sin navegar). Lo usa el flujo de refresh fallido
+  // cuando ya se está en /login o para no duplicar redirecciones.
+  limpiarLocal() {
     localStorage.removeItem(CLAVE_TOKEN);
+    localStorage.removeItem(CLAVE_REFRESH);
     localStorage.removeItem(CLAVE_USUARIO);
     this.usuario.set(null);
-    this.router.navigate(['/login']);
   }
 
   obtenerToken(): string | null {
     return localStorage.getItem(CLAVE_TOKEN);
+  }
+
+  obtenerRefreshToken(): string | null {
+    return localStorage.getItem(CLAVE_REFRESH);
   }
 
   estaAutenticado(): boolean {
@@ -87,7 +133,26 @@ export class AuthService {
 
   urlFoto(fotoUrl?: string | null): string | null {
     if (!fotoUrl) return null;
-    if (fotoUrl.startsWith('http')) return fotoUrl;
-    return `http://localhost:3000${fotoUrl}`;
+    // Las rutas /uploads son mismo origen (nginx o proxy de ng serve).
+    return fotoUrl.startsWith('http') ? fotoUrl : fotoUrl;
+  }
+
+  private registrarActividad() {
+    this.ultimaActividad = Date.now();
+  }
+
+  // Cierre por inactividad: 30 min sin clics/teclas/scroll cierra la sesión.
+  private iniciarVigilanciaInactividad() {
+    const eventos = ['click', 'keydown', 'scroll', 'touchstart', 'wheel'];
+    const marcar = () => (this.ultimaActividad = Date.now());
+    eventos.forEach((e) => window.addEventListener(e, marcar, { passive: true }));
+
+    setInterval(() => {
+      if (!this.estaAutenticado()) return;
+      if (Date.now() - this.ultimaActividad > LIMITE_INACTIVIDAD_MS) {
+        this.limpiarLocal();
+        this.router.navigate(['/login']);
+      }
+    }, 30_000);
   }
 }

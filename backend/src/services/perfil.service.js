@@ -4,6 +4,7 @@ const fs = require('fs');
 const prisma = require('../config/prisma');
 const { HttpError } = require('../utils/httpError');
 const { hashPassword, compararPassword } = require('../utils/password');
+const sesionService = require('./sesion.service');
 
 function shapeUsuario(u) {
   return {
@@ -15,6 +16,7 @@ function shapeUsuario(u) {
     fotoUrl: u.fotoUrl || '',
     rol: u.rol ? u.rol.nombre : null,
     activo: u.activo,
+    debeCambiarPassword: !!u.debeCambiarPassword,
     creadoEn: u.creadoEn,
     actualizadoEn: u.actualizadoEn
   };
@@ -55,7 +57,9 @@ async function cambiarPassword(id, passwordActual, passwordNuevo) {
     throw new HttpError(400, 'La nueva contraseña debe ser diferente a la actual');
   }
   const passwordHash = await hashPassword(passwordNuevo);
-  await prisma.usuario.update({ where: { id }, data: { passwordHash } });
+  await prisma.usuario.update({ where: { id }, data: { passwordHash, debeCambiarPassword: false } });
+  // Al cambiar la contraseña se cierran las demás sesiones del usuario.
+  await sesionService.revocarTodas(id);
   return { ok: true };
 }
 

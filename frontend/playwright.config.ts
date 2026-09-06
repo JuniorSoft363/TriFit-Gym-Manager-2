@@ -18,7 +18,9 @@ export default defineConfig({
   reporter: [['list'], ['html', { open: 'never', outputFolder: 'playwright-report' }]],
 
   use: {
-    baseURL: 'http://localhost:4200',
+    // El frontend de Docker sirve solo HTTPS (cert autofirmado) en el 8443.
+    baseURL: 'https://localhost:8443',
+    ignoreHTTPSErrors: true,
     trace: 'on-first-retry',
     screenshot: 'on',
     video: 'retain-on-failure',
@@ -34,8 +36,11 @@ export default defineConfig({
   ],
 
   webServer: {
+    // Se espera el frontend de Docker en https://localhost:8443.
+    // Si no está levantado, el comando levanta `ng serve` en el 4200.
     command: 'npm start',
-    url: 'http://localhost:4200',
+    url: 'https://localhost:8443',
+    ignoreHTTPSErrors: true,
     reuseExistingServer: true,
     timeout: 180_000,
     stdout: 'ignore',

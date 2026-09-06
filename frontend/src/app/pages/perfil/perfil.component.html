@@ -12,6 +12,10 @@
     <mat-icon>error_outline</mat-icon>
     <span>{{ errorMsg }}</span>
   </div>
+  <div class="tf-perfil-aviso" *ngIf="perfil()?.debeCambiarPassword">
+    <mat-icon>warning</mat-icon>
+    <span>Estás usando una contraseña inicial. Cámbiala abajo para poder usar la aplicación.</span>
+  </div>
 
   <div class="tf-perfil-grid">
     <!-- Tarjeta de foto -->

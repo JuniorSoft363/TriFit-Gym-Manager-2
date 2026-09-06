@@ -6,12 +6,13 @@ import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { routes } from './app.routes';
 import { tokenInterceptor } from './core/interceptors/token.interceptor';
 import { erroresInterceptor } from './core/interceptors/errores.interceptor';
+import { refrescoInterceptor } from './core/interceptors/refresco.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
     provideAnimations(),
-    provideHttpClient(withInterceptors([tokenInterceptor, erroresInterceptor])),
+    provideHttpClient(withInterceptors([tokenInterceptor, erroresInterceptor, refrescoInterceptor])),
     { provide: MAT_DATE_LOCALE, useValue: 'es-EC' }
   ]
 };

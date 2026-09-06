@@ -8,6 +8,7 @@ export interface UsuarioSesion {
   direccion?: string;
   fotoUrl?: string;
   rol: RolNombre;
+  debeCambiarPassword?: boolean;
 }
 
 export interface PerfilCompleto extends UsuarioSesion {
@@ -18,6 +19,7 @@ export interface PerfilCompleto extends UsuarioSesion {
 
 export interface RespuestaLogin {
   token: string;
+  refreshToken: string;
   usuario: UsuarioSesion;
 }
 

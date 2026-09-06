@@ -1,0 +1,59 @@
+# HTTP: solo redirección a HTTPS (no se sirve contenido en claro).
+server {
+    listen 80;
+    listen [::]:80;
+    server_name _;
+    # HTTPS_PORT lo define docker-compose (8443 en desarrollo, 443 en producción).
+    return 301 https://$host:${HTTPS_PORT}$request_uri;
+}
+
+# HTTPS: app Angular + proxy al backend (tráfico interno backend en HTTP,
+# práctica estándar con terminación TLS en el borde).
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    server_name _;
+
+    # Certificado autofirmado generado en el build (desarrollo).
+    # En producción, montar certificados reales en estas mismas rutas
+    # (ver docker-compose.yml) o usar un reverse proxy con Let's Encrypt.
+    ssl_certificate /etc/nginx/certs/trifit.crt;
+    ssl_certificate_key /etc/nginx/certs/trifit.key;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_prefer_server_ciphers on;
+
+    # HSTS: obliga al navegador a usar siempre HTTPS (1 año).
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+
+    root /usr/share/nginx/html;
+    index index.html;
+
+    # Rutas de la API y archivos subidos -> backend
+    location /api/ {
+        proxy_pass http://backend:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 60s;
+    }
+
+    location /uploads/ {
+        proxy_pass http://backend:3000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+
+    # SPA: cualquier ruta no encontrada -> index.html
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    # Cache para assets
+    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff2?)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+        try_files $uri =404;
+    }
+}
