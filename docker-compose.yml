@@ -7,12 +7,21 @@
 # El frontend queda en http://localhost:4200
 # El backend queda en http://localhost:3000
 # Las credenciales por defecto son admin@trifit.com / Admin123*
+#
+# Logs: `docker compose logs -f [servicio]` (JSON por línea en el backend,
+# con X-Request-Id para correlacionar). Rotación: 3 archivos de 10 MB.
+x-logging: &rotacion-logs
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
 
 services:
   postgres:
     image: postgres:16-alpine
     container_name: trifit-postgres
     restart: unless-stopped
+    logging: *rotacion-logs
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
@@ -38,12 +47,14 @@ services:
       dockerfile: Dockerfile
     container_name: trifit-backend
     restart: unless-stopped
+    logging: *rotacion-logs
     depends_on:
       postgres:
         condition: service_healthy
     environment:
       NODE_ENV: production
       PORT: 3000
+      LOG_LEVEL: ${LOG_LEVEL:-info}
       DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-trifit}
       JWT_SECRET: ${JWT_SECRET:-cambia_este_secreto_en_produccion}
       JWT_EXPIRES: ${JWT_EXPIRES:-30m}
@@ -71,6 +82,7 @@ services:
       dockerfile: Dockerfile
     container_name: trifit-frontend
     restart: unless-stopped
+    logging: *rotacion-logs
     depends_on:
       backend:
         condition: service_healthy
@@ -96,6 +108,7 @@ services:
     image: postgres:16-alpine
     container_name: trifit-backup
     restart: unless-stopped
+    logging: *rotacion-logs
     depends_on:
       postgres:
         condition: service_healthy

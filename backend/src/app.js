@@ -4,11 +4,14 @@ const fs = require('fs');
 const rutas = require('./routes');
 const { noEncontrado, manejadorErrores } = require('./middlewares/errores');
 const { cabeceras, corsRestringido, limiteApi } = require('./middlewares/seguridad');
+const { requestLog } = require('./middlewares/requestLog');
 
 const app = express();
 
 // Un solo salto de proxy (nginx del frontend) para req.ip real en rate-limit.
 app.set('trust proxy', 1);
+// Primero: ID de correlación + log de petición (cubre también rechazos).
+app.use(requestLog);
 
 const carpetaUploads = path.join(__dirname, '..', 'uploads');
 if (!fs.existsSync(carpetaUploads)) fs.mkdirSync(carpetaUploads, { recursive: true });
