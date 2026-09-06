@@ -36,7 +36,7 @@ export class ConfiguracionComponent implements OnInit {
           tipo: 'password',
           requerido: true,
           soloCrear: true,
-          placeholder: 'Dejar en blanco para mantener la actual'
+          placeholder: 'Mínimo 8 caracteres, con letra y número (en blanco mantiene la actual)'
         },
         {
           clave: 'rolId',

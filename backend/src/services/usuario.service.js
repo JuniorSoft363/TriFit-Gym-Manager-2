@@ -1,7 +1,7 @@
 // Gestión de usuarios del sistema y roles
 const prisma = require('../config/prisma');
 const { HttpError } = require('../utils/httpError');
-const { hashPassword } = require('../utils/password');
+const { hashPassword, validarPolitica } = require('../utils/password');
 const { crudService, limpiarDatos } = require('../utils/crud');
 const sesionService = require('./sesion.service');
 
@@ -17,6 +17,8 @@ async function listar(query) {
 async function crear(data) {
   const { password, ...resto } = limpiarDatos(data);
   if (!password) throw new HttpError(400, 'La contraseña es obligatoria');
+  const motivoCrear = validarPolitica(password);
+  if (motivoCrear) throw new HttpError(400, motivoCrear);
   const usuario = await prisma.usuario.create({
     data: { ...resto, passwordHash: await hashPassword(password), debeCambiarPassword: true },
     include: { rol: true }
@@ -28,6 +30,8 @@ async function editar(id, data) {
   const { password, ...resto } = limpiarDatos(data);
   const cambios = { ...resto };
   if (password) {
+    const motivoEditar = validarPolitica(password);
+    if (motivoEditar) throw new HttpError(400, motivoEditar);
     cambios.passwordHash = await hashPassword(password);
     // Si el admin resetea la contraseña, el usuario debe cambiarla al entrar.
     cambios.debeCambiarPassword = true;

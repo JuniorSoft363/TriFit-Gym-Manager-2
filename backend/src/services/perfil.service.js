@@ -3,7 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const prisma = require('../config/prisma');
 const { HttpError } = require('../utils/httpError');
-const { hashPassword, compararPassword } = require('../utils/password');
+const { hashPassword, compararPassword, validarPolitica } = require('../utils/password');
 const sesionService = require('./sesion.service');
 
 function shapeUsuario(u) {
@@ -50,9 +50,8 @@ async function cambiarPassword(id, passwordActual, passwordNuevo) {
   const u = await prisma.usuario.findUniqueOrThrow({ where: { id } });
   const ok = await compararPassword(passwordActual, u.passwordHash);
   if (!ok) throw new HttpError(400, 'La contraseña actual es incorrecta');
-  if (!passwordNuevo || passwordNuevo.length < 6) {
-    throw new HttpError(400, 'La nueva contraseña debe tener al menos 6 caracteres');
-  }
+  const motivo = validarPolitica(passwordNuevo);
+  if (motivo) throw new HttpError(400, motivo);
   if (passwordActual === passwordNuevo) {
     throw new HttpError(400, 'La nueva contraseña debe ser diferente a la actual');
   }

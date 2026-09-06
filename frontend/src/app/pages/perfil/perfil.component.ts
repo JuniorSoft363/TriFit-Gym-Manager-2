@@ -44,7 +44,10 @@ export class PerfilComponent implements OnInit {
     this.passwordForm = this.fb.group(
       {
         passwordActual: ['', [Validators.required]],
-        passwordNuevo: ['', [Validators.required, Validators.minLength(6)]],
+        passwordNuevo: [
+          '',
+          [Validators.required, Validators.minLength(8), Validators.pattern(/^(?=.*[A-Za-z])(?=.*\d).+$/)]
+        ],
         confirmar: ['', [Validators.required]]
       },
       { validators: this.coincidenValidator }
