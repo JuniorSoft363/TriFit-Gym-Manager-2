@@ -14,7 +14,8 @@
  *   TEST_PLAN_ID            id del plan activo (default 1)
  */
 
-import test, { APIRequestContext, expect, Page } from "@playwright/test";
+import test, { expect, Page } from "@playwright/test";
+import { API, asegurarToken, authed, inyectarSesion, loginReal, refrescarSesion } from "./sesion";
 
 declare const process: {
   env: Record<string, string | undefined>;
@@ -23,67 +24,6 @@ declare const process: {
 const CEDULA = process.env.TEST_CEDULA || '1956789012';
 const CEDULA_INEXISTENTE = process.env.TEST_CEDULA_INEXISTENTE || '0999999999';
 const PLAN_ID = Number(process.env.TEST_PLAN_ID || 1);
-const API = 'http://localhost:3000/api';
-
-// Sesión única por corrida: un solo POST /auth/login (respeta el rate-limit de
-// 10 intentos/15 min). Cada test obtiene su token vía /auth/refresh (rotación).
-let tokenSesion = '';
-let refreshSesion = '';
-let usuarioSesion: any = null;
-
-async function loginReal(request: APIRequestContext) {
-  const resp = await request.post(`${API}/auth/login`, {
-    data: { email: 'admin@trifit.com', password: 'Admin123*' }
-  });
-  expect(resp.ok(), `Login API falló: ${resp.status()}`).toBeTruthy();
-  const body = await resp.json();
-  tokenSesion = body.token;
-  refreshSesion = body.refreshToken;
-  usuarioSesion = body.usuario;
-}
-
-async function refrescarSesion(request: APIRequestContext) {
-  if (!refreshSesion) {
-    await loginReal(request);
-    return;
-  }
-  const resp = await request.post(`${API}/auth/refresh`, {
-    data: { refreshToken: refreshSesion }
-  });
-  if (!resp.ok()) {
-    await loginReal(request);
-    return;
-  }
-  const body = await resp.json();
-  tokenSesion = body.token;
-  refreshSesion = body.refreshToken;
-  usuarioSesion = body.usuario;
-}
-
-async function asegurarToken(request: APIRequestContext) {
-  await refrescarSesion(request);
-  return tokenSesion;
-}
-
-async function inyectarSesion(page: Page) {
-  await page.addInitScript(
-    ({ token, refresh, usuario }) => {
-      localStorage.setItem('tf_token', token);
-      localStorage.setItem('tf_refresh', refresh);
-      localStorage.setItem('tf_usuario', JSON.stringify(usuario));
-    },
-    { token: tokenSesion, refresh: refreshSesion, usuario: usuarioSesion }
-  );
-}
-
-function authed(request: APIRequestContext, token: string) {
-  const headers = { Authorization: `Bearer ${token}` };
-  return {
-    get: (url: string) => request.get(url, { headers }),
-    post: (url: string, data: any) => request.post(url, { headers, data }),
-    patch: (url: string, data: any) => request.patch(url, { headers, data })
-  };
-}
 
 async function irAMembresias(page: Page) {
   await page.goto('/app/membresias', { waitUntil: 'networkidle' });
