@@ -1,5 +1,27 @@
 // Reglas de validación de datos (express-validator)
 const { body } = require('express-validator');
+const { validarPolitica } = require('../utils/password');
+
+const reglaPassword = (campo = 'password', mensajeVacio = 'La contraseña es obligatoria') =>
+  body(campo)
+    .notEmpty()
+    .withMessage(mensajeVacio)
+    .bail()
+    .custom((v) => {
+      const motivo = validarPolitica(v);
+      if (motivo) throw new Error(motivo);
+      return true;
+    });
+
+// Para edición de usuarios: solo valida si se envía contraseña.
+const reglaPasswordOpcional = body('password')
+  .optional({ values: 'falsy' })
+  .bail()
+  .custom((v) => {
+    const motivo = validarPolitica(v);
+    if (motivo) throw new Error(motivo);
+    return true;
+  });
 
 const cedulaRegla = (campo = 'cedula') =>
   body(campo)
@@ -55,7 +77,7 @@ const entrenador = [
 const usuario = [
   body('nombre').trim().notEmpty().withMessage('El nombre es obligatorio'),
   body('email').isEmail().withMessage('Email inválido'),
-  body('password').optional({ values: 'falsy' }).isLength({ min: 6 }).withMessage('La contraseña debe tener mínimo 6 caracteres'),
+  reglaPasswordOpcional,
   body('rolId').isInt().withMessage('Rol inválido').toInt()
 ];
 
@@ -91,7 +113,7 @@ const actualizarPerfil = [
 
 const cambiarPassword = [
   body('passwordActual').notEmpty().withMessage('La contraseña actual es obligatoria'),
-  body('passwordNuevo').isLength({ min: 6 }).withMessage('La nueva contraseña debe tener al menos 6 caracteres')
+  reglaPassword('passwordNuevo', 'La nueva contraseña es obligatoria')
 ];
 
 module.exports = {

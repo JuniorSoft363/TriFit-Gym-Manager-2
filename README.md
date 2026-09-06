@@ -131,6 +131,12 @@ aceptarlo la primera vez), HSTS y solo TLS 1.2/1.3.
   snack-bar vía interceptor). La tabla **Auditoría** sigue siendo el rastro de
   negocio (quién creó/editó/desactivó qué).
 
+### Política de contraseñas
+
+Mínimo **8 caracteres, con al menos una letra y un número**. Se exige al
+cambiarla (perfil), al crear usuarios y al resetearlas (solo Administrador);
+el frontend la valida en el perfil y el backend en todos los casos.
+
 ### Contraseñas iniciales y secretos
 
 - Los usuarios creados por un admin (y el admin de fábrica) entran con
