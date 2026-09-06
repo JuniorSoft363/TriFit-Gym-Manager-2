@@ -3,7 +3,7 @@
 # 1. Si JWT_SECRET no está definido o trae un valor de ejemplo (público en el
 #    repo), genera uno aleatorio y lo persiste en el volumen backend_data.
 #    Cada despliegue queda así con un secreto único y estable entre reinicios.
-# 2. Aplica el schema a la BD y arranca el server.
+# 2. Aplica el schema a la BD, siembra la base si está vacía y arranca el server.
 set -eu
 
 SECRET_FILE=/app/data/.jwt_secret
@@ -32,4 +32,16 @@ if [ -z "${JWT_SECRET:-}" ] || es_ejemplo "$JWT_SECRET"; then
 fi
 
 npx prisma db push --skip-generate --accept-data-loss
+
+# Seed base solo si la BD está vacía (primer arranque en limpio).
+# seed.js es idempotente. El dataset de prueba NUNCA se siembra solo
+# porque reescribe membresías y pagos.
+VACIA="$(node -e 'const {PrismaClient}=require("@prisma/client");(async()=>{const p=new PrismaClient();try{const n=await p.usuario.count();console.log(n===0?"SI":"NO")}catch(e){console.log("ERROR")}finally{await p.$disconnect()}})();')"
+if [ "$VACIA" = "SI" ]; then
+  echo "[seed] BD vacía: sembrando datos base (roles, admin, gimnasio, planes, ejercicios)..."
+  npm run seed
+else
+  echo "[seed] BD con datos, se omite el seed base"
+fi
+
 exec node src/server.js
