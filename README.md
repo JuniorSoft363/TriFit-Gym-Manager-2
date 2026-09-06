@@ -119,6 +119,18 @@ aceptarlo la primera vez), HSTS y solo TLS 1.2/1.3.
 - El login tiene rate-limit (10/15 min por IP), por lo que los tests e2e hacen
   **un solo login** y obtienen los tokens siguientes vía `/auth/refresh`.
 
+### Observabilidad
+
+- El backend registra **JSON por línea**: cada petición (`metodo`, `ruta` sin
+  query, `estado`, `ms`, `usuarioId`, `ip`) y cada error (controlados como
+  aviso, inesperados con pila). Nivel por `LOG_LEVEL` (`debug|info|warn|error`).
+- Cada respuesta trae **`X-Request-Id`**: ante un error, ese ID permite
+  encontrar la petición y su error en `docker compose logs backend`.
+- Los logs de Docker rotan (3 archivos de 10 MB por servicio).
+- El frontend registra errores no controlados en consola (los HTTP ya muestran
+  snack-bar vía interceptor). La tabla **Auditoría** sigue siendo el rastro de
+  negocio (quién creó/editó/desactivó qué).
+
 ### Contraseñas iniciales y secretos
 
 - Los usuarios creados por un admin (y el admin de fábrica) entran con

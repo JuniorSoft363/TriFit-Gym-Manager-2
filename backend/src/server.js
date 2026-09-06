@@ -1,6 +1,7 @@
 const app = require('./app');
 const { PORT } = require('./config/env');
+const logger = require('./utils/logger');
 
 app.listen(PORT, () => {
-  console.log(`TriFit Gym Manager API escuchando en http://localhost:${PORT}`);
+  logger.info('servidor_listo', { puerto: PORT });
 });
