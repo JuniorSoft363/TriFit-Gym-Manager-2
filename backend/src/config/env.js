@@ -26,5 +26,12 @@ module.exports = {
   JWT_SECRET,
   // Access token corto; la sesión se mantiene viva con el refresh token.
   JWT_EXPIRES: process.env.JWT_EXPIRES || '30m',
-  REFRESH_EXPIRES_MS: DIAS_REFRESH * 24 * 60 * 60 * 1000
+  REFRESH_EXPIRES_MS: DIAS_REFRESH * 24 * 60 * 60 * 1000,
+  // Límites configurables (útil para sesiones de prueba con varios usuarios).
+  LOGIN_RATE_MAX: Number(process.env.LOGIN_RATE_MAX || 10),
+  LOGIN_RATE_VENTANA_MIN: Number(process.env.LOGIN_RATE_VENTANA_MIN || 15),
+  API_RATE_MAX: Number(process.env.API_RATE_MAX || 300),
+  API_RATE_VENTANA_MIN: Number(process.env.API_RATE_VENTANA_MIN || 15),
+  BLOQUEO_MAX_INTENTOS: Number(process.env.BLOQUEO_MAX_INTENTOS || 5),
+  BLOQUEO_MINUTOS: Number(process.env.BLOQUEO_MINUTOS || 15)
 };

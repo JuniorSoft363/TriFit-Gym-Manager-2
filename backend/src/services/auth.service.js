@@ -19,10 +19,9 @@ function shapeBasico(u) {
   };
 }
 
-// Bloqueo por intentos: 5 fallos seguidos bloquean la cuenta 15 minutos.
+// Bloqueo por intentos (configurable por env, mismos valores por defecto).
 // Mismo mensaje genérico exista o no el usuario (no enumerar cuentas).
-const MAX_INTENTOS = 5;
-const MINUTOS_BLOQUEO = 15;
+const { BLOQUEO_MAX_INTENTOS: MAX_INTENTOS, BLOQUEO_MINUTOS: MINUTOS_BLOQUEO } = require('../config/env');
 
 async function login(email, password) {
   const u = await prisma.usuario.findUnique({ where: { email }, include: { rol: true } });

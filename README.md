@@ -138,6 +138,8 @@ cambiarla (perfil), al crear usuarios y al resetearlas (solo Administrador);
 el frontend la valida en el perfil y el backend en todos los casos.
 **Bloqueo por intentos**: 5 ingresos fallidos seguidos bloquean la cuenta
 15 minutos (403 `CUENTA_BLOQUEADA`); un ingreso correcto limpia el contador.
+Todos los límites (rate-limit y bloqueo) son configurables por variables de
+entorno (ver `.env.example`) por si una sesión de pruebas necesita relajarlos.
 
 ### Contraseñas iniciales y secretos
 

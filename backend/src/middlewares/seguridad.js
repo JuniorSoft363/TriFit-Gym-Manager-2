@@ -1,6 +1,7 @@
 const helmet = require('helmet');
 const cors = require('cors');
 const { rateLimit } = require('express-rate-limit');
+const { LOGIN_RATE_MAX, LOGIN_RATE_VENTANA_MIN, API_RATE_MAX, API_RATE_VENTANA_MIN } = require('../config/env');
 
 // Cabeceras de seguridad. crossOriginResourcePolicy en 'cross-origin'
 // porque /uploads sirve imágenes que el frontend puede pedir directo.
@@ -26,19 +27,18 @@ const corsRestringido = cors({
 const respuestaLimite = (req, res) =>
   res.status(429).json({ mensaje: 'Demasiados intentos. Espera unos minutos e inténtalo de nuevo.' });
 
-// Antifuerza bruta en login: 10 intentos / 15 min por IP.
+// Antifuerza bruta en login (por IP) y protección general de la API.
 const limiteLogin = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  limit: 10,
+  windowMs: LOGIN_RATE_VENTANA_MIN * 60 * 1000,
+  limit: LOGIN_RATE_MAX,
   standardHeaders: 'draft-8',
   legacyHeaders: false,
   handler: respuestaLimite
 });
 
-// Protección general de la API: 300 req / 15 min por IP.
 const limiteApi = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  limit: 300,
+  windowMs: API_RATE_VENTANA_MIN * 60 * 1000,
+  limit: API_RATE_MAX,
   standardHeaders: 'draft-8',
   legacyHeaders: false,
   handler: respuestaLimite

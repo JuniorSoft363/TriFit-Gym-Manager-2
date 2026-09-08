@@ -60,6 +60,13 @@ services:
       JWT_EXPIRES: ${JWT_EXPIRES:-30m}
       REFRESH_EXPIRES_DIAS: ${REFRESH_EXPIRES_DIAS:-7}
       CORS_ORIGIN: ${CORS_ORIGIN:-https://localhost:8443,http://localhost:4200}
+      # Límites (subirlos temporalmente para sesiones de prueba con varios usuarios).
+      LOGIN_RATE_MAX: ${LOGIN_RATE_MAX:-10}
+      LOGIN_RATE_VENTANA_MIN: ${LOGIN_RATE_VENTANA_MIN:-15}
+      API_RATE_MAX: ${API_RATE_MAX:-300}
+      API_RATE_VENTANA_MIN: ${API_RATE_VENTANA_MIN:-15}
+      BLOQUEO_MAX_INTENTOS: ${BLOQUEO_MAX_INTENTOS:-5}
+      BLOQUEO_MINUTOS: ${BLOQUEO_MINUTOS:-15}
     ports:
       - "3000:3000"
     volumes:
