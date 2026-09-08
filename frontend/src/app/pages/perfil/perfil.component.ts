@@ -22,6 +22,7 @@ export class PerfilComponent implements OnInit {
   mensajeExito = '';
   errorMsg = '';
   passwordErrorMsg = '';
+  fotoError = false;
   hideActual = true;
   hideNueva = true;
   hideConfirmar = true;

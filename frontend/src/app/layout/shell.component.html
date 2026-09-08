@@ -1,5 +1,5 @@
 <mat-sidenav-container class="tf-shell">
-  <mat-sidenav mode="side" opened class="tf-sidenav">
+  <mat-sidenav [mode]="isMovil() ? 'over' : 'side'" [(opened)]="menuAbierto" class="tf-sidenav">
     <div class="tf-logo-area">
       <div class="tf-logo-icon">
         <mat-icon>fitness_center</mat-icon>
@@ -27,8 +27,13 @@
 
     <div class="tf-sidenav-footer">
       <div class="tf-sidenav-user">
-        <ng-container *ngIf="urlFoto(); else sfIniciales">
-          <img [src]="urlFoto()!" alt="Foto de perfil" class="tf-sidenav-avatar" />
+        <ng-container *ngIf="urlFoto() && !fotoError(); else sfIniciales">
+          <img
+            [src]="urlFoto()!"
+            alt="Foto de perfil"
+            class="tf-sidenav-avatar"
+            (error)="fotoError.set(true)"
+          />
         </ng-container>
         <ng-template #sfIniciales>
           <div class="tf-sidenav-avatar tf-sidenav-avatar-iniciales">{{ iniciales() }}</div>
@@ -43,6 +48,15 @@
 
   <mat-sidenav-content>
     <mat-toolbar class="tf-topbar">
+      <button
+        *ngIf="isMovil()"
+        type="button"
+        mat-icon-button
+        aria-label="Abrir menú"
+        (click)="menuAbierto = !menuAbierto"
+      >
+        <mat-icon>menu</mat-icon>
+      </button>
       <span class="tf-topbar-title">TriFit Gym Manager</span>
       <span class="tf-spacer"></span>
 
@@ -58,8 +72,13 @@
       </button>
 
       <button type="button" class="tf-user-trigger" [matMenuTriggerFor]="menuUsuario" aria-label="Menú de usuario">
-        <ng-container *ngIf="urlFoto(); else inicialesTpl">
-          <img [src]="urlFoto()!" alt="Foto de perfil" class="tf-user-avatar" />
+        <ng-container *ngIf="urlFoto() && !fotoError(); else inicialesTpl">
+          <img
+            [src]="urlFoto()!"
+            alt="Foto de perfil"
+            class="tf-user-avatar"
+            (error)="fotoError.set(true)"
+          />
         </ng-container>
         <ng-template #inicialesTpl>
           <div class="tf-user-avatar tf-user-avatar-iniciales">{{ iniciales() }}</div>
@@ -71,8 +90,13 @@
       <mat-menu #menuUsuario="matMenu" class="tf-usuario-menu" xPosition="before">
         <div class="tf-menu-header" mat-menu-item disabled>
           <div class="tf-menu-avatar-wrap">
-            <ng-container *ngIf="urlFoto(); else menuIniciales">
-              <img [src]="urlFoto()!" alt="Foto de perfil" class="tf-menu-avatar" />
+            <ng-container *ngIf="urlFoto() && !fotoError(); else menuIniciales">
+              <img
+                [src]="urlFoto()!"
+                alt="Foto de perfil"
+                class="tf-menu-avatar"
+                (error)="fotoError.set(true)"
+              />
             </ng-container>
             <ng-template #menuIniciales>
               <div class="tf-menu-avatar tf-menu-avatar-iniciales">{{ iniciales() }}</div>

@@ -1,6 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { BreakpointObserver } from '@angular/cdk/layout';
+import { filter } from 'rxjs';
 import { MATERIAL } from '../shared/material';
 import { AuthService } from '../core/services/auth.service';
 import { ThemeService } from '../core/services/theme.service';
@@ -44,10 +46,25 @@ const MENU: ItemMenu[] = [
   styleUrl: './shell.component.scss'
 })
 export class ShellComponent {
+  isMovil = signal(false);
+  menuAbierto = true;
+  fotoError = signal(false);
+
   constructor(
     public auth: AuthService,
-    public theme: ThemeService
-  ) {}
+    public theme: ThemeService,
+    breakpoint: BreakpointObserver,
+    router: Router
+  ) {
+    // En móvil el menú es overlay y arranca cerrado; en desktop es fijo.
+    breakpoint.observe('(max-width: 900px)').subscribe((r) => {
+      this.isMovil.set(r.matches);
+      this.menuAbierto = !r.matches;
+    });
+    router.events.pipe(filter((e) => e instanceof NavigationEnd)).subscribe(() => {
+      if (this.isMovil()) this.menuAbierto = false;
+    });
+  }
 
   get menu(): ItemMenu[] {
     const rol = this.auth.usuario()?.rol;

@@ -284,6 +284,12 @@ a:hover { color: var(--tf-primary-hover); }
 
 .tf-card mat-card-header { padding-bottom: 6px; }
 
+/* Títulos directos en cards (sin wrapper): con aire respecto al borde superior. */
+.tf-card > h2 {
+  margin: 10px 0 14px;
+  font-size: 20px;
+}
+
 /* --------------------------- KPI / MÉTRICAS --------------------- */
 .tf-kpi-grid {
   display: grid;

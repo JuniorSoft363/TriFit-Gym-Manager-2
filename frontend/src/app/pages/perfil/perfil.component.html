@@ -21,8 +21,8 @@
     <!-- Tarjeta de foto -->
     <mat-card class="tf-card tf-card-foto">
       <div class="tf-foto-contenedor">
-        <ng-container *ngIf="urlFoto(); else avatarIniciales">
-          <img [src]="urlFoto()!" alt="Foto de perfil" class="tf-foto-img" />
+        <ng-container *ngIf="urlFoto() && !fotoError; else avatarIniciales">
+          <img [src]="urlFoto()!" alt="Foto de perfil" class="tf-foto-img" (error)="fotoError = true" />
         </ng-container>
         <ng-template #avatarIniciales>
           <div class="tf-avatar-iniciales">{{ iniciales() }}</div>

@@ -24,6 +24,9 @@ frontend/src/environments/environment.prod.ts
 # Pruebas E2E
 frontend/test-results/
 
+# Capturas de la herramienta de auditoría visual (se regeneran)
+frontend/tests/auditoria/
+
 # Caches internos de Playwright que no son evidencia
 frontend/blob-report/
 frontend/playwright/.cache/

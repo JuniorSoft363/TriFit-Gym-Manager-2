@@ -12,6 +12,8 @@ import { tokenInterceptor } from './core/interceptors/token.interceptor';
 import { erroresInterceptor } from './core/interceptors/errores.interceptor';
 import { refrescoInterceptor } from './core/interceptors/refresco.interceptor';
 import { ManejadorErroresGlobales } from './core/services/manejador-errores-globales';
+import { MatPaginatorIntl } from '@angular/material/paginator';
+import { PaginadorEspanol } from './core/services/paginador-espanol';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -19,7 +21,7 @@ export const appConfig: ApplicationConfig = {
     provideAnimations(),
     provideHttpClient(withInterceptors([tokenInterceptor, erroresInterceptor, refrescoInterceptor])),
     { provide: ErrorHandler, useClass: ManejadorErroresGlobales },
-    { provide: MAT_DATE_LOCALE, useValue: 'es-EC' },
-    { provide: LOCALE_ID, useValue: 'es-EC' }
+    { provide: MatPaginatorIntl, useClass: PaginadorEspanol },
+    { provide: MAT_DATE_LOCALE, useValue: 'es-EC' }
   ]
 };
