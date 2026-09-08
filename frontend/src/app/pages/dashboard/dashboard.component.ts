@@ -1,8 +1,11 @@
 import { Component, OnInit, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { MATERIAL } from '../../shared/material';
 import { CountUpDirective } from '../../shared/count-up.directive';
+import { ConfirmDialogComponent } from '../../shared/confirm-dialog/confirm-dialog.component';
 import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
 
@@ -42,6 +45,8 @@ export class DashboardComponent implements OnInit {
   resumen = signal<Resumen | null>(null);
   cargando = signal(true);
   columnasPagos = ['cliente', 'plan', 'monto', 'metodo', 'estado', 'fecha'];
+  porVencer = signal<any[]>([]);
+  columnasPorVencer = ['cliente', 'plan', 'vence', 'dias', 'acciones'];
 
   hoy = new Date();
 
@@ -121,10 +126,17 @@ export class DashboardComponent implements OnInit {
 
   constructor(
     private api: ApiService,
-    public auth: AuthService
+    public auth: AuthService,
+    private dialog: MatDialog,
+    private snack: MatSnackBar
   ) {}
 
   ngOnInit() {
+    this.cargarResumen();
+    this.cargarPorVencer();
+  }
+
+  cargarResumen() {
     this.api.get<Resumen>('dashboard/resumen').subscribe({
       next: (res) => {
         this.resumen.set(res);
@@ -132,6 +144,43 @@ export class DashboardComponent implements OnInit {
       },
       error: () => this.cargando.set(false)
     });
+  }
+
+  cargarPorVencer() {
+    this.api.get<any[]>('membresias/por-vencer', { dias: 7 }).subscribe({
+      next: (res) => this.porVencer.set((res || []).slice(0, 8)),
+      error: () => this.porVencer.set([])
+    });
+  }
+
+  diasRestantes(m: any): number {
+    const ms = new Date(m.fechaFin).getTime() - Date.now();
+    return Math.max(0, Math.ceil(ms / (1000 * 60 * 60 * 24)));
+  }
+
+  textoDias(m: any): string {
+    const d = this.diasRestantes(m);
+    return d === 0 ? 'hoy' : d === 1 ? '1 día' : `${d} días`;
+  }
+
+  renovarDesdePanel(m: any) {
+    this.dialog
+      .open(ConfirmDialogComponent, {
+        data: {
+          titulo: 'Renovar membresía',
+          mensaje: `¿Renovar la membresía de ${m.cliente?.nombres} ${m.cliente?.apellidos}?`,
+          textoConfirmar: 'Renovar'
+        }
+      })
+      .afterClosed()
+      .subscribe((ok) => {
+        if (!ok) return;
+        this.api.patch(`membresias/${m.id}/renovar`).subscribe(() => {
+          this.snack.open('Membresía renovada', 'Cerrar', { duration: 3000 });
+          this.cargarPorVencer();
+          this.cargarResumen();
+        });
+      });
   }
 
   saludo(): string {

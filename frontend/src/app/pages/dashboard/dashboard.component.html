@@ -94,6 +94,51 @@
       </mat-card>
     </div>
 
+    <!-- Próximas a vencer -->
+    <mat-card class="tf-card tf-dash-pagos" *ngIf="porVencer().length">
+      <mat-card-header>
+        <mat-card-title>Próximas a vencer (7 días)</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="tf-table-wrap">
+          <table mat-table [dataSource]="porVencer()">
+            <ng-container matColumnDef="cliente">
+              <th mat-header-cell *matHeaderCellDef>Cliente</th>
+              <td mat-cell *matCellDef="let m">
+                {{ m.cliente?.nombres }} {{ m.cliente?.apellidos }}
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="plan">
+              <th mat-header-cell *matHeaderCellDef>Plan</th>
+              <td mat-cell *matCellDef="let m">{{ m.plan?.nombre }}</td>
+            </ng-container>
+            <ng-container matColumnDef="vence">
+              <th mat-header-cell *matHeaderCellDef>Vence</th>
+              <td mat-cell *matCellDef="let m">{{ m.fechaFin | date: 'dd/MM/yyyy' }}</td>
+            </ng-container>
+            <ng-container matColumnDef="dias">
+              <th mat-header-cell *matHeaderCellDef>Quedan</th>
+              <td mat-cell *matCellDef="let m">
+                <span class="tf-estado-chip" style="background: var(--tf-warning)">
+                  {{ textoDias(m) }}
+                </span>
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="acciones">
+              <th mat-header-cell *matHeaderCellDef>Acciones</th>
+              <td mat-cell *matCellDef="let m">
+                <button mat-icon-button matTooltip="Renovar" (click)="renovarDesdePanel(m)">
+                  <mat-icon>autorenew</mat-icon>
+                </button>
+              </td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="columnasPorVencer"></tr>
+            <tr mat-row *matRowDef="let row; columns: columnasPorVencer"></tr>
+          </table>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
     <!-- Accesos rápidos -->
     <h2 class="tf-dash-subtitle">Accesos rápidos</h2>
     <div class="tf-quick-grid">
