@@ -55,6 +55,8 @@ model Usuario {
   fotoUrl       String?
   activo        Boolean      @default(true)
   debeCambiarPassword Boolean @default(false)
+  intentosFallidos Int @default(0)
+  bloqueadoHasta DateTime?
   rolId         Int
   rol           Rol          @relation(fields: [rolId], references: [id])
   entrenador    Entrenador?

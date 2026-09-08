@@ -136,6 +136,8 @@ aceptarlo la primera vez), HSTS y solo TLS 1.2/1.3.
 Mínimo **8 caracteres, con al menos una letra y un número**. Se exige al
 cambiarla (perfil), al crear usuarios y al resetearlas (solo Administrador);
 el frontend la valida en el perfil y el backend en todos los casos.
+**Bloqueo por intentos**: 5 ingresos fallidos seguidos bloquean la cuenta
+15 minutos (403 `CUENTA_BLOQUEADA`); un ingreso correcto limpia el contador.
 
 ### Contraseñas iniciales y secretos
 

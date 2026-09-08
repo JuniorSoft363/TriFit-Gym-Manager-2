@@ -19,11 +19,39 @@ function shapeBasico(u) {
   };
 }
 
+// Bloqueo por intentos: 5 fallos seguidos bloquean la cuenta 15 minutos.
+// Mismo mensaje genérico exista o no el usuario (no enumerar cuentas).
+const MAX_INTENTOS = 5;
+const MINUTOS_BLOQUEO = 15;
+
 async function login(email, password) {
   const u = await prisma.usuario.findUnique({ where: { email }, include: { rol: true } });
   if (!u || !u.activo) throw new HttpError(401, 'Credenciales incorrectas');
+  if (u.bloqueadoHasta && u.bloqueadoHasta > new Date()) {
+    throw new HttpError(
+      403,
+      'Cuenta bloqueada temporalmente por demasiados intentos. Intenta más tarde.',
+      'CUENTA_BLOQUEADA'
+    );
+  }
   const ok = await compararPassword(password, u.passwordHash);
-  if (!ok) throw new HttpError(401, 'Credenciales incorrectas');
+  if (!ok) {
+    const intentos = (u.intentosFallidos || 0) + 1;
+    await prisma.usuario.update({
+      where: { id: u.id },
+      data:
+        intentos >= MAX_INTENTOS
+          ? { intentosFallidos: 0, bloqueadoHasta: new Date(Date.now() + MINUTOS_BLOQUEO * 60 * 1000) }
+          : { intentosFallidos: intentos }
+    });
+    throw new HttpError(401, 'Credenciales incorrectas');
+  }
+  if (u.intentosFallidos || u.bloqueadoHasta) {
+    await prisma.usuario.update({
+      where: { id: u.id },
+      data: { intentosFallidos: 0, bloqueadoHasta: null }
+    });
+  }
   const usuario = shapeBasico(u);
   return {
     token: firmarToken(usuario),
