@@ -22,6 +22,7 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(withInterceptors([tokenInterceptor, erroresInterceptor, refrescoInterceptor])),
     { provide: ErrorHandler, useClass: ManejadorErroresGlobales },
     { provide: MatPaginatorIntl, useClass: PaginadorEspanol },
-    { provide: MAT_DATE_LOCALE, useValue: 'es-EC' }
+    { provide: MAT_DATE_LOCALE, useValue: 'es-EC' },
+    { provide: LOCALE_ID, useValue: 'es-EC' }
   ]
 };
