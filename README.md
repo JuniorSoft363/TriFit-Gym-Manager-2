@@ -119,6 +119,14 @@ aceptarlo la primera vez), HSTS y solo TLS 1.2/1.3.
 - El login tiene rate-limit (10/15 min por IP), por lo que los tests e2e hacen
   **un solo login** y obtienen los tokens siguientes vía `/auth/refresh`.
 
+### PWA instalable
+
+La app es instalable (manifest + service worker + iconos). El service worker
+cachea solo la interfaz; las llamadas a `/api` siempre van a la red (sin
+datos obsoletos). El aviso de instalación del navegador requiere HTTPS con
+certificado válido (producción); con el autofirmado de desarrollo el SW igual
+se registra y la app funciona offline para la interfaz.
+
 ### Observabilidad
 
 - El backend registra **JSON por línea**: cada petición (`metodo`, `ruta` sin

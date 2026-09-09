@@ -1,4 +1,5 @@
-import { ApplicationConfig, ErrorHandler, LOCALE_ID } from '@angular/core';
+import { ApplicationConfig, ErrorHandler, LOCALE_ID, isDevMode } from '@angular/core';
+import { provideServiceWorker } from '@angular/service-worker';
 import { registerLocaleData } from '@angular/common';
 import localeEsEc from '@angular/common/locales/es-EC';
 import { provideRouter } from '@angular/router';
@@ -20,6 +21,10 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideAnimations(),
     provideHttpClient(withInterceptors([tokenInterceptor, erroresInterceptor, refrescoInterceptor])),
+    provideServiceWorker('ngsw-worker.js', {
+      enabled: !isDevMode(),
+      registrationStrategy: 'registerWhenStable:30000'
+    }),
     { provide: ErrorHandler, useClass: ManejadorErroresGlobales },
     { provide: MatPaginatorIntl, useClass: PaginadorEspanol },
     { provide: MAT_DATE_LOCALE, useValue: 'es-EC' },
