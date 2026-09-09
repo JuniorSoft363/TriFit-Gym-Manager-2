@@ -7,7 +7,7 @@
  * rate-limit; los logins por UI son solo donde el formulario es el sujeto.
  */
 import test, { expect } from "@playwright/test";
-import { API, asegurarToken, authed, loginReal } from "./sesion";
+import { API, asegurarToken, authed, loginApi, loginReal } from "./sesion";
 
 const TEMP = {
   nombre: 'TMP Auth',
@@ -109,6 +109,8 @@ test.describe('Autenticación y sesiones (TC-AUTH-01..06)', () => {
   });
 
   test('TC-AUTH-05 — Tras cambiar la contraseña se libera el acceso', async ({ page, request }) => {
+    // Navegación ocasionalmente lenta en Docker Desktop/Windows: triple timeout.
+    test.slow();
     test.skip(!sesionTemp, 'TC-AUTH-04 debe pasar primero (sesión del temporal)');
     await page.addInitScript(({ token, refresh }) => {
       localStorage.setItem('tf_token', token);
@@ -136,8 +138,9 @@ test.describe('Autenticación y sesiones (TC-AUTH-01..06)', () => {
     });
     await expect(page.locator('.tf-perfil-aviso')).toHaveCount(0);
 
-    // Ya puede navegar y la API responde.
-    await page.goto('/app/dashboard');
+    // Ya puede navegar y la API responde (domcontentloaded: el load completo
+    // a veces se cuelga de recursos externos y no aporta a la aserción).
+    await page.goto('/app/dashboard', { waitUntil: 'domcontentloaded' });
     await expect(page).toHaveURL(/\/app\/dashboard/, { timeout: 15000 });
     const r = authed(request, sesionTemp!.token);
     const perfil = await r.get(`${API}/auth/perfil`);
@@ -148,16 +151,16 @@ test.describe('Autenticación y sesiones (TC-AUTH-01..06)', () => {
   test('TC-AUTH-06 — Logout cierra sesión y revoca el refresh', async ({ page, request }) => {
     // Sesión fresca (TC-AUTH-05 revocó las anteriores al cambiar la contraseña).
     // Si TC-AUTH-05 no corrió, la contraseña sigue siendo la inicial.
-    let login = await request.post(`${API}/auth/login`, {
-      data: { email: TEMP.email, password: TEMP.nueva }
-    });
-    if (!login.ok()) {
-      login = await request.post(`${API}/auth/login`, {
-        data: { email: TEMP.email, password: TEMP.pass }
-      });
+    let body: any = null;
+    for (const password of [TEMP.nueva, TEMP.pass]) {
+      try {
+        body = await loginApi(request, { email: TEMP.email, password });
+        break;
+      } catch {
+        // No era la contraseña vigente, se prueba con la siguiente.
+      }
     }
-    expect(login.ok(), `Login temporal falló: ${login.status()}`).toBeTruthy();
-    const body = await login.json();
+    expect(body, 'Login temporal falló con ambas contraseñas').toBeTruthy();
     sesionTemp = { token: body.token, refresh: body.refreshToken };
     await page.addInitScript(
       ({ token, refresh, usuario }) => {

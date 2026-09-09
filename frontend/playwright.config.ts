@@ -11,6 +11,9 @@ import { defineConfig, devices } from '@playwright/test';
  */
 export default defineConfig({
   testDir: './tests',
+  // La auditoría visual es herramienta manual, no suite: se corre explícita
+  // (npx playwright test tests/auditoria-visual.spec.ts) y no gasta logins.
+  testIgnore: ['**/auditoria-visual.spec.ts'],
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: 1,

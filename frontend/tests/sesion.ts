@@ -14,10 +14,21 @@ let tokenSesion = '';
 let refreshSesion = '';
 let usuarioSesion: any = null;
 
-export async function loginReal(request: APIRequestContext) {
-  const resp = await request.post(`${API}/auth/login`, { data: CREDENCIALES });
+export async function loginApi(request: APIRequestContext, creds = CREDENCIALES) {
+  const resp = await request.post(`${API}/auth/login`, { data: creds });
+  if (resp.status() === 429) {
+    throw new Error(
+      'Login bloqueado por rate-limit (429): hubo demasiados logins recientes ' +
+        '(corridas o pruebas manuales). Reinicia el backend ' +
+        '(docker compose restart backend) y repite la suite.'
+    );
+  }
   expect(resp.ok(), `Login API falló: ${resp.status()}`).toBeTruthy();
-  const body = await resp.json();
+  return resp.json();
+}
+
+export async function loginReal(request: APIRequestContext) {
+  const body = await loginApi(request);
   tokenSesion = body.token;
   refreshSesion = body.refreshToken;
   usuarioSesion = body.usuario;
