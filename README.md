@@ -34,8 +34,8 @@ docker compose up -d --build
 
 # 3. Esperar ~30 segundos a que todo arranque
 
-# 4. Abrir en el navegador
-#    http://localhost:4200
+# 4. Abrir en el navegador (aceptar el certificado autofirmado la 1ra vez)
+#    https://localhost:8443  (http://localhost:4200 solo redirige aquí)
 #    Usuario: admin@trifit.com
 #    Contraseña: Admin123*
 ```
@@ -251,13 +251,15 @@ npm install
 npm start
 ```
 
-La aplicación queda disponible en `http://localhost:4200`.
+La aplicación queda disponible en `http://localhost:4200` (desarrollo local).
 
-Si el backend corre en una URL distinta a `http://localhost:3000/api`, edítala en `frontend/src/environments/environment.ts`.
+El frontend usa API de mismo origen (`/api`, sin contenido mixto): en local
+la redirige el proxy de `ng serve` y en Docker el nginx. Si el backend corre
+en un puerto distinto al 3000, ajusta el `target` en `frontend/proxy.conf.json`.
 
 ## 3. Uso
 
-1. Abre `http://localhost:4200` → landing page pública del gimnasio.
+1. Abre `https://localhost:8443` → landing page pública del gimnasio.
 2. Clic en "Iniciar Sesión" → ingresa con el usuario administrador.
 3. Desde **Configuración → Usuarios** puedes crear cuentas de RECEPCIONISTA y ENTRENADOR.
 4. Cada rol ve solo los módulos que le corresponden (el menú lateral se filtra automáticamente).
