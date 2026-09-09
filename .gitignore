@@ -50,3 +50,6 @@ logs/
 
 # Respaldos de la base de datos (contienen datos reales del negocio)
 backups/*.dump.gz
+
+# Recurso local del equipo: casos de prueba en redacción (no versionar)
+nuevos casos.txt

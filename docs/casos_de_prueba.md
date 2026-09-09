@@ -648,3 +648,119 @@
 |---|---|
 | **Resultados obtenidos** | Aprobado en corrida Playwright (05/09/2026). |
 | **Estado** | Aprobado |
+
+---
+
+## TriFit Gym Manager — Nuevos casos del equipo (TC-INT-11..15)
+
+> Suite separada en `frontend/tests/nuevos-casos.spec.ts` (no se mezcla con
+> las anteriores). Un solo login API por corrida + refresh (ver `sesion.ts`),
+> limpieza de datos creados para repetibilidad sin reseed.
+> Nota: evitar `waitUntil: networkidle` en estas pruebas (las fuentes externas
+> cuelgan la espera); usar `domcontentloaded` + aserción explícita.
+
+## TC-INT-11
+
+| Campo | Detalle |
+|---|---|
+| **ID** | TC-INT-11 |
+| **Nombre del caso de prueba** | Registrar un nuevo cliente con datos válidos |
+| **Prioridad** | Alta |
+| **Precondiciones** | Cédula `1978564321` sin registrar (el `beforeAll` la elimina si quedó de otra corrida). Sesión ADMIN/RECEPCIONISTA. |
+| **Tipo de prueba** | Integración |
+| **Estado de implementación** | Ejecutable con la UI `/app/clientes` |
+| **Objetivo** | Comprobar el alta de cliente y su disponibilidad para membresías. |
+| **Subsistema/s** | ClientesComponent (CrudPage) → diálogo Nuevo → POST /api/clientes |
+| **Datos de entrada** | cédula `1978564321`; Jorge Andrés Vera Cedeño; jvera@example.com; 0991234567 |
+| **Resultado esperado** | 201 + snack-bar *Registro creado correctamente* + fila visible + `GET /clientes/cedula` lo devuelve. El test lo elimina al final. |
+
+**Pasos de ejecución:**
+- En `/app/clientes`, clic en **Nuevo**, completar, **Guardar**
+
+**Criterio de verificación:**
+- Snack-bar de éxito, fila con la cédula y consulta por cédula OK
+
+| Campo | Detalle |
+|---|---|
+| **Resultados obtenidos** | Aprobado en corrida Playwright (08/09/2026). |
+| **Estado** | Aprobado |
+
+## TC-INT-12
+
+| Campo | Detalle |
+|---|---|
+| **ID** | TC-INT-12 |
+| **Nombre del caso de prueba** | Rechazar el registro de un cliente con cédula duplicada |
+| **Prioridad** | Alta |
+| **Precondiciones** | Existe el cliente con cédula `1956789012` (dataset). |
+| **Tipo de prueba** | Integración |
+| **Estado de implementación** | Ejecutable con UI + API |
+| **Objetivo** | Comprobar el 409 por cédula duplicada y que nada se crea. |
+| **Subsistema/s** | CrudDialog → POST /api/clientes → P2002 → snackbar con el mensaje |
+| **Datos de entrada** | cédula `1956789012` + nombres nuevos |
+| **Resultado esperado** | Snackbar *Ya existe un registro con esos datos únicos* y el total de clientes no cambia. |
+
+| Campo | Detalle |
+|---|---|
+| **Resultados obtenidos** | Aprobado en corrida Playwright (08/09/2026). |
+| **Estado** | Aprobado |
+
+## TC-INT-13
+
+| Campo | Detalle |
+|---|---|
+| **ID** | TC-INT-13 |
+| **Nombre del caso de prueba** | Registrar un pago asociado a una membresía activa |
+| **Prioridad** | Alta |
+| **Precondiciones** | Existe una membresía `ACTIVA`. |
+| **Tipo de prueba** | Integración |
+| **Estado de implementación** | Ejecutable con la UI `/app/pagos` |
+| **Objetivo** | Comprobar el registro de pago y el autocompletado del monto con el precio del plan. |
+| **Subsistema/s** | RegistrarPagoDialog (`GET /membresias/vigente/:cedula`) → POST /api/pagos |
+| **Datos de entrada** | Cédula del cliente activo; método Efectivo (monto autocompletado) |
+| **Resultado esperado** | Monto igual al precio del plan + snack-bar *Pago registrado correctamente*. |
+
+| Campo | Detalle |
+|---|---|
+| **Resultados obtenidos** | Aprobado en corrida Playwright (08/09/2026). |
+| **Estado** | Aprobado |
+
+## TC-INT-14
+
+| Campo | Detalle |
+|---|---|
+| **ID** | TC-INT-14 |
+| **Nombre del caso de prueba** | Registrar el ingreso (check-in) de un socio con membresía activa |
+| **Prioridad** | Media |
+| **Precondiciones** | Socio con membresía `ACTIVA` (el test cierra entradas abiertas previas y registra la salida al final). |
+| **Tipo de prueba** | Integración |
+| **Estado de implementación** | Ejecutable con UI + API |
+| **Objetivo** | Comprobar el check-in y el rechazo de doble entrada. |
+| **Subsistema/s** | AsistenciasComponent → `GET /asistencias/consultar/:cedula` → POST `/entrada` / `/salida` |
+| **Datos de entrada** | Cédula del socio elegido por API |
+| **Resultado esperado** | Snack-bar *Entrada registrada*; segundo intento sin salida → 409 *ya registró una entrada sin salida*. |
+
+| Campo | Detalle |
+|---|---|
+| **Resultados obtenidos** | Aprobado en corrida Playwright (08/09/2026). |
+| **Estado** | Aprobado |
+
+## TC-INT-15
+
+| Campo | Detalle |
+|---|---|
+| **ID** | TC-INT-15 |
+| **Nombre del caso de prueba** | Rechazar salida de inventario que supera el stock |
+| **Prioridad** | Media |
+| **Precondiciones** | Producto con stock ≥ 5 (elegido por API). Solo ADMINISTRADOR. |
+| **Tipo de prueba** | Integración |
+| **Estado de implementación** | Ejecutable con UI + API |
+| **Objetivo** | Comprobar el 409 transaccional sin modificar el stock. |
+| **Subsistema/s** | MovimientoDialog → POST /api/inventario/movimientos → 409 (el snackbar lo muestra el interceptor global, el diálogo no tiene error propio) |
+| **Datos de entrada** | tipo SALIDA, cantidad = stock + 5 |
+| **Resultado esperado** | Snackbar *Stock insuficiente...* y el stock queda igual. |
+
+| Campo | Detalle |
+|---|---|
+| **Resultados obtenidos** | Aprobado en corrida Playwright (08/09/2026). |
+| **Estado** | Aprobado |
