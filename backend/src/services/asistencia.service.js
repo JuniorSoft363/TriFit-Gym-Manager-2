@@ -80,4 +80,41 @@ async function listar(query) {
   return { datos, total, page, limit };
 }
 
-module.exports = { consultar, registrarEntrada, registrarSalida, listar };
+// Clientes actualmente dentro del gimnasio (entrada sin salida registrada).
+async function presentes() {
+  const datos = await prisma.asistencia.findMany({
+    where: { horaSalida: null },
+    include: { cliente: true },
+    orderBy: { horaEntrada: 'desc' }
+  });
+  return { total: datos.length, datos };
+}
+
+const claveDia = (d) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+// Aforo de un día: total de ingresos, cuántos siguen dentro y desglose por hora.
+async function aforo(query) {
+  const base = query.fecha ? new Date(query.fecha) : new Date();
+  const inicio = new Date(base); inicio.setHours(0, 0, 0, 0);
+  const fin = new Date(base); fin.setHours(23, 59, 59, 999);
+
+  const asistencias = await prisma.asistencia.findMany({
+    where: { horaEntrada: { gte: inicio, lte: fin } },
+    select: { horaEntrada: true, horaSalida: true }
+  });
+
+  const porHora = Array.from({ length: 24 }, (_, hora) => ({ hora, entradas: 0 }));
+  for (const a of asistencias) porHora[new Date(a.horaEntrada).getHours()].entradas += 1;
+  const horaPico = porHora.reduce((max, x) => (x.entradas > max.entradas ? x : max), porHora[0]);
+
+  return {
+    fecha: claveDia(inicio),
+    totalDia: asistencias.length,
+    dentroAhora: asistencias.filter((a) => !a.horaSalida).length,
+    horaPico,
+    porHora
+  };
+}
+
+module.exports = { consultar, registrarEntrada, registrarSalida, listar, presentes, aforo };

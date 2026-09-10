@@ -24,6 +24,8 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 
 // Array único para importar en cualquier componente standalone que use Material
 export const MATERIAL: Type<any>[] = [
@@ -51,5 +53,7 @@ export const MATERIAL: Type<any>[] = [
   MatCheckboxModule,
   MatDividerModule,
   MatBadgeModule,
-  MatSlideToggleModule
+  MatSlideToggleModule,
+  MatAutocompleteModule,
+  MatProgressBarModule
 ];

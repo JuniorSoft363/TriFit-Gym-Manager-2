@@ -11,6 +11,8 @@ const GESTION = ['ADMINISTRADOR', 'RECEPCIONISTA'];
 router.use(autenticar, permitirRoles(...GESTION));
 
 router.get('/', ctrl.listar);
+router.get('/presentes', ctrl.presentes);
+router.get('/aforo', ctrl.aforo);
 router.get('/consultar/:cedula', ctrl.consultar);
 router.post('/entrada', v.asistencia, validar, ctrl.entrada);
 router.post('/salida', v.asistencia, validar, ctrl.salida);

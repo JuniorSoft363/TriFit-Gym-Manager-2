@@ -1,0 +1,44 @@
+:host {
+  display: block;
+  width: 100%;
+  max-width: 420px;
+}
+
+.tf-busqueda-campo {
+  width: 100%;
+}
+
+.tf-busqueda-opcion {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  mat-icon {
+    flex: none;
+    opacity: 0.7;
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+
+  .tf-busqueda-titulo {
+    font-weight: 500;
+  }
+
+  .tf-busqueda-sub {
+    margin-left: auto;
+    padding-left: 12px;
+    font-size: 0.78rem;
+    opacity: 0.6;
+  }
+}
+
+@media (max-width: 900px) {
+  :host {
+    max-width: 200px;
+  }
+
+  .tf-busqueda-opcion .tf-busqueda-sub {
+    display: none;
+  }
+}

@@ -8,6 +8,7 @@ import { CountUpDirective } from '../../shared/count-up.directive';
 import { ConfirmDialogComponent } from '../../shared/confirm-dialog/confirm-dialog.component';
 import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
+import { MetricasDashboard } from '../../core/models';
 
 interface Resumen {
   clientesActivos: number;
@@ -47,6 +48,7 @@ export class DashboardComponent implements OnInit {
   columnasPagos = ['cliente', 'plan', 'monto', 'metodo', 'estado', 'fecha'];
   porVencer = signal<any[]>([]);
   columnasPorVencer = ['cliente', 'plan', 'vence', 'dias', 'acciones'];
+  metricas = signal<MetricasDashboard | null>(null);
 
   hoy = new Date();
 
@@ -134,6 +136,20 @@ export class DashboardComponent implements OnInit {
   ngOnInit() {
     this.cargarResumen();
     this.cargarPorVencer();
+    this.cargarMetricas();
+  }
+
+  cargarMetricas() {
+    this.api.get<MetricasDashboard>('dashboard/metricas').subscribe({
+      next: (res) => this.metricas.set(res),
+      error: () => this.metricas.set(null)
+    });
+  }
+
+  /** Altura relativa (2–100%) de un valor dentro de una serie, para las mini-barras. */
+  alturaRel(valor: number, serie: { total: number }[]): number {
+    const max = Math.max(1, ...serie.map((x) => x.total));
+    return Math.max(2, Math.round((valor / max) * 100));
   }
 
   cargarResumen() {

@@ -1,0 +1,31 @@
+<mat-form-field class="tf-busqueda-campo" appearance="outline" subscriptSizing="dynamic">
+  <mat-icon matPrefix>search</mat-icon>
+  <input
+    type="text"
+    matInput
+    placeholder="Buscar clientes, planes, inventario…"
+    aria-label="Búsqueda global"
+    [formControl]="control"
+    [matAutocomplete]="auto"
+  />
+  <mat-progress-spinner
+    *ngIf="cargando()"
+    matSuffix
+    mode="indeterminate"
+    diameter="18"
+  ></mat-progress-spinner>
+</mat-form-field>
+
+<mat-autocomplete #auto="matAutocomplete" [displayWith]="mostrar" (optionSelected)="seleccionar($event)">
+  <ng-container *ngIf="!cargando() && total() === 0 && control.value && control.value.length >= 2">
+    <mat-option disabled>Sin resultados para «{{ control.value }}»</mat-option>
+  </ng-container>
+
+  <mat-optgroup *ngFor="let grupo of grupos()" [label]="grupo.etiqueta">
+    <mat-option *ngFor="let opcion of opcionesDe(grupo)" [value]="opcion" class="tf-busqueda-opcion">
+      <mat-icon>{{ iconoGrupo(grupo.tipo) }}</mat-icon>
+      <span class="tf-busqueda-titulo">{{ opcion.titulo }}</span>
+      <span class="tf-busqueda-sub">{{ opcion.subtitulo }}</span>
+    </mat-option>
+  </mat-optgroup>
+</mat-autocomplete>

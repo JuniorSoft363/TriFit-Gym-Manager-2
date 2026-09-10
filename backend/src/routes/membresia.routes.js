@@ -12,6 +12,7 @@ router.use(autenticar, permitirRoles(...GESTION));
 
 router.get('/', ctrl.listar);
 router.get('/por-vencer', ctrl.porVencer);
+router.get('/resumen-vencimientos', ctrl.resumenVencimientos);
 router.get('/vigente/:cedula', ctrl.vigentePorCedula);
 router.post('/', v.membresia, validar, ctrl.asignar);
 router.patch('/:id/renovar', ctrl.renovar);

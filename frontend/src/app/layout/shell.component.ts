@@ -7,6 +7,7 @@ import { MATERIAL } from '../shared/material';
 import { AuthService } from '../core/services/auth.service';
 import { ThemeService } from '../core/services/theme.service';
 import { RolNombre } from '../core/models';
+import { BusquedaGlobalComponent } from '../shared/busqueda-global/busqueda-global.component';
 
 interface ItemMenu {
   ruta: string;
@@ -41,7 +42,7 @@ const MENU: ItemMenu[] = [
 @Component({
   selector: 'app-shell',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, MATERIAL],
+  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, MATERIAL, BusquedaGlobalComponent],
   templateUrl: './shell.component.html',
   styleUrl: './shell.component.scss'
 })
