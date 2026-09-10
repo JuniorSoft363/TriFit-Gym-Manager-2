@@ -3,7 +3,7 @@
  * existentes. Un solo login API por corrida (ver ./sesion.ts).
  */
 import test, { expect, Page } from "@playwright/test";
-import { API, asegurarToken, authed, inyectarSesion, loginReal, refrescarSesion } from "./sesion";
+import { API, asegurarToken, authed, inyectarSesion, cargarSesionAdmin } from "./sesion";
 
 const NUEVO = {
   cedula: '1978564321',
@@ -32,9 +32,9 @@ async function totalClientes(request: any, token: string) {
 
 test.describe('Nuevos casos (TC-INT-11..15)', () => {
   test.beforeAll(async ({ request }) => {
-    await loginReal(request);
+    cargarSesionAdmin();
     // Limpieza defensiva: si una corrida previa dejó al cliente, eliminarlo.
-    const token = await asegurarToken(request);
+    const token = await asegurarToken();
     const r = authed(request, token);
     const existe = await r.get(`${API}/clientes/cedula/${NUEVO.cedula}`);
     if (existe.ok()) {
@@ -43,8 +43,7 @@ test.describe('Nuevos casos (TC-INT-11..15)', () => {
     }
   });
 
-  test.beforeEach(async ({ page, request }) => {
-    await refrescarSesion(request);
+  test.beforeEach(async ({ page }) => {
     await inyectarSesion(page);
   });
 
@@ -65,7 +64,7 @@ test.describe('Nuevos casos (TC-INT-11..15)', () => {
     await expect(page.getByText(NUEVO.cedula).first()).toBeVisible({ timeout: 10000 });
 
     // Queda disponible para asignar membresías (búsqueda por cédula).
-    const token = await asegurarToken(request);
+    const token = await asegurarToken();
     const r = authed(request, token);
     const consulta = await r.get(`${API}/clientes/cedula/${NUEVO.cedula}`);
     expect(consulta.ok()).toBeTruthy();
@@ -77,7 +76,7 @@ test.describe('Nuevos casos (TC-INT-11..15)', () => {
   });
 
   test('TC-INT-12 — Rechazar cliente con cédula duplicada', async ({ page, request }) => {
-    const token = await asegurarToken(request);
+    const token = await asegurarToken();
     const r = authed(request, token);
     const antes = await totalClientes(request, token);
 
@@ -102,7 +101,7 @@ test.describe('Nuevos casos (TC-INT-11..15)', () => {
     page,
     request
   }) => {
-    const token = await asegurarToken(request);
+    const token = await asegurarToken();
     const r = authed(request, token);
     const lista = await r.get(`${API}/membresias?estado=ACTIVA&limit=1`);
     test.skip(!lista.ok(), `No se pudo listar membresías: ${lista.status()}`);
@@ -133,7 +132,7 @@ test.describe('Nuevos casos (TC-INT-11..15)', () => {
     page,
     request
   }) => {
-    const token = await asegurarToken(request);
+    const token = await asegurarToken();
     const r = authed(request, token);
     const lista = await r.get(`${API}/membresias?estado=ACTIVA&limit=8`);
     test.skip(!lista.ok(), `No se pudo listar membresías: ${lista.status()}`);
@@ -175,7 +174,7 @@ test.describe('Nuevos casos (TC-INT-11..15)', () => {
     page,
     request
   }) => {
-    const token = await asegurarToken(request);
+    const token = await asegurarToken();
     const r = authed(request, token);
     const lista = await r.get(`${API}/inventario/productos?limit=25`);
     test.skip(!lista.ok(), `No se pudo listar productos: ${lista.status()}`);

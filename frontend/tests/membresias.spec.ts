@@ -15,7 +15,7 @@
  */
 
 import test, { expect, Page } from "@playwright/test";
-import { API, asegurarToken, authed, inyectarSesion, loginReal, refrescarSesion } from "./sesion";
+import { API, asegurarToken, authed, inyectarSesion, cargarSesionAdmin } from "./sesion";
 
 declare const process: {
   env: Record<string, string | undefined>;
@@ -33,12 +33,11 @@ async function irAMembresias(page: Page) {
 }
 
 test.describe('Módulo Membresías (TC-INT-01..10)', () => {
-  test.beforeAll(async ({ request }) => {
-    await loginReal(request);
+  test.beforeAll(() => {
+    cargarSesionAdmin();
   });
 
-  test.beforeEach(async ({ page, request }) => {
-    await refrescarSesion(request);
+  test.beforeEach(async ({ page }) => {
     await inyectarSesion(page);
   });
 
@@ -46,7 +45,7 @@ test.describe('Módulo Membresías (TC-INT-01..10)', () => {
     // Verificar precondición: el cliente no debe tener membresía activa.
     // Si ya la tiene (por una corrida previa del test), omitir para mantener
     // idempotencia. Para resetear la BD entre corridas: npm run seed:dataset.
-    const token = await asegurarToken(request);
+    const token = await asegurarToken();
     const r = authed(request, token);
     const cliente = await r.get(`${API}/clientes/cedula/${CEDULA}`);
     if (cliente.ok()) {
@@ -77,7 +76,7 @@ test.describe('Módulo Membresías (TC-INT-01..10)', () => {
 
   test('TC-INT-02 — Bloquea segunda membresía activa para el mismo cliente', async ({ page, request }) => {
     // Re-autenticar con token de API porque la página no afecta al request context
-    const token = await asegurarToken(request);
+    const token = await asegurarToken();
     const r = authed(request, token);
 
     // Buscar la primera membresía activa del seed
@@ -152,12 +151,37 @@ test.describe('Módulo Membresías (TC-INT-01..10)', () => {
 
   test('TC-INT-09 — Paginación funciona al cambiar el tamaño de página', async ({ page }) => {
     await irAMembresias(page);
-    const paginator = page.locator('mat-paginator').first();
+
+    // La vista tiene dos pestañas, cada una con su tabla y su paginador. Todo se
+    // busca dentro del panel activo: con un locator de página, .first() caía en
+    // el paginador de Planes ("1 – 4 de 4") y la cuenta de filas mezclaba ambas.
+    const panel = page.getByRole('tabpanel');
+    const paginator = panel.locator('mat-paginator');
+    const filas = panel.locator('table tbody tr');
     await expect(paginator).toBeVisible({ timeout: 10_000 });
+    await expect(filas.first()).toBeVisible({ timeout: 10_000 });
+
+    // El total sale de la etiqueta de rango del paginador ("1 – 10 de 39").
+    const rango = paginator.locator('.mat-mdc-paginator-range-label');
+    const total = Number((await rango.textContent())?.match(/de\s+(\d+)/)?.[1] ?? 0);
+    test.skip(total <= 5, `Solo hay ${total} membresías: no se puede comprobar el cambio de tamaño`);
+
+    const elegirTamano = async (valor: string) => {
+      await paginator.locator('mat-select').click();
+      await page.getByRole('option', { name: valor, exact: true }).click();
+    };
+
+    // Con 5 por página la tabla muestra exactamente 5 filas.
+    await elegirTamano('5');
+    await expect(filas).toHaveCount(5, { timeout: 10_000 });
+
+    // Al subir a 25 muestra más (o el total, si hay menos de 25).
+    await elegirTamano('25');
+    await expect(filas).toHaveCount(Math.min(total, 25), { timeout: 10_000 });
   });
 
   test('TC-INT-10 — Renovar una membresía cancelada no produce error 500', async ({ page, request }) => {
-    const token = await asegurarToken(request);
+    const token = await asegurarToken();
     const r = authed(request, token);
 
     const lista = await r.get(`${API}/membresias?estado=CANCELADA&limit=1`);

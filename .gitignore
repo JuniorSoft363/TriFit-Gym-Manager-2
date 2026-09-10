@@ -55,3 +55,6 @@ backups/*.dump*
 # Recurso local del equipo: casos de prueba en redacción (no versionar)
 nuevos casos.txt
 info_casos.txt
+
+# Sesion compartida de los e2e (la crea tests/global-setup.ts en cada corrida)
+frontend/tests/.sesion-admin.json

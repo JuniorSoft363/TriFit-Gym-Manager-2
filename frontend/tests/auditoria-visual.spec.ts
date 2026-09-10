@@ -5,7 +5,7 @@
  * Uso: npx playwright test tests/auditoria-visual.spec.ts
  */
 import test, { expect } from "@playwright/test";
-import { inyectarSesion, loginReal, refrescarSesion } from "./sesion";
+import { inyectarSesion, cargarSesionAdmin } from "./sesion";
 
 const RUTAS = [
   'dashboard',
@@ -26,14 +26,13 @@ const TEMAS = ['dark', 'light'] as const;
 test.describe.configure({ mode: 'serial' });
 
 test.describe('Auditoría visual — desktop', () => {
-  test.beforeAll(async ({ request }) => {
-    await loginReal(request);
+  test.beforeAll(() => {
+    cargarSesionAdmin();
   });
 
   for (const tema of TEMAS) {
     test(`desktop/${tema}`, async ({ page, request }) => {
       await page.setViewportSize({ width: 1440, height: 900 });
-      await refrescarSesion(request);
       await page.addInitScript((t) => localStorage.setItem('tf_theme', t), tema);
       await inyectarSesion(page);
       for (const ruta of RUTAS) {
@@ -53,13 +52,12 @@ test.describe('Auditoría visual — desktop', () => {
 test.describe('Auditoría visual — móvil', () => {
   test.use({ viewport: { width: 390, height: 844 }, hasTouch: true });
 
-  test.beforeAll(async ({ request }) => {
-    await loginReal(request);
+  test.beforeAll(() => {
+    cargarSesionAdmin();
   });
 
   for (const tema of TEMAS) {
     test(`movil/${tema}`, async ({ page, request }) => {
-      await refrescarSesion(request);
       await page.addInitScript((t) => localStorage.setItem('tf_theme', t), tema);
       await inyectarSesion(page);
       for (const ruta of RUTAS_MOVIL) {

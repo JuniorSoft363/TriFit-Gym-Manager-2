@@ -6,7 +6,7 @@
  * Sesión compartida vía ./sesion.ts (un solo login por corrida).
  */
 import test, { expect, Page } from "@playwright/test";
-import { API, asegurarToken, authed, inyectarSesion, loginReal, refrescarSesion } from "./sesion";
+import { API, asegurarToken, authed, inyectarSesion, cargarSesionAdmin } from "./sesion";
 
 async function irAPagos(page: Page) {
   await page.goto('/app/pagos', { waitUntil: 'networkidle' });
@@ -14,17 +14,16 @@ async function irAPagos(page: Page) {
 }
 
 test.describe('Módulo Pagos (TC-PAG-01..06)', () => {
-  test.beforeAll(async ({ request }) => {
-    await loginReal(request);
+  test.beforeAll(() => {
+    cargarSesionAdmin();
   });
 
-  test.beforeEach(async ({ page, request }) => {
-    await refrescarSesion(request);
+  test.beforeEach(async ({ page }) => {
     await inyectarSesion(page);
   });
 
   test('TC-PAG-01 — Registrar pago válido por UI', async ({ page, request }) => {
-    const token = await asegurarToken(request);
+    const token = await asegurarToken();
     const r = authed(request, token);
     const lista = await r.get(`${API}/membresias?estado=ACTIVA&limit=1`);
     test.skip(!lista.ok(), `No se pudo listar membresías: ${lista.status()}`);
@@ -49,7 +48,7 @@ test.describe('Módulo Pagos (TC-PAG-01..06)', () => {
   });
 
   test('TC-PAG-02 — Validaciones devuelven 400 sin error 500', async ({ request }) => {
-    const token = await asegurarToken(request);
+    const token = await asegurarToken();
     const r = authed(request, token);
     const lista = await r.get(`${API}/membresias?estado=ACTIVA&limit=1`);
     test.skip(!lista.ok(), `No se pudo listar membresías: ${lista.status()}`);
@@ -81,7 +80,7 @@ test.describe('Módulo Pagos (TC-PAG-01..06)', () => {
   });
 
   test('TC-PAG-03 — Anular pago por UI queda ANULADO en la API', async ({ page, request }) => {
-    const token = await asegurarToken(request);
+    const token = await asegurarToken();
     const r = authed(request, token);
     const lista = await r.get(`${API}/pagos?estado=PAGADO&limit=1`);
     test.skip(!lista.ok(), `No se pudo listar pagos: ${lista.status()}`);
@@ -109,7 +108,7 @@ test.describe('Módulo Pagos (TC-PAG-01..06)', () => {
   });
 
   test('TC-PAG-04 — Anular un pago ya anulado no produce error 500', async ({ request }) => {
-    const token = await asegurarToken(request);
+    const token = await asegurarToken();
     const r = authed(request, token);
     const lista = await r.get(`${API}/pagos?estado=ANULADO&limit=1`);
     test.skip(!lista.ok(), `No se pudo listar pagos: ${lista.status()}`);
@@ -122,7 +121,7 @@ test.describe('Módulo Pagos (TC-PAG-01..06)', () => {
   });
 
   test('TC-PAG-05 — Filtro por estado solo trae ese estado', async ({ request }) => {
-    const token = await asegurarToken(request);
+    const token = await asegurarToken();
     const r = authed(request, token);
     const resp = await r.get(`${API}/pagos?estado=ANULADO&limit=25`);
     expect(resp.ok(), `Listar anulados falló: ${resp.status()}`).toBeTruthy();

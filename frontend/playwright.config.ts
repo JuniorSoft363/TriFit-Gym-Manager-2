@@ -11,6 +11,9 @@ import { defineConfig, devices } from '@playwright/test';
  */
 export default defineConfig({
   testDir: './tests',
+  // Un único login de administrador para toda la corrida: el backend solo admite
+  // 10 logins cada 15 min y la suite llegaba a pedir 14.
+  globalSetup: require.resolve('./tests/global-setup'),
   // La auditoría visual es herramienta manual, no suite: se corre explícita
   // (npx playwright test tests/auditoria-visual.spec.ts) y no gasta logins.
   testIgnore: ['**/auditoria-visual.spec.ts'],

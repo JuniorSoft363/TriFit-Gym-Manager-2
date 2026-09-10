@@ -7,7 +7,7 @@
  * rate-limit; los logins por UI son solo donde el formulario es el sujeto.
  */
 import test, { expect } from "@playwright/test";
-import { API, asegurarToken, authed, loginApi, loginReal } from "./sesion";
+import { API, asegurarToken, authed, loginApi, cargarSesionAdmin } from "./sesion";
 
 const TEMP = {
   nombre: 'TMP Auth',
@@ -17,8 +17,10 @@ const TEMP = {
   rolId: 2
 };
 
-// Sesión del temporal capturada del localStorage en TC-AUTH-04.
-let sesionTemp: { token: string; refresh: string } | null = null;
+// Sesión del temporal capturada del localStorage en TC-AUTH-04. Se guarda el
+// usuario tal cual lo dejó la app (no uno inventado): el guard de rutas se apoya
+// en ese objeto, así que fabricarlo hacía que TC-AUTH-05 no saliera del perfil.
+let sesionTemp: { token: string; refresh: string; usuario: string } | null = null;
 let tempId = 0;
 
 async function irAlLogin(page: any) {
@@ -28,8 +30,8 @@ async function irAlLogin(page: any) {
 
 test.describe('Autenticación y sesiones (TC-AUTH-01..06)', () => {
   test.beforeAll(async ({ request }) => {
-    await loginReal(request);
-    const admin = authed(request, await asegurarToken(request));
+    cargarSesionAdmin();
+    const admin = authed(request, await asegurarToken());
     // Asegurar temporal con contraseña conocida (idempotente entre corridas).
     const creado = await admin.post(`${API}/usuarios`, {
       nombre: TEMP.nombre,
@@ -51,7 +53,7 @@ test.describe('Autenticación y sesiones (TC-AUTH-01..06)', () => {
 
   test.afterAll(async ({ request }) => {
     if (!tempId) return;
-    const admin = authed(request, await asegurarToken(request));
+    const admin = authed(request, await asegurarToken());
     await admin.del(`${API}/usuarios/${tempId}?definitivo=true`);
   });
 
@@ -98,7 +100,8 @@ test.describe('Autenticación y sesiones (TC-AUTH-01..06)', () => {
     // La API también bloquea (403 con código), excepto perfil/password.
     sesionTemp = await page.evaluate(() => ({
       token: localStorage.getItem('tf_token')!,
-      refresh: localStorage.getItem('tf_refresh')!
+      refresh: localStorage.getItem('tf_refresh')!,
+      usuario: localStorage.getItem('tf_usuario')!
     }));
     const r = authed(request, sesionTemp.token);
     const bloqueado = await r.get(`${API}/clientes?limit=1`);
@@ -112,20 +115,20 @@ test.describe('Autenticación y sesiones (TC-AUTH-01..06)', () => {
     // Navegación ocasionalmente lenta en Docker Desktop/Windows: triple timeout.
     test.slow();
     test.skip(!sesionTemp, 'TC-AUTH-04 debe pasar primero (sesión del temporal)');
-    await page.addInitScript(({ token, refresh }) => {
-      localStorage.setItem('tf_token', token);
-      localStorage.setItem('tf_refresh', refresh);
-      localStorage.setItem(
-        'tf_usuario',
-        JSON.stringify({
-          id: 0,
-          nombre: 'TMP',
-          email: TEMP.email,
-          rol: 'RECEPCIONISTA',
-          debeCambiarPassword: true
-        })
-      );
-    }, sesionTemp);
+    // La sesión se siembra con evaluate sobre una ruta pública, NO con
+    // addInitScript: ese se reejecuta en CADA navegación, así que al ir luego al
+    // dashboard volvería a escribir el usuario original (debeCambiarPassword:
+    // true) pisando el que la app acaba de actualizar, y el guard rebotaría al
+    // perfil. Se restaura el usuario tal cual lo dejó TC-AUTH-04.
+    await page.goto('/login', { waitUntil: 'domcontentloaded' });
+    await page.evaluate(
+      ({ token, refresh, usuario }) => {
+        localStorage.setItem('tf_token', token);
+        localStorage.setItem('tf_refresh', refresh);
+        localStorage.setItem('tf_usuario', usuario);
+      },
+      sesionTemp!
+    );
     await page.goto('/app/perfil', { waitUntil: 'networkidle' });
     await expect(page.locator('.tf-perfil-aviso')).toBeVisible({ timeout: 15000 });
 
@@ -161,7 +164,11 @@ test.describe('Autenticación y sesiones (TC-AUTH-01..06)', () => {
       }
     }
     expect(body, 'Login temporal falló con ambas contraseñas').toBeTruthy();
-    sesionTemp = { token: body.token, refresh: body.refreshToken };
+    sesionTemp = {
+      token: body.token,
+      refresh: body.refreshToken,
+      usuario: JSON.stringify(body.usuario)
+    };
     await page.addInitScript(
       ({ token, refresh, usuario }) => {
         localStorage.setItem('tf_token', token);
