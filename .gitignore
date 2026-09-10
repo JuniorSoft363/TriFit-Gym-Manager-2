@@ -18,6 +18,7 @@ backend/uploads/perfiles/
 backend/uploads/tmp/
 
 # Variables de entorno
+.env
 backend/.env
 frontend/src/environments/environment.prod.ts
 
