@@ -613,6 +613,12 @@ table.mat-mdc-table {
 .mat-mdc-form-field-icon-prefix, .mat-mdc-form-field-icon-suffix {
   color: var(--tf-text-tertiary);
 }
+/* Un texto mas largo que el campo se desplaza dentro del input y llegaba a
+   quedar a 4px del icono del sufijo, de modo que se leia pegado a la lupa.
+   Se reserva un respiro a la derecha solo en los campos que llevan icono. */
+.mat-mdc-form-field-has-icon-suffix .mat-mdc-form-field-infix {
+  padding-right: 8px;
+}
 
 /* Select / opciones / menús */
 .mat-mdc-select-panel,
