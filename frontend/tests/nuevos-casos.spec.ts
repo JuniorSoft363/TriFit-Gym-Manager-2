@@ -61,6 +61,7 @@ test.describe('Nuevos casos (TC-INT-11..15)', () => {
     await dlg.getByRole('button', { name: 'Guardar' }).click();
 
     await expect(page.getByText(/Registro creado correctamente/i)).toBeVisible({ timeout: 10000 });
+    await page.screenshot({ path: '../docs/evidencias/TC-INT-11/01-snackbar-registro.png' });
     await expect(page.getByText(NUEVO.cedula).first()).toBeVisible({ timeout: 10000 });
 
     // Queda disponible para asignar membresías (búsqueda por cédula).
@@ -93,6 +94,7 @@ test.describe('Nuevos casos (TC-INT-11..15)', () => {
     await expect(page.getByText(/Ya existe un registro con esos datos únicos/i)).toBeVisible({
       timeout: 10000
     });
+    await page.screenshot({ path: '../docs/evidencias/TC-INT-12/01-snackbar-duplicado.png' });
     expect(await totalClientes(request, token)).toBe(antes);
   });
 
@@ -124,6 +126,7 @@ test.describe('Nuevos casos (TC-INT-11..15)', () => {
     await dlg.getByRole('button', { name: 'Registrar' }).click();
 
     await expect(page.getByText(/Pago registrado correctamente/i)).toBeVisible({ timeout: 10000 });
+    await page.screenshot({ path: '../docs/evidencias/TC-INT-13/01-snackbar-pago.png' });
   });
 
   test('TC-INT-14 — Registrar el ingreso (check-in) de un socio con membresía activa', async ({
@@ -157,6 +160,7 @@ test.describe('Nuevos casos (TC-INT-11..15)', () => {
     await page.getByRole('button', { name: 'Buscar' }).click();
     await page.getByRole('button', { name: 'Registrar entrada' }).click();
     await expect(page.getByText(/Entrada registrada/i)).toBeVisible({ timeout: 10000 });
+    await page.screenshot({ path: '../docs/evidencias/TC-INT-14/01-snackbar-entrada.png' });
 
     // Segundo intento sin salida: rechazado.
     const dup = await r.post(`${API}/asistencias/entrada`, { cedula });
@@ -195,6 +199,7 @@ test.describe('Nuevos casos (TC-INT-11..15)', () => {
 
     // El interceptor global muestra el 409 del backend.
     await expect(page.getByText(/Stock insuficiente/i)).toBeVisible({ timeout: 10000 });
+    await page.screenshot({ path: '../docs/evidencias/TC-INT-15/01-snackbar-stock.png' });
 
     // El stock no se modificó.
     const verif = await r.get(`${API}/inventario/productos/${prod.id}`);
