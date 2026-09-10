@@ -59,7 +59,8 @@ services:
       JWT_SECRET: ${JWT_SECRET:-cambia_este_secreto_en_produccion}
       JWT_EXPIRES: ${JWT_EXPIRES:-30m}
       REFRESH_EXPIRES_DIAS: ${REFRESH_EXPIRES_DIAS:-7}
-      CORS_ORIGIN: ${CORS_ORIGIN:-https://localhost:8443,http://localhost:4200}
+      # El comodín de túneles es para sesiones UAT/remotas; en producción usa el dominio exacto.
+      CORS_ORIGIN: ${CORS_ORIGIN:-https://localhost:8443,http://localhost:4200,https://*.trycloudflare.com}
       # Límites (subirlos temporalmente para sesiones de prueba con varios usuarios).
       LOGIN_RATE_MAX: ${LOGIN_RATE_MAX:-10}
       LOGIN_RATE_VENTANA_MIN: ${LOGIN_RATE_VENTANA_MIN:-15}

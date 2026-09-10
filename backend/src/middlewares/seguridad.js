@@ -1,6 +1,7 @@
 const helmet = require('helmet');
 const cors = require('cors');
 const { rateLimit } = require('express-rate-limit');
+const { HttpError } = require('../utils/httpError');
 const { LOGIN_RATE_MAX, LOGIN_RATE_VENTANA_MIN, API_RATE_MAX, API_RATE_VENTANA_MIN } = require('../config/env');
 
 // Cabeceras de seguridad. crossOriginResourcePolicy en 'cross-origin'
@@ -16,11 +17,30 @@ const origenesPermitidos = (process.env.CORS_ORIGIN || 'https://localhost:8443,h
   .map((o) => o.trim())
   .filter(Boolean);
 
+// Acepta orígenes exactos y comodines de subdominio (*.ejemplo.com).
+// El comodín de túneles es para sesiones UAT; en producción usa el dominio exacto.
+function origenPermitido(origen) {
+  if (!origen) return true; // curl, apps móviles, healthchecks
+  if (origenesPermitidos.includes(origen)) return true;
+  let u;
+  try {
+    u = new URL(origen);
+  } catch {
+    return false;
+  }
+  return origenesPermitidos.some((p) => {
+    const m = p.match(/^(https?:\/\/)?\*\.([^/]+)$/);
+    if (!m) return false;
+    if (m[1] && `${u.protocol}//` !== m[1]) return false;
+    return u.hostname === m[2] || u.hostname.endsWith(`.${m[2]}`);
+  });
+}
+
 const corsRestringido = cors({
   origin: (origen, cb) => {
-    // Sin Origin (curl, apps móviles, healthchecks) se permite.
-    if (!origen || origenesPermitidos.includes(origen)) return cb(null, true);
-    return cb(new Error('Origen no permitido por CORS'));
+    if (origenPermitido(origen)) return cb(null, true);
+    // 403 controlado (antes era un Error sin estado → 500 genérico).
+    return cb(new HttpError(403, 'Origen no permitido', 'ORIGEN_NO_PERMITIDO'));
   }
 });
 
@@ -44,4 +64,4 @@ const limiteApi = rateLimit({
   handler: respuestaLimite
 });
 
-module.exports = { cabeceras, corsRestringido, limiteLogin, limiteApi };
+module.exports = { cabeceras, corsRestringido, limiteLogin, limiteApi, origenPermitido };
