@@ -104,17 +104,24 @@
               <h2>Ingresos por mes</h2>
               <p>Últimos 6 meses · pagos confirmados</p>
             </div>
-            <mat-icon>bar_chart</mat-icon>
+            <mat-icon>show_chart</mat-icon>
           </div>
-          <div class="tf-minichart">
-            <div class="tf-minichart-col" *ngFor="let x of m.ingresosPorMes">
-              <div class="tf-minichart-bar" [style.height.%]="alturaRel(x.total, m.ingresosPorMes)"
-                   [matTooltip]="(x.total | currency: 'USD')"></div>
-              <span class="tf-minichart-lbl">{{ x.etiqueta }}</span>
-            </div>
-          </div>
+          <app-area-chart [puntos]="serieIngresos()" prefix="$" color="var(--tf-primary)"></app-area-chart>
         </mat-card>
 
+        <mat-card class="tf-card tf-panel">
+          <div class="tf-panel-head">
+            <div>
+              <h2>Distribución de planes</h2>
+              <p>Membresías activas por plan</p>
+            </div>
+            <mat-icon>donut_large</mat-icon>
+          </div>
+          <app-donut-chart [datos]="segmentosPlanes()" subtitulo="activas"></app-donut-chart>
+        </mat-card>
+      </div>
+
+      <div class="tf-dash-panels">
         <mat-card class="tf-card tf-panel">
           <div class="tf-panel-head">
             <div>
@@ -123,17 +130,9 @@
             </div>
             <mat-icon>calendar_month</mat-icon>
           </div>
-          <div class="tf-minichart">
-            <div class="tf-minichart-col" *ngFor="let x of m.asistenciasPorDia">
-              <div class="tf-minichart-bar tf-minichart-bar-alt" [style.height.%]="alturaRel(x.total, m.asistenciasPorDia)"
-                   [matTooltip]="x.total + ' asistencias'"></div>
-              <span class="tf-minichart-lbl">{{ x.etiqueta }}</span>
-            </div>
-          </div>
+          <app-bar-chart [puntos]="serieAsistencias()" [alt]="true" suffix=""></app-bar-chart>
         </mat-card>
-      </div>
 
-      <div class="tf-dash-panels">
         <mat-card class="tf-card tf-panel" *ngIf="m.topEntrenadores.length">
           <div class="tf-panel-head">
             <div>

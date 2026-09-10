@@ -9,6 +9,9 @@ import { ConfirmDialogComponent } from '../../shared/confirm-dialog/confirm-dial
 import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
 import { MetricasDashboard } from '../../core/models';
+import { AreaChartComponent, PuntoSerie } from '../../shared/charts/area-chart.component';
+import { BarChartComponent } from '../../shared/charts/bar-chart.component';
+import { DonutChartComponent, SegmentoDona } from '../../shared/charts/donut-chart.component';
 
 interface Resumen {
   clientesActivos: number;
@@ -38,7 +41,15 @@ interface Acceso {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink, MATERIAL, CountUpDirective],
+  imports: [
+    CommonModule,
+    RouterLink,
+    MATERIAL,
+    CountUpDirective,
+    AreaChartComponent,
+    BarChartComponent,
+    DonutChartComponent
+  ],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })
@@ -146,11 +157,17 @@ export class DashboardComponent implements OnInit {
     });
   }
 
-  /** Altura relativa (2–100%) de un valor dentro de una serie, para las mini-barras. */
-  alturaRel(valor: number, serie: { total: number }[]): number {
-    const max = Math.max(1, ...serie.map((x) => x.total));
-    return Math.max(2, Math.round((valor / max) * 100));
-  }
+  serieIngresos = computed<PuntoSerie[]>(() =>
+    (this.metricas()?.ingresosPorMes || []).map((m) => ({ label: m.etiqueta, value: m.total }))
+  );
+
+  serieAsistencias = computed<PuntoSerie[]>(() =>
+    (this.metricas()?.asistenciasPorDia || []).map((d) => ({ label: d.etiqueta, value: d.total }))
+  );
+
+  segmentosPlanes = computed<SegmentoDona[]>(() =>
+    (this.metricas()?.distribucionPlanes || []).map((p) => ({ label: p.plan, value: p.total }))
+  );
 
   cargarResumen() {
     this.api.get<Resumen>('dashboard/resumen').subscribe({

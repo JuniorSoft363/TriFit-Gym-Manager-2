@@ -74,6 +74,43 @@
   </div>
 </section>
 
+<!-- Planes -->
+<section class="tf-section tf-plans" *ngIf="planes.length">
+  <div class="tf-section-inner">
+    <div class="tf-section-header" tfReveal>
+      <span class="tf-section-tag">Membresías</span>
+      <h2 class="tf-section-title">Elige el plan que se ajusta a ti</h2>
+      <p class="tf-section-desc">Precios transparentes. Sin matrícula oculta. Cancela cuando quieras.</p>
+    </div>
+    <div class="tf-plans-grid">
+      <div
+        class="tf-plan-card"
+        *ngFor="let p of planes; let i = index"
+        [class.tf-plan-featured]="p.id === planDestacadoId"
+        tfReveal
+        [tfRevealDelay]="i * 90"
+      >
+        <span class="tf-plan-badge" *ngIf="p.id === planDestacadoId">Más popular</span>
+        <h3 class="tf-plan-name">{{ p.nombre }}</h3>
+        <div class="tf-plan-price">
+          <span class="tf-plan-currency">$</span>
+          <span class="tf-plan-amount">{{ p.precio | number: '1.0-2' }}</span>
+          <span class="tf-plan-period">{{ etiquetaDuracion(p.duracionDias) }}</span>
+        </div>
+        <p class="tf-plan-desc">{{ p.descripcion || 'Acceso completo a instalaciones y clases.' }}</p>
+        <ul class="tf-plan-features">
+          <li><mat-icon>check_circle</mat-icon> Acceso a todo el equipamiento</li>
+          <li><mat-icon>check_circle</mat-icon> Seguimiento de asistencias y progreso</li>
+          <li><mat-icon>check_circle</mat-icon> Rutinas asignadas por entrenador</li>
+        </ul>
+        <button mat-flat-button class="tf-btn-primary tf-plan-cta" routerLink="/login">
+          Comenzar ahora
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- Contacto -->
 <section class="tf-section tf-contact">
   <div class="tf-section-inner">

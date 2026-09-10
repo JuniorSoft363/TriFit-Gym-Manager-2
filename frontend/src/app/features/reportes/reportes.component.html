@@ -4,6 +4,65 @@
   </div>
 
   <mat-tab-group>
+    <mat-tab label="Resumen visual">
+      <div class="tf-rep-resumen">
+        <div *ngIf="cargandoResumen()" class="tf-center" style="padding: 40px">
+          <mat-spinner diameter="34"></mat-spinner>
+        </div>
+
+        <ng-container *ngIf="!cargandoResumen() && metricas() as m">
+          <div class="tf-rep-kpis">
+            <div class="tf-rep-kpi">
+              <span class="tf-rep-kpi-num">{{ totalIngresos6m() | currency: 'USD' }}</span>
+              <span class="tf-rep-kpi-lbl">Ingresos últimos 6 meses</span>
+            </div>
+            <div class="tf-rep-kpi">
+              <span class="tf-rep-kpi-num">{{ m.retencion }}%</span>
+              <span class="tf-rep-kpi-lbl">Retención ({{ m.clientesConMembresia }}/{{ m.clientesActivos }})</span>
+            </div>
+            <div class="tf-rep-kpi">
+              <span class="tf-rep-kpi-num">{{ m.stockBajo.length }}</span>
+              <span class="tf-rep-kpi-lbl">Productos con stock bajo</span>
+            </div>
+          </div>
+
+          <div class="tf-rep-grid">
+            <mat-card class="tf-card tf-panel">
+              <div class="tf-panel-head">
+                <div><h2>Ingresos por mes</h2><p>Pagos confirmados</p></div>
+                <mat-icon>show_chart</mat-icon>
+              </div>
+              <app-area-chart [puntos]="serieIngresos()" prefix="$"></app-area-chart>
+            </mat-card>
+
+            <mat-card class="tf-card tf-panel">
+              <div class="tf-panel-head">
+                <div><h2>Asistencias por día</h2><p>Últimos 7 días</p></div>
+                <mat-icon>calendar_month</mat-icon>
+              </div>
+              <app-bar-chart [puntos]="serieAsistencias()" [alt]="true"></app-bar-chart>
+            </mat-card>
+
+            <mat-card class="tf-card tf-panel">
+              <div class="tf-panel-head">
+                <div><h2>Membresías por estado</h2><p>Situación actual</p></div>
+                <mat-icon>pie_chart</mat-icon>
+              </div>
+              <app-donut-chart [datos]="segmentosVencimientos()" subtitulo="membresías"></app-donut-chart>
+            </mat-card>
+
+            <mat-card class="tf-card tf-panel">
+              <div class="tf-panel-head">
+                <div><h2>Distribución de planes</h2><p>Membresías activas</p></div>
+                <mat-icon>donut_large</mat-icon>
+              </div>
+              <app-donut-chart [datos]="segmentosPlanes()" subtitulo="activas"></app-donut-chart>
+            </mat-card>
+          </div>
+        </ng-container>
+      </div>
+    </mat-tab>
+
     <mat-tab label="Clientes">
       <div style="padding-top: 16px">
         <app-reporte-tabla
