@@ -80,10 +80,12 @@ async function listar(query) {
   return { datos, total, page, limit };
 }
 
-// Clientes actualmente dentro del gimnasio (entrada sin salida registrada).
+// Clientes actualmente dentro del gimnasio: entrada de hoy sin salida registrada
+// (una entrada sin cerrar de días anteriores se considera dato obsoleto).
 async function presentes() {
+  const inicioHoy = new Date(); inicioHoy.setHours(0, 0, 0, 0);
   const datos = await prisma.asistencia.findMany({
-    where: { horaSalida: null },
+    where: { horaSalida: null, horaEntrada: { gte: inicioHoy } },
     include: { cliente: true },
     orderBy: { horaEntrada: 'desc' }
   });

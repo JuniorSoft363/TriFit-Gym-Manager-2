@@ -16,7 +16,13 @@
   ></mat-progress-spinner>
 </mat-form-field>
 
-<mat-autocomplete #auto="matAutocomplete" [displayWith]="mostrar" (optionSelected)="seleccionar($event)">
+<mat-autocomplete
+  #auto="matAutocomplete"
+  class="tf-busqueda-panel"
+  panelWidth="auto"
+  [displayWith]="mostrar"
+  (optionSelected)="seleccionar($event)"
+>
   <ng-container *ngIf="!cargando() && total() === 0 && control.value && control.value.length >= 2">
     <mat-option disabled>Sin resultados para «{{ control.value }}»</mat-option>
   </ng-container>

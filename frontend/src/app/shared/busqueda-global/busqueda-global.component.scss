@@ -1,41 +1,65 @@
 :host {
   display: block;
   width: 100%;
-  max-width: 420px;
+  max-width: 460px;
 }
 
 .tf-busqueda-campo {
   width: 100%;
 }
 
-.tf-busqueda-opcion {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+// El contenido de cada opción se dispone en una sola línea.
+::ng-deep .tf-busqueda-panel {
+  min-width: 340px !important;
+  max-width: min(560px, 90vw) !important;
 
+  .mat-mdc-option .mdc-list-item__primary-text {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .mat-mdc-optgroup-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    opacity: 0.55;
+    min-height: 34px;
+  }
+}
+
+.tf-busqueda-opcion {
   mat-icon {
     flex: none;
-    opacity: 0.7;
+    opacity: 0.65;
     font-size: 20px;
     width: 20px;
     height: 20px;
   }
 
   .tf-busqueda-titulo {
+    flex: 1 1 auto;
     font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .tf-busqueda-sub {
-    margin-left: auto;
-    padding-left: 12px;
+    flex: none;
+    padding-left: 14px;
     font-size: 0.78rem;
-    opacity: 0.6;
+    opacity: 0.55;
+    white-space: nowrap;
   }
 }
 
 @media (max-width: 900px) {
   :host {
-    max-width: 200px;
+    max-width: 190px;
   }
 
   .tf-busqueda-opcion .tf-busqueda-sub {

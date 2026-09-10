@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { PageEvent } from '@angular/material/paginator';
+import { ActivatedRoute } from '@angular/router';
 import { debounceTime, Subject } from 'rxjs';
 import { MATERIAL } from '../material';
 import { ApiService } from '../../core/services/api.service';
@@ -50,7 +51,8 @@ export class CrudPageComponent implements OnInit, OnChanges {
   constructor(
     private api: ApiService,
     private dialog: MatDialog,
-    private snack: MatSnackBar
+    private snack: MatSnackBar,
+    private route: ActivatedRoute
   ) {
     this.busquedaCambio.pipe(debounceTime(350)).subscribe(() => {
       this.pageIndex = 0;
@@ -59,6 +61,9 @@ export class CrudPageComponent implements OnInit, OnChanges {
   }
 
   ngOnInit() {
+    // Permite llegar prefiltrado desde el buscador global (?busqueda=...)
+    const inicial = this.route.snapshot.queryParamMap.get('busqueda');
+    if (inicial) this.busqueda = inicial;
     this.cargar();
   }
 

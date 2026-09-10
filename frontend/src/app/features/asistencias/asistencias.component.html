@@ -58,6 +58,40 @@
     </div>
   </mat-card>
 
+  <mat-card class="tf-card" *ngIf="aforo">
+    <div class="tf-aforo-head">
+      <h2 style="margin: 0">Dentro ahora</h2>
+      <button mat-icon-button matTooltip="Actualizar" (click)="cargarAforo()">
+        <mat-icon>refresh</mat-icon>
+      </button>
+    </div>
+
+    <div class="tf-aforo-stats">
+      <div class="tf-aforo-stat">
+        <span class="tf-aforo-num">{{ aforo.dentroAhora }}</span>
+        <span class="tf-aforo-lbl">personas dentro</span>
+      </div>
+      <div class="tf-aforo-stat">
+        <span class="tf-aforo-num">{{ aforo.totalDia }}</span>
+        <span class="tf-aforo-lbl">ingresos del día</span>
+      </div>
+      <div class="tf-aforo-stat">
+        <span class="tf-aforo-num">{{ aforo.horaPico?.hora }}:00</span>
+        <span class="tf-aforo-lbl">hora pico ({{ aforo.horaPico?.entradas }})</span>
+      </div>
+    </div>
+
+    <mat-chip-set *ngIf="presentes.length" style="margin-top: 12px">
+      <mat-chip *ngFor="let p of presentes">
+        {{ p.cliente?.nombres }} {{ p.cliente?.apellidos }}
+        <span style="opacity: 0.6; margin-left: 6px">{{ p.horaEntrada | date: 'HH:mm' }}</span>
+      </mat-chip>
+    </mat-chip-set>
+    <p *ngIf="!presentes.length" class="tf-vacio" style="margin: 12px 0 0">
+      Nadie tiene una entrada abierta en este momento.
+    </p>
+  </mat-card>
+
   <mat-card class="tf-card">
     <h2>Asistencias de hoy</h2>
 
