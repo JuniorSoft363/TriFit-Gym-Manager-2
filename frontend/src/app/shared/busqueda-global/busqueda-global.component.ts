@@ -70,7 +70,11 @@ export class BusquedaGlobalComponent {
   seleccionar(ev: MatAutocompleteSelectedEvent) {
     const opcion = ev.option.value as OpcionBusqueda;
     if (!opcion?.grupo) return;
-    this.router.navigate([opcion.grupo.ruta], { queryParams: { busqueda: opcion.titulo } });
+    if (opcion.grupo.tipo === 'cliente') {
+      this.router.navigate(['/app/clientes', opcion.id]);
+    } else {
+      this.router.navigate([opcion.grupo.ruta], { queryParams: { busqueda: opcion.titulo } });
+    }
     this.control.setValue('', { emitEvent: false });
     this.grupos.set([]);
     this.total.set(0);

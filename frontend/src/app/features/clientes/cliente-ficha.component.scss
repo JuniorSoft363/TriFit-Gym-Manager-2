@@ -1,0 +1,240 @@
+.tf-ficha-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--tf-text-secondary);
+  text-decoration: none;
+  font-size: 0.9rem;
+  margin-bottom: 18px;
+  transition: color 0.2s ease;
+}
+.tf-ficha-back:hover {
+  color: var(--tf-primary);
+}
+.tf-ficha-back mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+/* Cabecera */
+.tf-ficha-head {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  padding: 24px;
+  background: var(--tf-surface);
+  background-image: var(--tf-grad-surface);
+  border: 1px solid var(--tf-border);
+  border-radius: var(--tf-radius, 16px);
+  margin-bottom: 18px;
+}
+
+.tf-ficha-avatar {
+  width: 76px;
+  height: 76px;
+  flex: none;
+  border-radius: 20px;
+  display: grid;
+  place-items: center;
+  font-size: 1.7rem;
+  font-weight: 800;
+  color: #fff;
+  background: var(--tf-grad-primary);
+  box-shadow: var(--tf-shadow-primary);
+}
+
+.tf-ficha-id h1 {
+  margin: 0 0 6px;
+  font-size: 1.5rem;
+}
+
+.tf-ficha-sub {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin: 0 0 10px;
+  color: var(--tf-text-secondary);
+  font-size: 0.85rem;
+}
+.tf-ficha-sub span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.tf-ficha-sub mat-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  opacity: 0.7;
+}
+
+.tf-ficha-chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* KPIs */
+.tf-ficha-kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 14px;
+  margin-bottom: 18px;
+}
+.tf-ficha-kpi {
+  background: var(--tf-surface-2, #171f30);
+  border: 1px solid var(--tf-border);
+  border-radius: 14px;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.tf-ficha-kpi-num {
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
+.tf-ficha-kpi-lbl {
+  font-size: 0.78rem;
+  opacity: 0.6;
+}
+
+/* Grid de paneles */
+.tf-ficha-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.tf-panel {
+  padding: 20px 22px !important;
+  margin-bottom: 16px;
+}
+.tf-panel-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.tf-panel-head h2 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+}
+.tf-panel-head p {
+  margin: 4px 0 0;
+  font-size: 12.5px;
+  color: var(--tf-text-tertiary);
+}
+.tf-panel-head > mat-icon {
+  color: var(--tf-text-tertiary);
+}
+
+/* Entrenadores */
+.tf-ficha-entrenadores {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.tf-ficha-entrenador {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.tf-ficha-mini-avatar {
+  width: 38px;
+  height: 38px;
+  flex: none;
+  border-radius: 11px;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+  background: var(--tf-primary-soft);
+  color: var(--tf-primary);
+}
+.tf-ficha-entrenador div span {
+  display: block;
+  font-size: 0.8rem;
+  opacity: 0.6;
+}
+
+/* Timeline */
+.tf-timeline {
+  position: relative;
+  padding-left: 4px;
+}
+.tf-timeline-item {
+  position: relative;
+  padding: 0 0 18px 24px;
+  border-left: 2px solid var(--tf-border);
+}
+.tf-timeline-item:last-child {
+  border-left-color: transparent;
+  padding-bottom: 0;
+}
+.tf-timeline-dot {
+  position: absolute;
+  left: -7px;
+  top: 2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid var(--tf-surface);
+}
+.tf-timeline-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+.tf-timeline-meta {
+  margin: 0;
+  font-size: 0.83rem;
+  color: var(--tf-text-secondary);
+}
+
+/* Rutinas */
+.tf-ficha-rutinas {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.tf-ficha-rutinas li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--tf-border);
+}
+.tf-ficha-rutinas li:last-child {
+  border-bottom: none;
+}
+.tf-ficha-rutinas mat-icon {
+  color: var(--tf-primary);
+}
+.tf-ficha-rutinas div span {
+  display: block;
+  font-size: 0.8rem;
+  opacity: 0.6;
+}
+
+.tf-estado-chip {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.tf-empty-inline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--tf-text-tertiary);
+  font-size: 0.88rem;
+}
