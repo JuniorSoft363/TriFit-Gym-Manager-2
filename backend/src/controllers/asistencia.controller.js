@@ -4,6 +4,8 @@ const asistenciaService = require('../services/asistencia.service');
 
 module.exports = {
   listar: asyncHandler(async (req, res) => res.json(await asistenciaService.listar(req.query))),
+  presentes: asyncHandler(async (req, res) => res.json(await asistenciaService.presentes())),
+  aforo: asyncHandler(async (req, res) => res.json(await asistenciaService.aforo(req.query))),
   consultar: asyncHandler(async (req, res) => res.json(await asistenciaService.consultar(req.params.cedula))),
   entrada: asyncHandler(async (req, res) => {
     const r = await asistenciaService.registrarEntrada(req.body.cedula, req.usuario.id);

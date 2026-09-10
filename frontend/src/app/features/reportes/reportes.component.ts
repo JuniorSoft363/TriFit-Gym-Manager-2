@@ -1,9 +1,14 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MATERIAL } from '../../shared/material';
 import { ReporteTablaComponent } from './reporte-tabla.component';
 import { Columna } from '../../shared/campos';
 import { FiltroReporte } from './filtro-reporte';
+import { ApiService } from '../../core/services/api.service';
+import { MetricasDashboard } from '../../core/models';
+import { AreaChartComponent, PuntoSerie } from '../../shared/charts/area-chart.component';
+import { BarChartComponent } from '../../shared/charts/bar-chart.component';
+import { DonutChartComponent, SegmentoDona } from '../../shared/charts/donut-chart.component';
 
 const COLORES_ESTADO_MEMBRESIA: Record<string, string> = {
   ACTIVA: '#10b981',
@@ -21,10 +26,59 @@ const COLORES_ESTADO_PAGO: Record<string, string> = {
 @Component({
   selector: 'app-reportes',
   standalone: true,
-  imports: [CommonModule, MATERIAL, ReporteTablaComponent],
-  templateUrl: './reportes.component.html'
+  imports: [
+    CommonModule,
+    MATERIAL,
+    ReporteTablaComponent,
+    AreaChartComponent,
+    BarChartComponent,
+    DonutChartComponent
+  ],
+  templateUrl: './reportes.component.html',
+  styleUrl: './reportes.component.scss'
 })
-export class ReportesComponent {
+export class ReportesComponent implements OnInit {
+  private api = inject(ApiService);
+
+  metricas = signal<MetricasDashboard | null>(null);
+  vencimientos = signal<any | null>(null);
+  cargandoResumen = signal(true);
+
+  ngOnInit() {
+    this.api.get<MetricasDashboard>('dashboard/metricas').subscribe({
+      next: (r) => {
+        this.metricas.set(r);
+        this.cargandoResumen.set(false);
+      },
+      error: () => this.cargandoResumen.set(false)
+    });
+    this.api.get('membresias/resumen-vencimientos').subscribe({
+      next: (r) => this.vencimientos.set(r)
+    });
+  }
+
+  serieIngresos = computed<PuntoSerie[]>(() =>
+    (this.metricas()?.ingresosPorMes || []).map((m) => ({ label: m.etiqueta, value: m.total }))
+  );
+  serieAsistencias = computed<PuntoSerie[]>(() =>
+    (this.metricas()?.asistenciasPorDia || []).map((d) => ({ label: d.etiqueta, value: d.total }))
+  );
+  segmentosPlanes = computed<SegmentoDona[]>(() =>
+    (this.metricas()?.distribucionPlanes || []).map((p) => ({ label: p.plan, value: p.total }))
+  );
+  segmentosVencimientos = computed<SegmentoDona[]>(() => {
+    const v = this.vencimientos();
+    if (!v) return [];
+    return [
+      { label: 'Activas', value: v.activas, color: 'var(--tf-success)' },
+      { label: 'Vencidas', value: v.vencidas, color: 'var(--tf-danger)' },
+      { label: 'Suspendidas', value: v.suspendidas, color: 'var(--tf-warning)' }
+    ].filter((s) => s.value > 0);
+  });
+
+  totalIngresos6m = computed(() =>
+    (this.metricas()?.ingresosPorMes || []).reduce((s, m) => s + m.total, 0)
+  );
   columnasClientes: Columna[] = [
     { clave: 'cedula', titulo: 'Cédula' },
     { clave: 'nombres', titulo: 'Nombres' },

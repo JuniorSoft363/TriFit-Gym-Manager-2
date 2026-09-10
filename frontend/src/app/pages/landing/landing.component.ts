@@ -48,10 +48,31 @@ export class LandingComponent implements OnInit {
   ];
 
   contactos: { icono: string; etiqueta: string; valor: string }[] = [];
+  planes: { id: number; nombre: string; descripcion?: string; duracionDias: number; precio: number | string }[] = [];
 
   constructor(private api: ApiService) {}
 
+  /** El plan de duración intermedia se marca como destacado. */
+  get planDestacadoId(): number | null {
+    if (this.planes.length < 2) return null;
+    const ordenados = [...this.planes].sort((a, b) => a.duracionDias - b.duracionDias);
+    return ordenados[Math.floor(ordenados.length / 2)]?.id ?? null;
+  }
+
+  etiquetaDuracion(dias: number): string {
+    if (dias >= 360 && dias <= 366) return 'al año';
+    if (dias === 30 || dias === 31) return 'al mes';
+    if (dias % 30 === 0) return `cada ${dias / 30} meses`;
+    if (dias === 7) return 'a la semana';
+    return `cada ${dias} días`;
+  }
+
   ngOnInit() {
+    this.api.get<any[]>('planes/publico').subscribe({
+      next: (res) => (this.planes = res || []),
+      error: () => (this.planes = [])
+    });
+
     this.api.get<DatosGimnasio>('configuracion/publico').subscribe({
       next: (res) => {
         this.gimnasio = res;

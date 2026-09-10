@@ -8,6 +8,9 @@ const v = require('../validators');
 const router = Router();
 const LECTURA = ['ADMINISTRADOR', 'RECEPCIONISTA'];
 
+// Público: catálogo de planes activos para la landing.
+router.get('/publico', ctrl.publicos);
+
 router.use(autenticar);
 
 router.get('/', permitirRoles(...LECTURA), ctrl.listar);

@@ -8,6 +8,10 @@ import { CountUpDirective } from '../../shared/count-up.directive';
 import { ConfirmDialogComponent } from '../../shared/confirm-dialog/confirm-dialog.component';
 import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
+import { MetricasDashboard } from '../../core/models';
+import { AreaChartComponent, PuntoSerie } from '../../shared/charts/area-chart.component';
+import { BarChartComponent } from '../../shared/charts/bar-chart.component';
+import { DonutChartComponent, SegmentoDona } from '../../shared/charts/donut-chart.component';
 
 interface Resumen {
   clientesActivos: number;
@@ -37,7 +41,15 @@ interface Acceso {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink, MATERIAL, CountUpDirective],
+  imports: [
+    CommonModule,
+    RouterLink,
+    MATERIAL,
+    CountUpDirective,
+    AreaChartComponent,
+    BarChartComponent,
+    DonutChartComponent
+  ],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })
@@ -47,6 +59,7 @@ export class DashboardComponent implements OnInit {
   columnasPagos = ['cliente', 'plan', 'monto', 'metodo', 'estado', 'fecha'];
   porVencer = signal<any[]>([]);
   columnasPorVencer = ['cliente', 'plan', 'vence', 'dias', 'acciones'];
+  metricas = signal<MetricasDashboard | null>(null);
 
   hoy = new Date();
 
@@ -134,7 +147,27 @@ export class DashboardComponent implements OnInit {
   ngOnInit() {
     this.cargarResumen();
     this.cargarPorVencer();
+    this.cargarMetricas();
   }
+
+  cargarMetricas() {
+    this.api.get<MetricasDashboard>('dashboard/metricas').subscribe({
+      next: (res) => this.metricas.set(res),
+      error: () => this.metricas.set(null)
+    });
+  }
+
+  serieIngresos = computed<PuntoSerie[]>(() =>
+    (this.metricas()?.ingresosPorMes || []).map((m) => ({ label: m.etiqueta, value: m.total }))
+  );
+
+  serieAsistencias = computed<PuntoSerie[]>(() =>
+    (this.metricas()?.asistenciasPorDia || []).map((d) => ({ label: d.etiqueta, value: d.total }))
+  );
+
+  segmentosPlanes = computed<SegmentoDona[]>(() =>
+    (this.metricas()?.distribucionPlanes || []).map((p) => ({ label: p.plan, value: p.total }))
+  );
 
   cargarResumen() {
     this.api.get<Resumen>('dashboard/resumen').subscribe({

@@ -94,6 +94,85 @@
       </mat-card>
     </div>
 
+    <!-- Tendencias (métricas ampliadas) -->
+    <ng-container *ngIf="metricas() as m">
+      <h2 class="tf-dash-subtitle">Tendencias</h2>
+      <div class="tf-dash-panels">
+        <mat-card class="tf-card tf-panel">
+          <div class="tf-panel-head">
+            <div>
+              <h2>Ingresos por mes</h2>
+              <p>Últimos 6 meses · pagos confirmados</p>
+            </div>
+            <mat-icon>show_chart</mat-icon>
+          </div>
+          <app-area-chart [puntos]="serieIngresos()" prefix="$" color="var(--tf-primary)"></app-area-chart>
+        </mat-card>
+
+        <mat-card class="tf-card tf-panel">
+          <div class="tf-panel-head">
+            <div>
+              <h2>Distribución de planes</h2>
+              <p>Membresías activas por plan</p>
+            </div>
+            <mat-icon>donut_large</mat-icon>
+          </div>
+          <app-donut-chart [datos]="segmentosPlanes()" subtitulo="activas"></app-donut-chart>
+        </mat-card>
+      </div>
+
+      <div class="tf-dash-panels">
+        <mat-card class="tf-card tf-panel">
+          <div class="tf-panel-head">
+            <div>
+              <h2>Asistencias por día</h2>
+              <p>Últimos 7 días</p>
+            </div>
+            <mat-icon>calendar_month</mat-icon>
+          </div>
+          <app-bar-chart [puntos]="serieAsistencias()" [alt]="true" suffix=""></app-bar-chart>
+        </mat-card>
+
+        <mat-card class="tf-card tf-panel" *ngIf="m.topEntrenadores.length">
+          <div class="tf-panel-head">
+            <div>
+              <h2>Top entrenadores</h2>
+              <p>Por clientes activos asignados</p>
+            </div>
+            <mat-icon>sports</mat-icon>
+          </div>
+          <ul class="tf-rank">
+            <li *ngFor="let e of m.topEntrenadores; let i = index">
+              <span class="tf-rank-pos">{{ i + 1 }}</span>
+              <span class="tf-rank-nombre">{{ e.nombre }}</span>
+              <span class="tf-rank-valor">{{ e.clientesActivos }}</span>
+            </li>
+          </ul>
+        </mat-card>
+
+        <mat-card class="tf-card tf-panel">
+          <div class="tf-panel-head">
+            <div>
+              <h2>Stock bajo</h2>
+              <p>Productos en o bajo el mínimo</p>
+            </div>
+            <mat-icon>inventory_2</mat-icon>
+          </div>
+          <ul class="tf-rank" *ngIf="m.stockBajo.length; else sinStock">
+            <li *ngFor="let p of m.stockBajo">
+              <span class="tf-rank-nombre">{{ p.nombre }}</span>
+              <span class="tf-estado-chip" style="background: var(--tf-danger)">
+                {{ p.stock }} / {{ p.stockMinimo }}
+              </span>
+            </li>
+          </ul>
+          <ng-template #sinStock>
+            <p class="tf-empty-inline"><mat-icon>check_circle</mat-icon> Todo el inventario sobre el mínimo.</p>
+          </ng-template>
+        </mat-card>
+      </div>
+    </ng-container>
+
     <!-- Próximas a vencer -->
     <mat-card class="tf-card tf-dash-pagos" *ngIf="porVencer().length">
       <mat-card-header>

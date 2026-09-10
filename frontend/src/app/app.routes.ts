@@ -30,6 +30,13 @@ export const routes: Routes = [
         loadComponent: () => import('./features/clientes/clientes.component').then((m) => m.ClientesComponent)
       },
       {
+        path: 'clientes/:id',
+        canActivate: [rolGuard],
+        data: { roles: ['ADMINISTRADOR', 'RECEPCIONISTA', 'ENTRENADOR'] },
+        loadComponent: () =>
+          import('./features/clientes/cliente-ficha.component').then((m) => m.ClienteFichaComponent)
+      },
+      {
         path: 'membresias',
         canActivate: [rolGuard],
         data: { roles: ['ADMINISTRADOR', 'RECEPCIONISTA'] },

@@ -1,0 +1,62 @@
+.tf-rep-resumen {
+  padding-top: 16px;
+}
+
+.tf-rep-kpis {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.tf-rep-kpi {
+  flex: 1 1 180px;
+  background: var(--tf-surface-2, #171f30);
+  border: 1px solid var(--tf-border);
+  border-radius: 14px;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tf-rep-kpi-num {
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.tf-rep-kpi-lbl {
+  font-size: 0.8rem;
+  opacity: 0.6;
+}
+
+.tf-rep-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+.tf-rep-grid .tf-panel {
+  padding: 20px 22px;
+}
+
+.tf-panel-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+.tf-panel-head h2 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+}
+.tf-panel-head p {
+  margin: 4px 0 0;
+  font-size: 12.5px;
+  color: var(--tf-text-tertiary);
+}
+.tf-panel-head > mat-icon {
+  color: var(--tf-text-tertiary);
+}

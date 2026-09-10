@@ -91,6 +91,29 @@ async function porVencer(dias = 7) {
   });
 }
 
+// Contadores de vencimientos para alertas del panel (sin traer los registros).
+async function resumenVencimientos() {
+  await actualizarVencidas();
+  const hoy = new Date(); hoy.setHours(0, 0, 0, 0);
+  const enDias = (n) => {
+    const d = new Date(hoy); d.setDate(d.getDate() + n); d.setHours(23, 59, 59, 999); return d;
+  };
+  const hace30 = new Date(hoy); hace30.setDate(hace30.getDate() - 30);
+
+  const [activas, venceEn3, venceEn7, venceEn30, vencidas, vencidasRecientes, suspendidas] =
+    await Promise.all([
+      prisma.membresia.count({ where: { estado: 'ACTIVA' } }),
+      prisma.membresia.count({ where: { estado: 'ACTIVA', fechaFin: { gte: hoy, lte: enDias(3) } } }),
+      prisma.membresia.count({ where: { estado: 'ACTIVA', fechaFin: { gte: hoy, lte: enDias(7) } } }),
+      prisma.membresia.count({ where: { estado: 'ACTIVA', fechaFin: { gte: hoy, lte: enDias(30) } } }),
+      prisma.membresia.count({ where: { estado: 'VENCIDA' } }),
+      prisma.membresia.count({ where: { estado: 'VENCIDA', fechaFin: { gte: hace30 } } }),
+      prisma.membresia.count({ where: { estado: 'SUSPENDIDA' } })
+    ]);
+
+  return { activas, venceEn3, venceEn7, venceEn30, vencidas, vencidasRecientes, suspendidas };
+}
+
 // Membresía vigente de un cliente identificado por cédula (para pagos y asistencias)
 async function vigentePorCedula(cedula) {
   await actualizarVencidas();
@@ -104,4 +127,7 @@ async function vigentePorCedula(cedula) {
   return { cliente, membresia };
 }
 
-module.exports = { listar, asignar, renovar, cambiarEstado, porVencer, vigentePorCedula, actualizarVencidas };
+module.exports = {
+  listar, asignar, renovar, cambiarEstado, porVencer, resumenVencimientos,
+  vigentePorCedula, actualizarVencidas
+};

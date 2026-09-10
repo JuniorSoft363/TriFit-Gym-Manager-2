@@ -9,7 +9,35 @@ import { ApiService } from '../../core/services/api.service';
   selector: 'app-asistencias',
   standalone: true,
   imports: [CommonModule, FormsModule, MATERIAL],
-  templateUrl: './asistencias.component.html'
+  templateUrl: './asistencias.component.html',
+  styles: [
+    `
+      .tf-aforo-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .tf-aforo-stats {
+        display: flex;
+        gap: 28px;
+        flex-wrap: wrap;
+        margin-top: 8px;
+      }
+      .tf-aforo-stat {
+        display: flex;
+        flex-direction: column;
+      }
+      .tf-aforo-num {
+        font-size: 1.9rem;
+        font-weight: 700;
+        line-height: 1.1;
+      }
+      .tf-aforo-lbl {
+        font-size: 0.8rem;
+        opacity: 0.6;
+      }
+    `
+  ]
 })
 export class AsistenciasComponent implements OnInit {
   cedula = '';
@@ -18,6 +46,9 @@ export class AsistenciasComponent implements OnInit {
   cliente: any = null;
   membresia: any = null;
   entradaAbierta: any = null;
+
+  aforo: any = null;
+  presentes: any[] = [];
 
   registros: any[] = [];
   total = 0;
@@ -33,6 +64,18 @@ export class AsistenciasComponent implements OnInit {
 
   ngOnInit() {
     this.cargar();
+    this.cargarAforo();
+  }
+
+  cargarAforo() {
+    this.api.get('asistencias/aforo').subscribe({
+      next: (res: any) => (this.aforo = res),
+      error: () => (this.aforo = null)
+    });
+    this.api.get('asistencias/presentes').subscribe({
+      next: (res: any) => (this.presentes = res.datos || []),
+      error: () => (this.presentes = [])
+    });
   }
 
   buscar() {
@@ -60,6 +103,7 @@ export class AsistenciasComponent implements OnInit {
         this.snack.open('Entrada registrada', 'Cerrar', { duration: 3000 });
         this.buscar();
         this.cargar();
+        this.cargarAforo();
       },
       error: () => (this.registrando = false)
     });
@@ -73,6 +117,7 @@ export class AsistenciasComponent implements OnInit {
         this.snack.open('Salida registrada', 'Cerrar', { duration: 3000 });
         this.buscar();
         this.cargar();
+        this.cargarAforo();
       },
       error: () => (this.registrando = false)
     });

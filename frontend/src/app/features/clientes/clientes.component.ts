@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { MATERIAL } from '../../shared/material';
 import { CrudPageComponent, AccionExtra } from '../../shared/crud-page/crud-page.component';
@@ -34,14 +35,21 @@ export class ClientesComponent {
     { clave: 'fechaNacimiento', etiqueta: 'Fecha de nacimiento', tipo: 'fecha' }
   ];
 
+  private router = inject(Router);
+
   accionesExtra: AccionExtra[] = [
-    { icono: 'history', tooltip: 'Ver historial', accion: (fila) => this.abrirHistorial(fila) }
+    { icono: 'person', tooltip: 'Ver ficha completa', accion: (fila) => this.verFicha(fila) },
+    { icono: 'history', tooltip: 'Historial rápido', accion: (fila) => this.abrirHistorial(fila) }
   ];
 
   constructor(
     public auth: AuthService,
     private dialog: MatDialog
   ) {}
+
+  verFicha(fila: any) {
+    this.router.navigate(['/app/clientes', fila.id]);
+  }
 
   get soloLectura(): boolean {
     return this.auth.tieneRol('ENTRENADOR');

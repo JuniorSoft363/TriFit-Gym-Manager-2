@@ -5,6 +5,9 @@ const membresiaService = require('../services/membresia.service');
 module.exports = {
   listar: asyncHandler(async (req, res) => res.json(await membresiaService.listar(req.query))),
   porVencer: asyncHandler(async (req, res) => res.json(await membresiaService.porVencer(req.query.dias))),
+  resumenVencimientos: asyncHandler(async (req, res) =>
+    res.json(await membresiaService.resumenVencimientos())
+  ),
   vigentePorCedula: asyncHandler(async (req, res) =>
     res.json(await membresiaService.vigentePorCedula(req.params.cedula))
   ),

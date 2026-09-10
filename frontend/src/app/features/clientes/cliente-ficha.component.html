@@ -1,0 +1,137 @@
+<div class="tf-page">
+  <a routerLink="/app/clientes" class="tf-ficha-back">
+    <mat-icon>arrow_back</mat-icon> Volver a clientes
+  </a>
+
+  <div *ngIf="cargando()" class="tf-center" style="padding: 60px">
+    <mat-spinner diameter="36"></mat-spinner>
+  </div>
+
+  <div *ngIf="error()" class="tf-center" style="padding: 60px; color: var(--tf-text-tertiary)">
+    <mat-icon>person_off</mat-icon>
+    <p>No se pudo cargar la ficha del cliente.</p>
+  </div>
+
+  <ng-container *ngIf="!cargando() && !error() && h() as c">
+    <!-- Cabecera -->
+    <section class="tf-ficha-head">
+      <div class="tf-ficha-avatar">{{ iniciales() }}</div>
+      <div class="tf-ficha-id">
+        <h1>{{ c.nombres }} {{ c.apellidos }}</h1>
+        <p class="tf-ficha-sub">
+          <span><mat-icon>badge</mat-icon> {{ c.cedula }}</span>
+          <span *ngIf="c.email"><mat-icon>mail</mat-icon> {{ c.email }}</span>
+          <span *ngIf="c.telefono"><mat-icon>call</mat-icon> {{ c.telefono }}</span>
+        </p>
+        <div class="tf-ficha-chips">
+          <span class="tf-estado-chip" [style.background]="c.activo ? 'var(--tf-success)' : 'var(--tf-text-tertiary)'">
+            {{ c.activo ? 'Activo' : 'Inactivo' }}
+          </span>
+          <span
+            *ngIf="membresiaActual() as m"
+            class="tf-estado-chip"
+            [style.background]="colorEstado(m.estado)"
+          >
+            {{ m.plan?.nombre }} · {{ m.estado }}
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <!-- KPIs -->
+    <div class="tf-ficha-kpis">
+      <div class="tf-ficha-kpi">
+        <span class="tf-ficha-kpi-num" [tfCountUp]="totalPagado()" [tfCountUpDecimals]="2" tfCountUpPrefix="$">
+          ${{ totalPagado() | number: '1.2-2' }}
+        </span>
+        <span class="tf-ficha-kpi-lbl">Total pagado</span>
+      </div>
+      <div class="tf-ficha-kpi">
+        <span class="tf-ficha-kpi-num" [tfCountUp]="totalAsistencias()">{{ totalAsistencias() }}</span>
+        <span class="tf-ficha-kpi-lbl">Asistencias registradas</span>
+      </div>
+      <div class="tf-ficha-kpi">
+        <span class="tf-ficha-kpi-num" [tfCountUp]="rutinasActivas()">{{ rutinasActivas() }}</span>
+        <span class="tf-ficha-kpi-lbl">Rutinas activas</span>
+      </div>
+      <div class="tf-ficha-kpi">
+        <span class="tf-ficha-kpi-num" [tfCountUp]="antiguedadDias()">{{ antiguedadDias() }}</span>
+        <span class="tf-ficha-kpi-lbl">Días como miembro</span>
+      </div>
+    </div>
+
+    <div class="tf-ficha-grid">
+      <!-- Asistencias -->
+      <mat-card class="tf-card tf-panel">
+        <div class="tf-panel-head">
+          <div><h2>Asistencias</h2><p>Últimos 14 días</p></div>
+          <mat-icon>how_to_reg</mat-icon>
+        </div>
+        <app-bar-chart [puntos]="serieAsistencias()" [alt]="true"></app-bar-chart>
+      </mat-card>
+
+      <!-- Entrenadores -->
+      <mat-card class="tf-card tf-panel">
+        <div class="tf-panel-head">
+          <div><h2>Entrenadores asignados</h2><p>Asignaciones activas</p></div>
+          <mat-icon>sports</mat-icon>
+        </div>
+        <div class="tf-ficha-entrenadores" *ngIf="entrenadores().length; else sinEntrenador">
+          <div class="tf-ficha-entrenador" *ngFor="let e of entrenadores()">
+            <div class="tf-ficha-mini-avatar">{{ (e.nombres || '?')[0] }}{{ (e.apellidos || '')[0] }}</div>
+            <div>
+              <strong>{{ e.nombres }} {{ e.apellidos }}</strong>
+              <span *ngIf="e.especialidad">{{ e.especialidad }}</span>
+            </div>
+          </div>
+        </div>
+        <ng-template #sinEntrenador>
+          <p class="tf-empty-inline"><mat-icon>info</mat-icon> Sin entrenador asignado.</p>
+        </ng-template>
+      </mat-card>
+    </div>
+
+    <!-- Membresías -->
+    <mat-card class="tf-card tf-panel">
+      <div class="tf-panel-head">
+        <div><h2>Historial de membresías</h2><p>{{ c.membresias.length }} en total</p></div>
+        <mat-icon>card_membership</mat-icon>
+      </div>
+      <div class="tf-timeline" *ngIf="c.membresias.length; else sinMembresias">
+        <div class="tf-timeline-item" *ngFor="let m of c.membresias">
+          <span class="tf-timeline-dot" [style.background]="colorEstado(m.estado)"></span>
+          <div class="tf-timeline-body">
+            <div class="tf-timeline-top">
+              <strong>{{ m.plan?.nombre }}</strong>
+              <span class="tf-estado-chip" [style.background]="colorEstado(m.estado)">{{ m.estado }}</span>
+            </div>
+            <p class="tf-timeline-meta">
+              {{ m.fechaInicio | date: 'dd/MM/yyyy' }} → {{ m.fechaFin | date: 'dd/MM/yyyy' }}
+              · pagado <strong>{{ pagadoDe(m) | currency: 'USD' }}</strong>
+            </p>
+          </div>
+        </div>
+      </div>
+      <ng-template #sinMembresias>
+        <p class="tf-empty-inline"><mat-icon>info</mat-icon> Sin membresías registradas.</p>
+      </ng-template>
+    </mat-card>
+
+    <!-- Rutinas -->
+    <mat-card class="tf-card tf-panel" *ngIf="c.rutinas?.length">
+      <div class="tf-panel-head">
+        <div><h2>Rutinas activas</h2></div>
+        <mat-icon>fitness_center</mat-icon>
+      </div>
+      <ul class="tf-ficha-rutinas">
+        <li *ngFor="let r of c.rutinas">
+          <mat-icon>chevron_right</mat-icon>
+          <div>
+            <strong>{{ r.nombre }}</strong>
+            <span *ngIf="r.objetivo">{{ r.objetivo }}</span>
+          </div>
+        </li>
+      </ul>
+    </mat-card>
+  </ng-container>
+</div>
