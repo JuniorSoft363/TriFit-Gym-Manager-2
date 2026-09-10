@@ -39,7 +39,9 @@ server {
         proxy_read_timeout 60s;
     }
 
-    location /uploads/ {
+    # ^~ : tiene prioridad sobre el location regex de assets de abajo, para que
+    # las imágenes subidas (.jpg/.png en /uploads/) sí lleguen al backend.
+    location ^~ /uploads/ {
         proxy_pass http://backend:3000;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;

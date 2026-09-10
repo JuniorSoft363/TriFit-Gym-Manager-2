@@ -1,6 +1,32 @@
 <h2 mat-dialog-title>{{ esEdicion ? 'Editar producto' : 'Nuevo producto' }}</h2>
 
 <mat-dialog-content class="tf-form">
+  <div class="tf-codigo-barras" *ngIf="!esEdicion">
+    <mat-form-field appearance="outline" class="tf-full-width" subscriptSizing="dynamic">
+      <mat-label>Código de barras (opcional)</mat-label>
+      <mat-icon matPrefix>qr_code_2</mat-icon>
+      <input
+        matInput
+        [(ngModel)]="codigoBarras"
+        (keyup.enter)="buscarPorCodigo()"
+        placeholder="Ej. 7501055363513"
+        inputmode="numeric"
+      />
+      <button
+        matSuffix
+        mat-icon-button
+        type="button"
+        matTooltip="Buscar en Open Food Facts"
+        [disabled]="buscandoCodigo() || codigoBarras.trim().length < 6"
+        (click)="buscarPorCodigo()"
+      >
+        <mat-progress-spinner *ngIf="buscandoCodigo()" diameter="18" mode="indeterminate"></mat-progress-spinner>
+        <mat-icon *ngIf="!buscandoCodigo()">search</mat-icon>
+      </button>
+    </mat-form-field>
+    <p class="tf-codigo-hint">Autocompleta nombre, descripción e imagen desde la base de datos abierta Open Food Facts.</p>
+  </div>
+
   <form [formGroup]="form">
     <div class="tf-form-imagen">
       <ng-container *ngIf="imagenPreview(); else placeholder">

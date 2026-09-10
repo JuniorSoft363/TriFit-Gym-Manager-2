@@ -41,6 +41,65 @@ async function actualizarImagenProducto(id, archivo) {
   });
 }
 
+// Consulta un código de barras en Open Food Facts (base de datos abierta) y
+// devuelve datos normalizados para autocompletar el formulario de producto.
+// Si el producto trae foto, se descarga al volumen local para servirla same-origin.
+const OFF_URL = 'https://world.openfoodfacts.org/api/v2/product';
+
+async function consultarCodigoBarras(codigo) {
+  const limpio = String(codigo || '').replace(/\D/g, '');
+  if (limpio.length < 6) throw new HttpError(400, 'Código de barras inválido');
+
+  let json;
+  try {
+    const resp = await fetch(
+      `${OFF_URL}/${limpio}.json?fields=product_name,product_name_es,brands,categories,quantity,image_front_url,image_url`,
+      { headers: { 'User-Agent': 'TriFit-Gym-Manager/1.0' }, signal: AbortSignal.timeout(8000) }
+    );
+    json = await resp.json();
+  } catch {
+    throw new HttpError(502, 'No se pudo consultar la base de datos externa. Revisa la conexión.');
+  }
+  if (!json || json.status !== 1 || !json.product) {
+    throw new HttpError(404, 'No se encontró ningún producto con ese código de barras');
+  }
+
+  const p = json.product;
+  const nombre = [p.brands ? p.brands.split(',')[0].trim() : '', p.product_name_es || p.product_name || '']
+    .filter(Boolean)
+    .join(' ')
+    .trim();
+  const categoria = (p.categories || '').split(',').map((c) => c.trim()).filter(Boolean).slice(-1)[0] || '';
+
+  let imagenUrl = null;
+  const fotoRemota = p.image_front_url || p.image_url;
+  if (fotoRemota) {
+    try {
+      const img = await fetch(fotoRemota, { signal: AbortSignal.timeout(8000) });
+      if (img.ok) {
+        const buffer = Buffer.from(await img.arrayBuffer());
+        if (buffer.length && buffer.length < 5 * 1024 * 1024) {
+          const carpeta = path.join(__dirname, '..', '..', 'uploads', 'productos');
+          if (!fs.existsSync(carpeta)) fs.mkdirSync(carpeta, { recursive: true });
+          const nombreArchivo = `off_${limpio}_${Date.now()}.jpg`;
+          fs.writeFileSync(path.join(carpeta, nombreArchivo), buffer);
+          imagenUrl = `/uploads/productos/${nombreArchivo}`;
+        }
+      }
+    } catch {
+      /* la foto es opcional: si falla, se devuelve el resto igual */
+    }
+  }
+
+  return {
+    codigo: limpio,
+    nombre: nombre || `Producto ${limpio}`,
+    descripcion: [categoria, p.quantity].filter(Boolean).join(' · '),
+    imagenUrl,
+    fuente: 'Open Food Facts'
+  };
+}
+
 async function listarMovimientosProducto(productoId) {
   return prisma.inventario.findMany({
     where: { productoId: Number(productoId) },
@@ -96,5 +155,6 @@ module.exports = {
   registrarMovimiento,
   listarMovimientos,
   actualizarImagenProducto,
-  listarMovimientosProducto
+  listarMovimientosProducto,
+  consultarCodigoBarras
 };

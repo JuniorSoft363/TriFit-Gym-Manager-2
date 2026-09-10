@@ -1,7 +1,10 @@
-// Inserta productos y equipos de ejemplo con descripciones.
-// Idempotente: usa upsert por nombre. Las imágenes se suben por separado.
+// Inserta productos y equipos de ejemplo con descripciones e imágenes reales.
+// Las imágenes viven en frontend/src/assets/productos/ (fotos de Unsplash, uso
+// libre) y se sirven en /assets/productos/*. Idempotente: upsert por nombre.
 const { PrismaClient, Prisma } = require('@prisma/client');
 const prisma = new PrismaClient();
+
+const IMG = (archivo) => `/assets/productos/${archivo}`;
 
 const PRODUCTOS = [
   {
@@ -10,7 +13,8 @@ const PRODUCTOS = [
     descripcion: 'Suplemento proteico de suero de leche sabor chocolate. Ideal para recuperación post-entreno. Contiene 25g de proteína por porción.',
     precio: 35.00,
     stock: 20,
-    stockMinimo: 5
+    stockMinimo: 5,
+    imagen: 'proteina-whey.jpg'
   },
   {
     nombre: 'Creatina Monohidrato 300g',
@@ -18,7 +22,8 @@ const PRODUCTOS = [
     descripcion: 'Creatina micronizada de alta pureza. Aumenta la fuerza y el rendimiento en entrenamientos de alta intensidad.',
     precio: 18.50,
     stock: 30,
-    stockMinimo: 10
+    stockMinimo: 10,
+    imagen: 'creatina.jpg'
   },
   {
     nombre: 'Shaker 600ml',
@@ -26,7 +31,8 @@ const PRODUCTOS = [
     descripcion: 'Botella mezcladora con rejilla metálica. Capacidad 600ml, libre de BPA. Ideal para preparar batidos.',
     precio: 6.00,
     stock: 50,
-    stockMinimo: 15
+    stockMinimo: 15,
+    imagen: 'shaker.jpg'
   },
   {
     nombre: 'Toalla deportiva',
@@ -34,7 +40,8 @@ const PRODUCTOS = [
     descripcion: 'Toalla de microfibra 40x80cm. Absorción superior, secado rápido. Logo bordado TriFit.',
     precio: 9.00,
     stock: 25,
-    stockMinimo: 5
+    stockMinimo: 5,
+    imagen: 'toalla.jpg'
   },
   {
     nombre: 'Camiseta TriFit',
@@ -42,7 +49,8 @@ const PRODUCTOS = [
     descripcion: 'Camiseta deportiva de secado rápido. Tallas S, M, L, XL. Color negro con logo TriFit en pecho.',
     precio: 22.00,
     stock: 15,
-    stockMinimo: 5
+    stockMinimo: 5,
+    imagen: 'camiseta.jpg'
   },
   {
     nombre: 'Botella de agua 1L',
@@ -50,7 +58,8 @@ const PRODUCTOS = [
     descripcion: 'Botella reutilizable libre de BPA con tapa rosca. Capacidad 1 litro. Marcador de hidratación.',
     precio: 8.00,
     stock: 40,
-    stockMinimo: 10
+    stockMinimo: 10,
+    imagen: 'botella-agua.jpg'
   },
   {
     nombre: 'Mancuerna 10kg',
@@ -58,7 +67,8 @@ const PRODUCTOS = [
     descripcion: 'Par de mancuernas hexagonales de hierro fundido con mango ergonómico antideslizante. Peso unitario 10kg.',
     precio: 45.00,
     stock: 8,
-    stockMinimo: 2
+    stockMinimo: 2,
+    imagen: 'mancuerna.jpg'
   },
   {
     nombre: 'Esterilla yoga',
@@ -66,7 +76,8 @@ const PRODUCTOS = [
     descripcion: 'Esterilla antideslizante 6mm de grosor. Material ecológico, libre de látex. Incluye correa de transporte.',
     precio: 15.00,
     stock: 12,
-    stockMinimo: 3
+    stockMinimo: 3,
+    imagen: 'esterilla-yoga.jpg'
   },
   {
     nombre: 'Cuerda para saltar',
@@ -74,7 +85,8 @@ const PRODUCTOS = [
     descripcion: 'Cuerda de saltar con rodamientos de alta velocidad. Mangos ergonómicos de foam. Longitud ajustable.',
     precio: 7.50,
     stock: 0,
-    stockMinimo: 5
+    stockMinimo: 5,
+    imagen: 'cuerda-saltar.jpg'
   }
 ];
 
@@ -89,7 +101,8 @@ async function main() {
       precio: new Prisma.Decimal(p.precio.toFixed(2)),
       stock: p.stock,
       stockMinimo: p.stockMinimo,
-      activo: true
+      activo: true,
+      imagenUrl: IMG(p.imagen)
     };
     if (existente) {
       await prisma.producto.update({ where: { id: existente.id }, data });

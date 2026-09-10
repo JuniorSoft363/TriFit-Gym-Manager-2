@@ -1,14 +1,15 @@
 import { Component, Inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { MATERIAL } from '../../shared/material';
 import { ApiService } from '../../core/services/api.service';
 
 @Component({
   selector: 'app-producto-form-dialog',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MatDialogModule, MATERIAL],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, MatDialogModule, MATERIAL],
   templateUrl: './producto-form-dialog.component.html',
   styleUrl: './producto-form-dialog.component.scss'
 })
@@ -19,13 +20,18 @@ export class ProductoFormDialogComponent implements OnInit {
   subiendo = signal(false);
   imagenPreview = signal<string | null>(null);
   imagenFile: File | null = null;
+  imagenRemota: string | null = null;
   apiBase = '';
   esEdicion = false;
+
+  codigoBarras = '';
+  buscandoCodigo = signal(false);
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: { producto?: any },
     private fb: FormBuilder,
     private api: ApiService,
+    private snack: MatSnackBar,
     public ref: MatDialogRef<ProductoFormDialogComponent>
   ) {
     this.esEdicion = !!data?.producto;
@@ -58,10 +64,36 @@ export class ProductoFormDialogComponent implements OnInit {
     return img.startsWith('http') ? img : `${this.apiBase}${img}`;
   }
 
+  buscarPorCodigo() {
+    const codigo = this.codigoBarras.trim();
+    if (codigo.length < 6) return;
+    this.buscandoCodigo.set(true);
+    this.api.get(`inventario/codigo-barras/${codigo}`).subscribe({
+      next: (res: any) => {
+        this.buscandoCodigo.set(false);
+        this.form.patchValue({
+          nombre: res.nombre || this.form.value.nombre,
+          descripcion: res.descripcion || this.form.value.descripcion
+        });
+        if (res.imagenUrl) {
+          this.imagenRemota = res.imagenUrl;
+          this.imagenFile = null;
+          this.imagenPreview.set(this.urlImagen(res.imagenUrl));
+        }
+        this.snack.open(`Datos traídos de ${res.fuente}`, 'Cerrar', { duration: 3000 });
+      },
+      error: (err) => {
+        this.buscandoCodigo.set(false);
+        this.snack.open(err?.error?.mensaje || 'No se encontró el producto', 'Cerrar', { duration: 4000 });
+      }
+    });
+  }
+
   onFileSelected(event: Event) {
     const input = event.target as HTMLInputElement;
     const archivo = input.files?.[0];
     if (!archivo) return;
+    this.imagenRemota = null;
     if (!archivo.type.startsWith('image/')) {
       this.ref.close({ mensaje: 'Solo se permiten imágenes' });
       return;
@@ -78,6 +110,7 @@ export class ProductoFormDialogComponent implements OnInit {
 
   eliminarImagenPreview() {
     this.imagenFile = null;
+    this.imagenRemota = null;
     this.imagenPreview.set(null);
   }
 
@@ -90,6 +123,8 @@ export class ProductoFormDialogComponent implements OnInit {
     const datos = { ...this.form.value };
     if (datos.precio === null || datos.precio === '') datos.precio = null;
     if (datos.proveedorId === null || datos.proveedorId === '') datos.proveedorId = null;
+    // Imagen traída por código de barras (ya guardada en el servidor).
+    if (this.imagenRemota && !this.imagenFile) datos.imagenUrl = this.imagenRemota;
 
     const obs = this.esEdicion
       ? this.api.editar('inventario/productos', this.data.producto.id, datos)

@@ -10,6 +10,9 @@ const router = Router();
 
 router.use(autenticar, permitirRoles('ADMINISTRADOR'));
 
+// Consulta externa por código de barras (Open Food Facts)
+router.get('/codigo-barras/:codigo', ctrl.consultarCodigoBarras);
+
 // Productos y equipos
 router.get('/productos', ctrl.productos.listar);
 router.get('/productos/:id', ctrl.productos.obtener);

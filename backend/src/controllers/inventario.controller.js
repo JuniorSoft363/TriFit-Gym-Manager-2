@@ -22,5 +22,8 @@ module.exports = {
   }),
   movimientosPorProducto: asyncHandler(async (req, res) =>
     res.json(await inventarioService.listarMovimientosProducto(req.params.id))
+  ),
+  consultarCodigoBarras: asyncHandler(async (req, res) =>
+    res.json(await inventarioService.consultarCodigoBarras(req.params.codigo))
   )
 };
