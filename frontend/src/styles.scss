@@ -589,6 +589,18 @@ table.mat-mdc-table {
   --mdc-outlined-text-field-caret-color: var(--tf-primary);
   --mdc-outlined-text-field-container-shape: 12px;
   --mat-form-field-container-text-size: 14px;
+  /* Select: tokens que Material no fija y que, sin esto, siguen el tema del
+     SISTEMA OPERATIVO en vez del de la app (texto blanco sobre fondo claro). */
+  --mat-select-trigger-text-color: var(--tf-text);
+  --mat-select-enabled-trigger-text-color: var(--tf-text);
+  --mat-select-disabled-trigger-text-color: var(--tf-text-tertiary);
+  --mat-select-placeholder-text-color: var(--tf-text-tertiary);
+  --mat-select-enabled-arrow-color: var(--tf-text-secondary);
+  --mat-select-disabled-arrow-color: var(--tf-text-tertiary);
+  --mat-select-focused-arrow-color: var(--tf-primary);
+  --mat-form-field-error-text-color: var(--tf-danger);
+  --mat-form-field-leading-icon-color: var(--tf-text-tertiary);
+  --mat-form-field-trailing-icon-color: var(--tf-text-tertiary);
 }
 .mat-mdc-text-field-wrapper {
   background: var(--tf-surface-2) !important;
@@ -621,6 +633,84 @@ table.mat-mdc-table {
 .mat-mdc-menu-item { --mat-menu-item-label-text-color: var(--tf-text); }
 .mat-mdc-menu-item .mat-icon { color: var(--tf-text-secondary); }
 .mat-mdc-menu-item:hover:not([disabled]) { background: var(--tf-primary-soft) !important; }
+
+/* --- Texto siempre legible, ignore el navegador el tema del SO --- */
+/* Valor y placeholder del select cerrado */
+.mat-mdc-select-value,
+.mat-mdc-select-value-text,
+.mat-mdc-select-min-line { color: var(--tf-text) !important; }
+.mat-mdc-select-placeholder { color: var(--tf-text-tertiary) !important; }
+.mat-mdc-select-arrow svg,
+.mat-mdc-select-arrow { color: var(--tf-text-secondary) !important; fill: currentColor; }
+.mat-mdc-select-disabled .mat-mdc-select-value { color: var(--tf-text-tertiary) !important; }
+
+/* Opciones del panel desplegable */
+.mat-mdc-option .mdc-list-item__primary-text { color: var(--tf-text) !important; }
+.mat-mdc-option.mdc-list-item--selected:not(.mat-mdc-option-multiple) .mdc-list-item__primary-text {
+  color: var(--tf-primary) !important;
+}
+.mat-mdc-optgroup-label .mdc-list-item__primary-text { color: var(--tf-text-secondary) !important; }
+.mat-mdc-option .mat-pseudo-checkbox { color: var(--tf-text-tertiary); }
+
+/* Inputs / textarea: fuerza el color aunque el SO diga lo contrario
+   (-webkit-text-fill-color cubre además el texto de autocompletado). */
+.mat-mdc-input-element,
+.mdc-text-field__input,
+input.mat-mdc-form-field-input-control,
+textarea.mat-mdc-form-field-input-control {
+  color: var(--tf-text) !important;
+  -webkit-text-fill-color: var(--tf-text) !important;
+  caret-color: var(--tf-primary);
+}
+input.mat-mdc-form-field-input-control::placeholder,
+textarea.mat-mdc-form-field-input-control::placeholder {
+  color: var(--tf-text-tertiary) !important;
+  -webkit-text-fill-color: var(--tf-text-tertiary) !important;
+}
+/* Etiqueta flotante, hint y error */
+.mat-mdc-form-field .mdc-floating-label,
+.mat-mdc-form-field .mdc-floating-label--float-above { color: var(--tf-text-secondary) !important; }
+.mat-mdc-form-field.mat-focused .mdc-floating-label { color: var(--tf-primary) !important; }
+.mat-mdc-form-field-hint,
+.mat-mdc-form-field-hint-wrapper,
+mat-hint { color: var(--tf-text-tertiary) !important; }
+.mat-mdc-form-field-error,
+mat-error { color: var(--tf-danger) !important; }
+
+/* Autofill del navegador: sin flash blanco ni texto negro sobre oscuro */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--tf-text) !important;
+  transition: background-color 9999s ease-in-out 0s;
+  caret-color: var(--tf-primary);
+}
+
+/* Datepicker */
+.mat-datepicker-content {
+  background: var(--tf-surface-2) !important;
+  color: var(--tf-text) !important;
+  --mat-datepicker-calendar-body-label-text-color: var(--tf-text-secondary);
+  --mat-datepicker-calendar-period-button-text-color: var(--tf-text);
+  --mat-datepicker-calendar-date-text-color: var(--tf-text);
+  --mat-datepicker-calendar-header-text-color: var(--tf-text-secondary);
+  --mat-datepicker-toggle-icon-color: var(--tf-text-tertiary);
+  border: 1px solid var(--tf-border) !important;
+  border-radius: 14px !important;
+}
+.mat-calendar-body-cell-content { color: var(--tf-text) !important; }
+.mat-calendar-body-selected { background: var(--tf-primary) !important; color: #fff !important; }
+.mat-datepicker-toggle .mat-mdc-icon-button { color: var(--tf-text-tertiary) !important; }
+
+/* Etiquetas de checkbox / radio / slide-toggle */
+.mat-mdc-checkbox label,
+.mat-mdc-radio-button label,
+.mat-mdc-slide-toggle label,
+.mdc-form-field > label { color: var(--tf-text) !important; }
+
+/* Encabezado de tabla y celdas: legibles pase lo que pase */
+.mat-mdc-header-cell { color: var(--tf-text-secondary) !important; }
+.mat-mdc-cell { color: var(--tf-text) !important; }
 
 /* Paginador */
 .mat-mdc-paginator {
