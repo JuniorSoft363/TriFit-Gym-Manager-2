@@ -85,17 +85,22 @@
       </div>
     </mat-tab>
 
+    <!-- matTabContent: el contenido se crea al abrir la pestaña, ya visible. Si se
+         crea oculto, Material mide el icono de la lupa como 0 y deja la etiqueta
+         encima de el (no vuelve a recalcularlo nunca). -->
     <mat-tab label="Ejercicios">
-      <div style="padding-top: 16px">
-        <app-crud-page
-          recurso="ejercicios"
-          busquedaPlaceholder="Buscar ejercicio..."
-          [columnas]="columnasEjercicios"
-          [campos]="camposEjercicios"
-          textoEliminar="¿Desea desactivar este ejercicio?"
-        >
-        </app-crud-page>
-      </div>
+      <ng-template matTabContent>
+        <div style="padding-top: 16px">
+          <app-crud-page
+            recurso="ejercicios"
+            busquedaPlaceholder="Buscar ejercicio..."
+            [columnas]="columnasEjercicios"
+            [campos]="camposEjercicios"
+            textoEliminar="¿Desea desactivar este ejercicio?"
+          >
+          </app-crud-page>
+        </div>
+      </ng-template>
     </mat-tab>
   </mat-tab-group>
 </div>

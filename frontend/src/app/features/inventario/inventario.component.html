@@ -10,17 +10,22 @@
       </div>
     </mat-tab>
 
+    <!-- matTabContent: el contenido se crea al abrir la pestaña, ya visible. Si se
+         crea oculto, Material mide el icono de la lupa como 0 y deja la etiqueta
+         encima de el (no vuelve a recalcularlo nunca). -->
     <mat-tab label="Proveedores">
-      <div style="padding-top: 16px">
-        <app-crud-page
-          recurso="inventario/proveedores"
-          busquedaPlaceholder="Buscar proveedor..."
-          [columnas]="columnasProveedores"
-          [campos]="camposProveedores"
-          textoEliminar="¿Desea desactivar este proveedor?"
-        >
-        </app-crud-page>
-      </div>
+      <ng-template matTabContent>
+        <div style="padding-top: 16px">
+          <app-crud-page
+            recurso="inventario/proveedores"
+            busquedaPlaceholder="Buscar proveedor..."
+            [columnas]="columnasProveedores"
+            [campos]="camposProveedores"
+            textoEliminar="¿Desea desactivar este proveedor?"
+          >
+          </app-crud-page>
+        </div>
+      </ng-template>
     </mat-tab>
 
     <mat-tab label="Movimientos">
