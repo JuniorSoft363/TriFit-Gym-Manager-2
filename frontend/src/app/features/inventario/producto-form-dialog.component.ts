@@ -68,7 +68,7 @@ export class ProductoFormDialogComponent implements OnInit {
     const codigo = this.codigoBarras.trim();
     if (codigo.length < 6) return;
     this.buscandoCodigo.set(true);
-    this.api.get(`inventario/codigo-barras/${codigo}`).subscribe({
+    this.api.get(`inventario/codigo-barras/${encodeURIComponent(codigo)}`).subscribe({
       next: (res: any) => {
         this.buscandoCodigo.set(false);
         this.form.patchValue({
